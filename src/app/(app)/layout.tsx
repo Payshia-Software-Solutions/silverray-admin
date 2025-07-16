@@ -6,26 +6,30 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarTrigger,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader>
-          <div className="flex h-12 items-center px-2">
-            <AppLogo className="[&>span]:text-sidebar-foreground" />
-          </div>
+           <AppLogo />
         </SidebarHeader>
         <SidebarContent>
           <Nav />
         </SidebarContent>
-        <SidebarFooter className="p-4">
+        <SidebarSeparator />
+        <SidebarFooter className="p-4 flex flex-col gap-4">
+           <Button variant="ghost" className="justify-start gap-2">
+            <Settings className="h-5 w-5" />
+            <span className="text-sm font-medium">Settings</span>
+          </Button>
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="person avatar" />

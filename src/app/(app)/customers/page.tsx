@@ -6,17 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const customers = [
-  { id: 'CUST001', name: 'John Doe', email: 'john.doe@example.com', phone: '123-456-7890', stays: 5, avatar: 'https://placehold.co/40x40/2E3192/E8E9F3.png?text=JD' },
-  { id: 'CUST002', name: 'Jane Smith', email: 'jane.smith@example.com', phone: '234-567-8901', stays: 2, avatar: 'https://placehold.co/40x40/D4AF37/2E3192.png?text=JS' },
-  { id: 'CUST003', name: 'Peter Jones', email: 'peter.jones@example.com', phone: '345-678-9012', stays: 10, avatar: 'https://placehold.co/40x40/2E3192/E8E9F3.png?text=PJ' },
-  { id: 'CUST004', name: 'Mary Johnson', email: 'mary.j@example.com', phone: '456-789-0123', stays: 1, avatar: 'https://placehold.co/40x40/D4AF37/2E3192.png?text=MJ' },
-  { id: 'CUST005', name: 'David Williams', email: 'd.williams@example.com', phone: '567-890-1234', stays: 8, avatar: 'https://placehold.co/40x40/2E3192/E8E9F3.png?text=DW' },
+  { id: 'CUST001', name: 'John Doe', email: 'john.doe@example.com', phone: '123-456-7890', stays: 5, avatar: 'https://placehold.co/40x40/C0A060/FFFFFF.png?text=JD' },
+  { id: 'CUST002', name: 'Jane Smith', email: 'jane.smith@example.com', phone: '234-567-8901', stays: 2, avatar: 'https://placehold.co/40x40/333333/FFFFFF.png?text=JS' },
+  { id: 'CUST003', name: 'Peter Jones', email: 'peter.jones@example.com', phone: '345-678-9012', stays: 10, avatar: 'https://placehold.co/40x40/C0A060/FFFFFF.png?text=PJ' },
+  { id: 'CUST004', name: 'Mary Johnson', email: 'mary.j@example.com', phone: '456-789-0123', stays: 1, avatar: 'https://placehold.co/40x40/333333/FFFFFF.png?text=MJ' },
+  { id: 'CUST005', name: 'David Williams', email: 'd.williams@example.com', phone: '567-890-1234', stays: 8, avatar: 'https://placehold.co/40x40/C0A060/FFFFFF.png?text=DW' },
 ];
 
 export default function CustomersPage() {
   return (
     <>
-      <PageHeader title="Customer Management" description="Manage all your guest and customer records.">
+      <PageHeader title="User Management" description="Manage all your guest and customer records.">
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Customer

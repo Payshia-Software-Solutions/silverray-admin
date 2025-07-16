@@ -1,9 +1,8 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, FileText, LayoutDashboard, UserCog, Users } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -14,11 +13,14 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/rooms', label: 'Rooms', icon: BedDouble },
-  { href: '/reservations', label: 'Reservations', icon: CalendarCheck },
-  { href: '/customers', label: 'Customers', icon: Users },
-  { href: '/staff', label: 'Staff', icon: UserCog },
-  { href: '/reports', label: 'Reports', icon: FileText },
+  { href: '/rooms', label: 'Room Management', icon: BedDouble },
+  { href: '/reservations', label: 'Booking Management', icon: CalendarCheck },
+  { href: '/restaurant', label: 'Restaurant & Dining', icon: UtensilsCrossed },
+  { href: '/experience', label: 'Experience Management', icon: Star },
+  { href: '/messages', label: 'Contact Messages', icon: Mail },
+  { href: '/weddings', label: 'Wedding Management', icon: Heart },
+  { href: '/website', label: 'Website Content', icon: Globe },
+  { href: '/users', label: 'User Management', icon: Users },
 ];
 
 export function Nav() {
@@ -34,12 +36,12 @@ export function Nav() {
               as="a"
               isActive={pathname === item.href}
               tooltip={item.label}
-              className="justify-start"
+              className="justify-start group"
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
               <span
                 className={cn(
-                  'transition-opacity duration-200',
+                  'transition-opacity duration-200 text-sm font-medium',
                   state === 'collapsed' ? 'opacity-0' : 'opacity-100'
                 )}
               >
