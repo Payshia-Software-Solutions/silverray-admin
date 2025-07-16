@@ -45,8 +45,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+      <SidebarInset className="bg-secondary/30">
+        <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1">
                 {/* Header content can go here */}
