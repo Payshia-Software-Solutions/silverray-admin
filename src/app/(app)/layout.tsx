@@ -10,9 +10,10 @@ import {
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, Bell } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
+import { Header } from '@/components/header';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -46,10 +47,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-secondary/30">
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-6 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+        <header className="flex h-auto items-center gap-4 border-b bg-card px-6 py-4 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
             <SidebarTrigger className="md:hidden" />
-            <div className="flex-1">
-                {/* Header content can go here */}
+            <Header />
+            <div className="flex-1 flex justify-end items-center gap-4">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifications</span>
+              </Button>
+              <div className="flex items-center gap-3">
+                 <div className="flex flex-col text-right">
+                    <span className="text-sm font-semibold truncate">User Saman</span>
+                    <span className="text-xs text-muted-foreground truncate">Administrator</span>
+                 </div>
+              </div>
             </div>
         </header>
         <main className="flex-1 p-6">

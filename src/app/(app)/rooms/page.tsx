@@ -1,6 +1,5 @@
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -24,12 +23,13 @@ const statusVariant = {
 export default function RoomsPage() {
   return (
     <>
-      <PageHeader title="Rooms Management" description="View, add, edit, or delete hotel rooms.">
+      <div className="flex items-center justify-between mb-8">
+        <div></div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Room
         </Button>
-      </PageHeader>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Room List</CardTitle>

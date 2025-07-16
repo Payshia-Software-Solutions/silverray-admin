@@ -1,6 +1,5 @@
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,12 +15,13 @@ const customers = [
 export default function CustomersPage() {
   return (
     <>
-      <PageHeader title="User Management" description="Manage all your guest and customer records.">
+      <div className="flex items-center justify-between mb-8">
+        <div></div>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Customer
         </Button>
-      </PageHeader>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
