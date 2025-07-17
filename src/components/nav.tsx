@@ -20,8 +20,9 @@ const navItems = [
   { href: '/experience', label: 'Experience Management', icon: Star },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
   { href: '/weddings', label: 'Wedding Management', icon: Heart },
-  { href: '/website', label: 'Website Content', icon: Globe },
-  { href: '/users', label: 'Staff Management', icon: UserCog },
+  { href: '/website-content', label: 'Website Content', icon: Globe },
+  { href: '/user-management', label: 'User Management', icon: UserCog },
+ 
 ];
 
 export function Nav() {
