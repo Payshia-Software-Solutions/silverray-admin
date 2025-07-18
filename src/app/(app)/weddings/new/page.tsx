@@ -16,9 +16,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const associatedHalls = [
     { id: 'grand-ballroom', label: 'Grand Ballroom' },
@@ -31,6 +39,7 @@ const associatedHalls = [
 
 export default function NewWeddingPackagePage() {
   const [inclusions, setInclusions] = useState([{ id: 1, title: '', details: '' }]);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const addInclusion = () => {
     setInclusions([...inclusions, { id: Date.now(), title: '', details: '' }]);
@@ -38,6 +47,11 @@ export default function NewWeddingPackagePage() {
 
   const removeInclusion = (id: number) => {
     setInclusions(inclusions.filter(inclusion => inclusion.id !== id));
+  };
+
+  const handleAddPackage = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
   };
 
   return (
@@ -187,8 +201,29 @@ export default function NewWeddingPackagePage() {
         <Button variant="outline" asChild>
           <Link href="/weddings">Cancel</Link>
         </Button>
-        <Button>+ Add Wedding Package</Button>
+        <Button onClick={handleAddPackage}>+ Add Wedding Package</Button>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>A new wedding package has been successfully created.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Wedding Package !</h2>
+                    <p className="text-muted-foreground">The new package is now available for booking.</p>
+                    <DialogClose asChild>
+                        <Button className="mt-6 w-full" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
