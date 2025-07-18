@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -34,36 +35,7 @@ export default function ReservationsPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex-1 flex items-center space-x-4">
-           <Input
-            placeholder="Search by guest name, booking ID..."
-            className="max-w-sm"
-           />
-           <Popover>
-             <PopoverTrigger asChild>
-               <Button
-                 variant={'outline'}
-                 className={cn(
-                   'w-[240px] justify-start text-left font-normal',
-                   !date && 'text-muted-foreground'
-                 )}
-               >
-                 <CalendarIcon className="mr-2 h-4 w-4" />
-                 {date ? format(date, 'PPP') : <span>Pick a date</span>}
-               </Button>
-             </PopoverTrigger>
-             <PopoverContent className="w-auto p-0" align="start">
-               <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-             </PopoverContent>
-           </Popover>
-        </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Reservation
-        </Button>
-      </div>
+    <div className="space-y-8">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -103,6 +75,37 @@ export default function ReservationsPage() {
           </CardContent>
         </Card>
       </div>
+
+       <div className="flex items-center justify-between">
+        <div className="flex-1 flex items-center space-x-4">
+           <Input
+            placeholder="Search by guest name, booking ID..."
+            className="max-w-sm"
+           />
+           <Popover>
+             <PopoverTrigger asChild>
+               <Button
+                 variant={'outline'}
+                 className={cn(
+                   'w-[240px] justify-start text-left font-normal',
+                   !date && 'text-muted-foreground'
+                 )}
+               >
+                 <CalendarIcon className="mr-2 h-4 w-4" />
+                 {date ? format(date, 'PPP') : <span>Pick a date</span>}
+               </Button>
+             </PopoverTrigger>
+             <PopoverContent className="w-auto p-0" align="start">
+               <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+             </PopoverContent>
+           </Popover>
+        </div>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Reservation
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Reservation List</CardTitle>
@@ -157,6 +160,6 @@ export default function ReservationsPage() {
           </Table>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
