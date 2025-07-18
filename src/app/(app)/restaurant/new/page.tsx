@@ -25,6 +25,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -37,6 +45,13 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 
 export default function NewRestaurantVenuePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+
+  const handleDelete = () => {
+    setShowDeleteDialog(false);
+    setShowDeleteSuccessDialog(true);
+  }
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -220,7 +235,7 @@ export default function NewRestaurantVenuePage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter className="sm:justify-center">
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                  <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDelete}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
                  <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
                     <X className="h-5 w-5" />
@@ -233,6 +248,25 @@ export default function NewRestaurantVenuePage() {
             </div>
         </div>
       </div>
+       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+             <DialogHeader className="sr-only">
+                  <DialogTitle>Success</DialogTitle>
+                  <DialogDescription>The venue was successfully deleted.</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-red-100 rounded-full mb-4">
+                      <div className="p-2 bg-red-200 rounded-full">
+                         <Trash2 className="h-8 w-8 text-red-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Main Restaurant !</h2>
+                  <DialogClose asChild>
+                      <Button className="mt-6 w-full" onClick={() => setShowDeleteSuccessDialog(false)}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
