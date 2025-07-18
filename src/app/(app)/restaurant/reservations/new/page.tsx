@@ -230,7 +230,11 @@ export default function NewDiningReservationPage() {
 
         <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
             <DialogContent className="sm:max-w-md">
-                <div className="flex flex-col items-center justify-center text-center p-8">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>A new dining reservation has been successfully created.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
                     <div className="p-4 bg-blue-100 rounded-full mb-4">
                         <div className="p-2 bg-blue-200 rounded-full">
                            <CheckCircle2 className="h-8 w-8 text-blue-600" />
