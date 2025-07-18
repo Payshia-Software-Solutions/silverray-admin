@@ -11,9 +11,49 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+
+const menuItems = [
+    {
+        name: 'Grilled Atlantic Salmon',
+        subtext: 'Fresh, premium quality',
+        image: 'https://placehold.co/40x40',
+        category: 'Main Courses',
+        categoryColor: 'bg-blue-100 text-blue-700',
+        price: 'LKR. 2300',
+        description: 'Perfectly grilled salmon with seasonal vegetables and lemon butter sauce',
+        status: 'Available',
+        statusColor: 'bg-green-100 text-green-700'
+    },
+    {
+        name: 'Caesar Salad',
+        subtext: 'Classic recipe',
+        image: 'https://placehold.co/40x40',
+        category: 'Starters',
+        categoryColor: 'bg-green-100 text-green-700',
+        price: 'LKR. 800',
+        description: 'Fresh romaine lettuce with parmesan cheese and croutons',
+        status: 'Available',
+        statusColor: 'bg-green-100 text-green-700'
+    },
+    {
+        name: 'Chocolate Lava Cake',
+        subtext: 'Signature dessert',
+        image: 'https://placehold.co/40x40',
+        category: 'Desserts',
+        categoryColor: 'bg-purple-100 text-purple-700',
+        price: 'LKR. 600',
+        description: 'Warm chocolate cake with molten center, served with vanilla ice cream',
+        status: 'Seasonal',
+        statusColor: 'bg-yellow-100 text-yellow-700'
+    }
+];
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
@@ -58,13 +98,13 @@ export default function RestaurantDiningPage() {
                 </span>
               </div>
               <CardContent className="p-4 flex-grow">
-                <CardTitle className="text-lg font-semibold mb-1">
+                <h3 className="text-lg font-semibold mb-1">
                   Main Restaurant
-                </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   Elegant fine dining experience with international cuisine and
                   sophisticated ambiance.
-                </CardDescription>
+                </p>
                 <div className="mt-4 flex justify-between text-sm text-muted-foreground">
                   <div className='flex items-center gap-2'>
                     <Users className="h-4 w-4" />
@@ -98,13 +138,13 @@ export default function RestaurantDiningPage() {
                 </span>
               </div>
               <CardContent className="p-4 flex-grow">
-                <CardTitle className="text-lg font-semibold mb-1">
+                <h3 className="text-lg font-semibold mb-1">
                   Cafe 111
-                </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   Casual dining spot perfect for coffee, light meals, and
                   relaxed conversations.
-                </CardDescription>
+                </p>
                 <div className="mt-4 flex justify-between text-sm text-muted-foreground">
                    <div className='flex items-center gap-2'>
                     <Users className="h-4 w-4" />
@@ -138,13 +178,13 @@ export default function RestaurantDiningPage() {
                 </span>
               </div>
               <CardContent className="p-4 flex-grow">
-                <CardTitle className="text-lg font-semibold mb-1">
+                <h3 className="text-lg font-semibold mb-1">
                   Indian Restaurant
-                </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   Authentic Indian cuisine with traditional spices and flavors
                   in a cultural setting.
-                </CardDescription>
+                </p>
                  <div className="mt-4 flex justify-between text-sm text-muted-foreground">
                    <div className='flex items-center gap-2'>
                     <Users className="h-4 w-4" />
@@ -168,14 +208,102 @@ export default function RestaurantDiningPage() {
         </TabsContent>
         <TabsContent value="menu-items" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Menu Items</CardTitle>
-              <CardDescription>Manage your restaurant's menu items.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Menu item list and management will go here.</p>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Select Restaurant:</span>
+                  <Select defaultValue="main-restaurant">
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select a restaurant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
+                      <SelectItem value="cafe-111">Cafe 111</SelectItem>
+                      <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
+                <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
+              </div>
             </CardContent>
           </Card>
+           <Card>
+            <CardContent className="p-4 space-y-4">
+                <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Search menu items..." className="pl-8" />
+                    </div>
+                    <Select>
+                        <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="main-courses">Main Courses</SelectItem>
+                            <SelectItem value="starters">Starters</SelectItem>
+                            <SelectItem value="desserts">Desserts</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[250px]">Item Name</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {menuItems.map((item, index) => (
+                            <TableRow key={index}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <Image src={item.image} alt={item.name} width={40} height={40} className="rounded-md" data-ai-hint="food dish" />
+                                        <div>
+                                            <p className="font-medium">{item.name}</p>
+                                            <p className="text-xs text-muted-foreground">{item.subtext}</p>
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={item.categoryColor}>{item.category}</Badge>
+                                </TableCell>
+                                <TableCell>{item.price}</TableCell>
+                                <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={item.statusColor}>{item.status}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </div>
+                 <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div>Showing 1 to 3 of 12 results</div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">Previous</Button>
+                        <Button variant="default" size="sm">1</Button>
+                        <Button variant="outline" size="sm">2</Button>
+                        <Button variant="outline" size="sm">Next</Button>
+                    </div>
+                </div>
+            </CardContent>
+           </Card>
         </TabsContent>
         <TabsContent value="reservations" className="space-y-4">
           <Card>
