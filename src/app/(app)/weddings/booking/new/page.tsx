@@ -18,15 +18,30 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
+
 
 export default function NewWeddingBookingPage() {
   const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleCreateBooking = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -293,10 +308,28 @@ export default function NewWeddingBookingPage() {
         <Button variant="outline" asChild>
           <Link href="/weddings">Cancel</Link>
         </Button>
-        <Button>+ Create Wedding Booking</Button>
+        <Button onClick={handleCreateBooking}>+ Create Wedding Booking</Button>
       </div>
+
+       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>A new booking has been successfully created.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Booking !</h2>
+                    <DialogClose asChild>
+                        <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
-
-    
