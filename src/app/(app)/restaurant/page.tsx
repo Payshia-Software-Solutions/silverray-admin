@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription as DialogDescriptionComponent, // Renamed to avoid conflict
+  DialogClose,
+} from '@/components/ui/dialog';
 
 
 const menuItems = [
@@ -102,6 +110,7 @@ const reservations = [
 export default function RestaurantDiningPage() {
   const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState('');
 
   const handleDeleteClick = (venueName: string) => {
@@ -112,7 +121,7 @@ export default function RestaurantDiningPage() {
   const handleDeleteConfirm = () => {
     console.log(`Deleting ${venueToDelete}`);
     setShowDeleteDialog(false);
-    setVenueToDelete('');
+    setShowDeleteSuccessDialog(true);
     // Here you would add the logic to actually delete the venue
   }
 
@@ -440,6 +449,28 @@ export default function RestaurantDiningPage() {
             </button>
         </AlertDialogContent>
       </AlertDialog>
+       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+             <DialogHeader className="sr-only">
+                  <DialogTitle>Success</DialogTitle>
+                  <DialogDescriptionComponent>The venue was successfully deleted.</DialogDescriptionComponent>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-red-100 rounded-full mb-4">
+                      <div className="p-2 bg-red-200 rounded-full">
+                         <Trash2 className="h-8 w-8 text-red-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted {venueToDelete} !</h2>
+                  <DialogClose asChild>
+                      <Button className="mt-6 w-full" onClick={() => {
+                        setShowDeleteSuccessDialog(false);
+                        setVenueToDelete('');
+                      }}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
