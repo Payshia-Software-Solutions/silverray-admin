@@ -19,6 +19,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage user accounts and permissions' },
   '/rooms/new': { title: 'Create New Booking', description: 'Create New Booking' },
+  '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
 
   // Add other pages here
 };

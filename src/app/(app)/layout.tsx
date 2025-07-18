@@ -14,6 +14,7 @@ import { LogOut, Settings, Bell } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
+import Link from 'next/link';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,9 +28,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarSeparator />
         <SidebarFooter className="p-4 flex flex-col gap-4">
-           <Button variant="ghost" className="justify-start gap-2">
-            <Settings className="h-5 w-5" />
-            <span className="text-sm font-medium">Settings</span>
+           <Button variant="ghost" className="justify-start gap-2" asChild>
+            <Link href="/settings">
+              <Settings className="h-5 w-5" />
+              <span className="text-sm font-medium">Settings</span>
+            </Link>
           </Button>
           <div className="flex items-center gap-3">
             <Avatar>
