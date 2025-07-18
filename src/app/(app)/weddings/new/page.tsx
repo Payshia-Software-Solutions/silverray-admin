@@ -166,14 +166,14 @@ export default function NewWeddingPackagePage() {
             </div>
             <div className="flex flex-wrap gap-4">
                 <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Wedding hall" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding hall gold" />
+                    <Image src="https://images.unsplash.com/photo-1595431677320-991c68277257?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwaGFsbCUyMGdvbGR8ZW58MHx8fHwxNzUyODQzMjQwfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding hall" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding hall gold" />
                     <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
                 </div>
                  <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Wedding decor" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding table decoration" />
+                    <Image src="https://images.unsplash.com/photo-1550081692-564a275a4073?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBkZWNvcmF0aW9ufGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding decor" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding table decoration" />
                 </div>
                  <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Wedding ceremony" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding ceremony arch" />
+                    <Image src="https://images.unsplash.com/photo-1579344475510-53c8253138b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2VyZW1vbnklMjBhcmNofGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding ceremony" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding ceremony arch" />
                 </div>
             </div>
           </CardContent>
@@ -189,4 +189,3 @@ export default function NewWeddingPackagePage() {
     </div>
   );
 }
-
