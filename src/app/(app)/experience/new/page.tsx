@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bold, Italic, List, UploadCloud, Plus, Clock, Users } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -23,6 +29,13 @@ import Image from 'next/image';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function AddExperiencePage() {
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleAddExperience = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
+  
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -249,8 +262,25 @@ export default function AddExperiencePage() {
         <Button variant="outline" asChild>
           <Link href="/experience">Cancel</Link>
         </Button>
-        <Button>+ Add Experience</Button>
+        <Button onClick={handleAddExperience}>+ Add Experience</Button>
       </div>
+      
+       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Experience !</h2>
+                    <p className="text-muted-foreground">The new experience is now available for booking.</p>
+                    <DialogClose asChild>
+                        <Button className="mt-6 w-full" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
