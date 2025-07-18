@@ -14,6 +14,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/restaurant/reservations/new': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' },
   '/messages': { title: 'Contact Form Messages', description: 'Manage and respond to customer inquiries' },
   '/experience': { title: 'Experience Management', description: 'Manage and showcase unique guest experiences and activities.' },
+  '/experience/new': { title: 'Add New Experience', description: 'Create a new guest experience to offer.' },
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage user accounts and permissions' },

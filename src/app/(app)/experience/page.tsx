@@ -1,10 +1,13 @@
 
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Plus, Star, CheckCircle, Calendar, Clock, DollarSign, Users, Ticket, Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const stats = [
   { label: 'Total Experiences', value: '12', icon: Star, color: 'text-blue-500', bgColor: 'bg-blue-100' },
@@ -83,6 +86,8 @@ const experiences = [
 
 
 export default function ExperienceManagementPage() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -112,7 +117,7 @@ export default function ExperienceManagementPage() {
             className="w-full rounded-lg bg-background pl-8"
           />
         </div>
-        <Button>
+        <Button onClick={() => router.push('/experience/new')}>
           <Plus className="mr-2 h-4 w-4" /> Add Experience
         </Button>
       </div>
