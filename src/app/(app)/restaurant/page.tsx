@@ -355,6 +355,26 @@ export default function RestaurantDiningPage() {
             </CardContent>
           </Card>
           <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Search by guest, booking ID..." className="pl-8" />
+                </div>
+                <Select>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Filter by Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
