@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -6,8 +7,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter,
-  CardDescription,
+  CardFooter
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,7 +20,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Calendar, Mail, CheckCircle, Archive, MessageSquare, Edit, Trash2 } from 'lucide-react';
+import { Search, Calendar, Mail, CheckCircle, Archive, MessageSquare, Trash2, Eye, Filter } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 
 // Placeholder data for stats
 const stats = [
@@ -60,48 +62,45 @@ const messages = [
     sender: 'John Smith',
     email: 'john.smith@email.com',
     subject: 'Booking Inquiry for Wedding',
+    snippet: 'Looking for availability for a wedding reception...',
     date: 'Dec 15, 2025',
     status: 'New',
-    avatar: 'https://placehold.co/40x40.png?text=JS',
+    avatar: 'https://placehold.co/40x40.png',
+    avatarHint: 'man face',
   },
   {
     sender: 'Sarah Johnson',
     email: 'sarah.j@email.com',
     subject: 'Room Service Complaint',
+    snippet: 'Had issues with room service during my stay...',
     date: 'Dec 14, 2025',
     status: 'Replied',
-    avatar: 'https://placehold.co/40x40.png?text=SJ',
+    avatar: 'https://placehold.co/40x40.png',
+    avatarHint: 'woman face',
   },
   {
     sender: 'Michael Brown',
     email: 'm.brown@email.com',
     subject: 'Corporate Event Booking',
+    snippet: 'Need to book conference rooms for company retreat...',
     date: 'Dec 13, 2025',
     status: 'New',
-    avatar: 'https://placehold.co/40x40.png?text=MB',
+    avatar: 'https://placehold.co/40x40.png',
+    avatarHint: 'man portrait',
   },
 ];
 
 export default function ContactMessagesPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Contact Form Messages
-        </h2>
-        <p className="text-muted-foreground">
-          Manage and respond to customer inquiries
-        </p>
-      </div>
-
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <div className={`${stat.bgColor} rounded-md p-2`}>
-                <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+              <div className={cn('rounded-md p-2', stat.bgColor)}>
+                <stat.icon className={cn('h-4 w-4', stat.iconColor)} />
               </div>
             </CardHeader>
             <CardContent>
@@ -124,7 +123,10 @@ export default function ContactMessagesPage() {
           <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input type="text" placeholder="mm/dd/yyyy" className="pl-8 w-[150px]"/>
         </div>
-        <Button>Apply Filters</Button>
+        <Button>
+            <Filter className="mr-2 h-4 w-4" />
+            Apply Filters
+        </Button>
       </div>
 
       {/* Messages Table */}
@@ -146,7 +148,7 @@ export default function ContactMessagesPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={message.avatar} alt={message.sender} />
+                        <AvatarImage src={message.avatar} alt={message.sender} data-ai-hint={message.avatarHint} />
                         <AvatarFallback>{message.sender.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div>
@@ -155,20 +157,28 @@ export default function ContactMessagesPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{message.subject}</TableCell>
+                  <TableCell>
+                     <p className="font-medium">{message.subject}</p>
+                     <p className="text-xs text-muted-foreground truncate max-w-xs">{message.snippet}</p>
+                  </TableCell>
                   <TableCell>{message.date}</TableCell>
                   <TableCell>
-                    <Badge variant={message.status === 'New' ? 'default' : 'secondary'}>
+                    <Badge variant={message.status === 'New' ? 'default' : 'outline'} className={cn(
+                        message.status === 'New' && 'bg-blue-100 text-blue-700 border-blue-200',
+                        message.status === 'Replied' && 'bg-green-100 text-green-700 border-green-200'
+                    )}>
                       {message.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="icon">
-                            <Edit className="h-4 w-4" />
+                    <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="outline" size="icon">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500">
                             <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
                         </Button>
                     </div>
                   </TableCell>
@@ -186,7 +196,7 @@ export default function ContactMessagesPage() {
                 <Button variant="outline" size="sm">
                     Previous
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="default" size="sm">
                     1
                 </Button>
                 <Button variant="outline" size="sm">
@@ -201,3 +211,5 @@ export default function ContactMessagesPage() {
     </div>
   );
 }
+
+    
