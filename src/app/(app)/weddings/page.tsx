@@ -22,6 +22,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
@@ -150,7 +151,7 @@ export default function WeddingManagementPage() {
                           />
                           </PopoverContent>
                       </Popover>
-                      <Button className="ml-auto" onClick={() => router.push('/weddings/new')}>
+                      <Button onClick={() => router.push('/weddings/new')}>
                           <Plus className="mr-2 h-4 w-4" /> Add New Wedding Package
                       </Button>
                   </div>
@@ -246,7 +247,7 @@ export default function WeddingManagementPage() {
                               />
                               </PopoverContent>
                           </Popover>
-                          <Button className="ml-auto">
+                          <Button>
                               <Plus className="mr-2 h-4 w-4" /> Add New Wedding Booking
                           </Button>
                       </div>
@@ -357,3 +358,5 @@ export default function WeddingManagementPage() {
     </div>
   );
 }
+
+    
