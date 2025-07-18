@@ -17,6 +17,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/experience': { title: 'Experience Management', description: 'Manage and showcase unique guest experiences and activities.' },
   '/experience/new': { title: 'Add New Experience', description: 'Create a new guest experience to offer.' },
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
+  '/weddings/new': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'User Management', description: 'Manage admin accounts and permissions' },

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, Search, Plus, Edit, Trash2, Eye, X } from 'lucide-react';
+import { CalendarIcon, Search, Plus, Trash2, Eye, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -32,6 +32,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
+import { useRouter } from 'next/navigation';
 
 const weddingPackages = [
   {
@@ -85,6 +86,7 @@ const weddingBookings = [
 
 
 export default function WeddingManagementPage() {
+    const router = useRouter();
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
@@ -144,7 +146,7 @@ export default function WeddingManagementPage() {
                           />
                           </PopoverContent>
                       </Popover>
-                      <Button className="ml-auto">
+                      <Button className="ml-auto" onClick={() => router.push('/weddings/new')}>
                           <Plus className="mr-2 h-4 w-4" /> Add New Wedding Package
                       </Button>
                   </div>
@@ -187,7 +189,7 @@ export default function WeddingManagementPage() {
                             <span className="sr-only">View</span>
                           </Button>
                           <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDeleteClick(pkg.name)}>
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Delete</span>
                               </Button>
