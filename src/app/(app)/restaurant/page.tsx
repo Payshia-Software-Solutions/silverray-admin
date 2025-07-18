@@ -76,8 +76,12 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-center p-4 pt-0">
+              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                 <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
+                <Button variant="outline" size="icon">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
               </CardFooter>
             </Card>
             <Card className="flex flex-col">
@@ -112,8 +116,12 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-center p-4 pt-0">
+              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                 <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
+                 <Button variant="outline" size="icon">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
               </CardFooter>
             </Card>
             <Card className="flex flex-col">
@@ -148,8 +156,12 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-center p-4 pt-0">
+              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                 <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
+                 <Button variant="outline" size="icon">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
               </CardFooter>
             </Card>
           </div>
