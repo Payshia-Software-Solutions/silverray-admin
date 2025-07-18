@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X, UploadCloud } from 'lucide-react';
+import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -46,10 +46,15 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 export default function NewRestaurantVenuePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
 
   const handleDelete = () => {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
+  }
+
+  const handleSaveChanges = () => {
+    setShowSaveSuccessDialog(true);
   }
 
   return (
@@ -273,7 +278,7 @@ export default function NewRestaurantVenuePage() {
             </AlertDialog>
             <div className="flex gap-2">
                 <Button variant="outline" asChild><Link href="/restaurant">Cancel</Link></Button>
-                <Button>Save Changes</Button>
+                <Button onClick={handleSaveChanges}>Save Changes</Button>
             </div>
         </div>
       </div>
@@ -296,6 +301,25 @@ export default function NewRestaurantVenuePage() {
               </div>
           </DialogContent>
       </Dialog>
+      <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>The changes have been saved successfully.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center p-8 pt-12">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Restaurants !</h2>
+                    <DialogClose asChild>
+                        <Button className="mt-6" onClick={() => setShowSaveSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
