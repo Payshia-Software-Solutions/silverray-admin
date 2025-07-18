@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X } from 'lucide-react';
+import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X, UploadCloud } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -177,19 +177,25 @@ export default function NewRestaurantVenuePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Image Gallery</CardTitle>
+            <CardTitle>Venue Images</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              <div className="relative group">
-                <Image src="https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Restaurant interior" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant interior" />
-                 <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
-              </div>
-              <Image src="https://images.unsplash.com/photo-1556911899-5df3026220fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwYmFyfGVufDB8fHx8MTc1MjgzNzgxNHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Restaurant bar" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant bar" />
-              <Image src="https://images.unsplash.com/photo-1667420818475-889eae449a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwc2VhdGluZ3xlbnwwfHx8fDE3NTI4Mzc4MTR8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Outdoor seating" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="outdoor seating" />
-              <Button variant="outline" className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-2">
-                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                 <span className="text-base">Add Image</span>
-              </Button>
+          <CardContent>
+             <div className="flex items-center justify-center w-full">
+                <label
+                    htmlFor="dropzone-file"
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <UploadCloud className="w-10 h-10 mb-4 text-muted-foreground" />
+                    <p className="mb-2 text-lg text-muted-foreground">
+                        Drag and drop images here
+                    </p>
+                    <p className="text-sm text-muted-foreground">or click to browse files</p>
+                    <Button className="mt-4">Browse Files</Button>
+                    </div>
+                    <Input id="dropzone-file" type="file" className="hidden" />
+                </label>
+             </div>
           </CardContent>
         </Card>
 
