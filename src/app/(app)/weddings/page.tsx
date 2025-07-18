@@ -385,6 +385,10 @@ export default function WeddingManagementPage() {
         <DialogContent className="max-w-3xl p-0">
           {selectedPackage && (
             <div>
+               <DialogHeader className="sr-only">
+                <DialogTitle>{selectedPackage.name}</DialogTitle>
+                <DialogDescriptionComponent>{selectedPackage.description}</DialogDescriptionComponent>
+              </DialogHeader>
               <div className="relative">
                 <Image src={selectedPackage.image} alt={selectedPackage.name} width={800} height={400} className="w-full h-64 object-cover rounded-t-lg" data-ai-hint={selectedPackage.imageHint} />
                 <div className="absolute top-4 right-4 bg-primary/80 backdrop-blur-sm text-primary-foreground p-3 rounded-lg text-right">
