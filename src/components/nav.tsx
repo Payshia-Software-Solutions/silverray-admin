@@ -15,7 +15,6 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/rooms', label: 'Room Management', icon: BedDouble },
   { href: '/reservations', label: 'Booking Management', icon: CalendarCheck },
-  { href: '/customers', label: 'User Management', icon: Users },
   { href: '/restaurant', label: 'Restaurant & Dining', icon: UtensilsCrossed },
   { href: '/experience', label: 'Experience Management', icon: Star },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
