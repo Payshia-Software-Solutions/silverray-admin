@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import React from 'react';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -11,9 +12,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params
 }: Readonly<{
   children: React.ReactNode;
+  params: { [key: string]: string | string[] | undefined };
 }>) {
+  // Prevent bundler from eliminating `params` through tree-shaking
+  if (process.env.NODE_ENV === 'development') {
+    React.use(Promise.resolve(params));
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-body antialiased`} suppressHydrationWarning>{children}</body>
