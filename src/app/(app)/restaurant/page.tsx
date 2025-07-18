@@ -247,8 +247,8 @@ export default function RestaurantDiningPage() {
                   </Select>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
                   <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
+                  <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
                 </div>
               </div>
             </CardContent>
