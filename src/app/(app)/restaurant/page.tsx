@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Edit, Trash2, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function RestaurantDiningPage() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       <div>
@@ -32,7 +36,7 @@ export default function RestaurantDiningPage() {
             <TabsTrigger value="reservations">Reservations</TabsTrigger>
           </TabsList>
           <div className="ml-auto">
-            <Button>
+            <Button onClick={() => router.push('/restaurant/new')}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Item
             </Button>
           </div>
@@ -45,9 +49,9 @@ export default function RestaurantDiningPage() {
                   <Image
                     src="https://placehold.co/600x400"
                     alt="Main Restaurant"
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-t-lg"
+                    fill
+                    className="object-cover rounded-t-lg"
+                    data-ai-hint="restaurant interior"
                   />
                   <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                     Active
@@ -72,7 +76,7 @@ export default function RestaurantDiningPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0">
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => router.push('/restaurant/new')}>
                   <Edit className="mr-2 h-4 w-4" /> Edit
                 </Button>
                 <Button variant="outline" size="icon">
@@ -86,9 +90,9 @@ export default function RestaurantDiningPage() {
                   <Image
                     src="https://placehold.co/600x400"
                     alt="Cafe 111"
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-t-lg"
+                    fill
+                    className="object-cover rounded-t-lg"
+                    data-ai-hint="cafe interior"
                   />
                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                     Active
@@ -113,7 +117,7 @@ export default function RestaurantDiningPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0">
-                <Button variant="outline">
+                 <Button variant="outline" onClick={() => router.push('/restaurant/new')}>
                   <Edit className="mr-2 h-4 w-4" /> Edit
                 </Button>
                 <Button variant="outline" size="icon">
@@ -127,9 +131,9 @@ export default function RestaurantDiningPage() {
                   <Image
                     src="https://placehold.co/600x400"
                     alt="Indian Restaurant"
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-t-lg"
+                    fill
+                    className="object-cover rounded-t-lg"
+                    data-ai-hint="indian restaurant"
                   />
                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                     Active
@@ -154,7 +158,7 @@ export default function RestaurantDiningPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0">
-                <Button variant="outline">
+                 <Button variant="outline" onClick={() => router.push('/restaurant/new')}>
                   <Edit className="mr-2 h-4 w-4" /> Edit
                 </Button>
                 <Button variant="outline" size="icon">
@@ -165,27 +169,23 @@ export default function RestaurantDiningPage() {
           </div>
         </TabsContent>
         <TabsContent value="menu-items" className="space-y-4">
-          {/* Content for Menu Items tab */}
           <Card>
             <CardHeader>
               <CardTitle>Menu Items</CardTitle>
               <CardDescription>Manage your restaurant's menu items.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Placeholder content for menu items */}
               <p>Menu item list and management will go here.</p>
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="reservations" className="space-y-4">
-          {/* Content for Reservations tab */}
           <Card>
             <CardHeader>
               <CardTitle>Reservations</CardTitle>
               <CardDescription>Manage your restaurant's reservations.</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Placeholder content for reservations */}
               <p>Reservation list and management will go here.</p>
             </CardContent>
           </Card>

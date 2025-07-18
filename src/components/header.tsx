@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -7,13 +8,14 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
   '/rooms': { title: 'Rooms Management', description: 'View, add, edit, or delete hotel rooms.' },
   '/reservations': { title: 'Reservations', description: 'Manage all guest reservations and their status.' },
-  '/customers': { title: 'User Management', description: 'Manage all your guest and customer records.' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
+  '/restaurant/new': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
   '/messages': { title: 'Contact Form Messages', description: 'Manage and respond to customer inquiries' },
   '/experience': { title: 'Experience Management', description: 'Manage and showcase unique guest experiences and activities.' },
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage user accounts and permissions' },
+  '/rooms/new': { title: 'Create New Booking', description: 'Create New Booking' },
 
   // Add other pages here
 };

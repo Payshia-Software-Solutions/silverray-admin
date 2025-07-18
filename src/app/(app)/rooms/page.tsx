@@ -1,8 +1,11 @@
+'use client';
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+
 
 const rooms = [
   { id: 'RM101', type: 'Single', price: 120, status: 'Available' },
@@ -21,14 +24,15 @@ const statusVariant = {
 } as const;
 
 export default function RoomsPage() {
+  const router = useRouter();
   return (
     <>
       <div className="flex items-center justify-between mb-8">
         <div></div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Room
-        </Button>
+        <Button onClick={() => router.push('/rooms/new')}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New Room
+          </Button>
       </div>
       <Card>
         <CardHeader>
