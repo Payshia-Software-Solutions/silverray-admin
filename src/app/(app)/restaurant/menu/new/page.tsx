@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,10 +11,25 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, UploadCloud } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription as DialogDesc,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { Info, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NewMealItemPage() {
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleAddMealItem = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
+
   return (
     <div className="space-y-6">
       <Alert className="bg-blue-50 border-blue-200 text-blue-800">
@@ -147,9 +163,29 @@ export default function NewMealItemPage() {
           <Button variant="outline" asChild>
             <Link href="/restaurant">Cancel</Link>
           </Button>
-          <Button>Add Meal Item</Button>
+          <Button onClick={handleAddMealItem}>Add Meal Item</Button>
         </div>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+                <DialogTitle>Success</DialogTitle>
+                <DialogDesc>A new meal item has been successfully added.</DialogDesc>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8 pt-12">
+                <div className="p-4 bg-blue-100 rounded-full mb-4">
+                    <div className="p-2 bg-blue-200 rounded-full">
+                       <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-bold mb-2">Successfully Added Meal Item to Main Restaurant !</h2>
+                <DialogClose asChild>
+                    <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                </DialogClose>
+            </div>
+        </DialogContent>
+    </Dialog>
     </div>
   );
 }
