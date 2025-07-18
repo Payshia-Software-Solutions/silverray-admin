@@ -6,13 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, Search, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { CalendarIcon, Search, Plus, Edit, Trash2, Eye, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const weddingPackages = [
   {
@@ -67,6 +78,20 @@ const weddingBookings = [
 
 export default function WeddingManagementPage() {
     const [date, setDate] = useState<Date | undefined>(undefined);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [packageToDelete, setPackageToDelete] = useState('');
+
+    const handleDeleteClick = (packageName: string) => {
+        setPackageToDelete(packageName);
+        setShowDeleteDialog(true);
+    }
+
+    const handleDeleteConfirm = () => {
+        console.log(`Deleting ${packageToDelete}`);
+        // Add actual delete logic here
+        setShowDeleteDialog(false);
+    }
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="wedding-packages" className="space-y-4">
@@ -150,10 +175,12 @@ export default function WeddingManagementPage() {
                            <Eye className="h-4 w-4" />
                            <span className="sr-only">View</span>
                          </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
+                         <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                         </AlertDialogTrigger>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -267,6 +294,23 @@ export default function WeddingManagementPage() {
             </Card>
         </TabsContent>
       </Tabs>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Package ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-red-500 text-lg">
+              {packageToDelete}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+           <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+              <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
