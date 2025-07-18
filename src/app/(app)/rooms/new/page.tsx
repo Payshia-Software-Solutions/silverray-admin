@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, ShowerHead, Tv, Wifi, Wind, Award, Coffee, Lock, User, Square, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -18,6 +19,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
+
 
 const amenities = [
     { id: 'king-bed', label: 'King-size Bed' },
@@ -35,6 +45,13 @@ const amenities = [
 ]
 
 export default function AddNewRoomPage() {
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleCreateRoom = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
+  
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -210,10 +227,28 @@ export default function AddNewRoomPage() {
         <Button variant="outline" asChild>
           <Link href="/rooms">Cancel</Link>
         </Button>
-        <Button>Create New Room</Button>
+        <Button onClick={handleCreateRoom}>Create New Room</Button>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>A new room has been successfully created.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created Room 101 !</h2>
+                    <DialogClose asChild>
+                        <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
-
-    
