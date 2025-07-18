@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,8 +21,12 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Calendar, Mail, CheckCircle, Archive, MessageSquare, Trash2, Eye, Filter } from 'lucide-react';
+import { Search, Mail, CheckCircle, Archive, MessageSquare, Trash2, Eye, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
 
 
 // Placeholder data for stats
@@ -91,6 +96,8 @@ const messages = [
 ];
 
 export default function ContactMessagesPage() {
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -120,8 +127,28 @@ export default function ContactMessagesPage() {
           />
         </div>
         <div className="relative">
-          <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="text" placeholder="mm/dd/yyyy" className="pl-8 w-[150px]"/>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-[180px] justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, 'PPP') : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
         <Button>
             <Filter className="mr-2 h-4 w-4" />
@@ -176,7 +203,7 @@ export default function ContactMessagesPage() {
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500 hover:bg-red-500/10">
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Delete</span>
                         </Button>
@@ -211,5 +238,3 @@ export default function ContactMessagesPage() {
     </div>
   );
 }
-
-    
