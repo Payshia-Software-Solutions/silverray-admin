@@ -187,8 +187,8 @@ export default function NewRestaurantVenuePage() {
               <Image src="https://images.unsplash.com/photo-1556911899-5df3026220fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwYmFyfGVufDB8fHx8MTc1MjgzNzgxNHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Restaurant bar" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant bar" />
               <Image src="https://images.unsplash.com/photo-1667420818475-889eae449a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwc2VhdGluZ3xlbnwwfHx8fDE3NTI4Mzc4MTR8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Outdoor seating" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="outdoor seating" />
               <Button variant="outline" className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-2">
-                 <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                 <span className="text-sm">Add Image</span>
+                 <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                 <span className="text-base">Add Image</span>
               </Button>
           </CardContent>
         </Card>
