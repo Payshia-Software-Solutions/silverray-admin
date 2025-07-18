@@ -175,7 +175,7 @@ export default function RestaurantDiningPage() {
           </TabsList>
            <Button onClick={() => router.push('/restaurant/new')}>
               <Plus className="mr-2 h-4 w-4" />
-              Add New Venue
+              Add New Item
             </Button>
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
