@@ -55,6 +55,37 @@ const menuItems = [
     }
 ];
 
+const reservations = [
+  {
+    id: '#BK001',
+    guest: 'John Smith',
+    email: 'john@email.com',
+    table: 'MR-TB-04',
+    date: 'June 15, 2025',
+    timeIn: '06.00 p.m',
+    timeOut: '09.00 p.m',
+    guests: 2,
+    total: 'LKR. 7500',
+    payment: 'Paid',
+    status: 'Confirmed',
+  },
+  {
+    id: '#BK001',
+    guest: 'John Smith',
+    email: 'john@email.com',
+    table: 'MR-TB-06',
+    date: 'June 15, 2025',
+    timeIn: '07.30 p.m',
+    timeOut: '10.00 p.m',
+    guests: 2,
+    total: 'LKR. 7500',
+    payment: 'Pending',
+    status: 'Pending',
+  },
+  // Add more mock reservations if needed
+];
+
+
 export default function RestaurantDiningPage() {
   const router = useRouter();
 
@@ -307,13 +338,95 @@ export default function RestaurantDiningPage() {
         </TabsContent>
         <TabsContent value="reservations" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Reservations</CardTitle>
-              <CardDescription>Manage your restaurant's reservations.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Reservation list and management will go here.</p>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">Select Restaurant:</span>
+                  <Select defaultValue="main-restaurant">
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select a restaurant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
+                      <SelectItem value="cafe-111">Cafe 111</SelectItem>
+                      <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Add New Reservation
+                </Button>
+              </div>
             </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Booking ID</TableHead>
+                    <TableHead>Guest</TableHead>
+                    <TableHead>Table Number</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time in</TableHead>
+                    <TableHead>Time out</TableHead>
+                    <TableHead>Guests</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reservations.map((res, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-semibold">{res.id}</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{res.guest}</div>
+                        <div className="text-xs text-muted-foreground">{res.email}</div>
+                      </TableCell>
+                      <TableCell>{res.table}</TableCell>
+                      <TableCell>{res.date}</TableCell>
+                      <TableCell>{res.timeIn}</TableCell>
+                      <TableCell>{res.timeOut}</TableCell>
+                      <TableCell>{res.guests}</TableCell>
+                      <TableCell>{res.total}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={res.payment === 'Paid' ? 'text-green-700 bg-green-100' : 'text-yellow-700 bg-yellow-100'}>
+                          {res.payment}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={res.status === 'Confirmed' ? 'text-blue-700 bg-blue-100' : 'text-yellow-700 bg-yellow-100'}>
+                          {res.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                           <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+            <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+              <div className="text-sm text-muted-foreground">
+                Showing 1 to {reservations.length} of 247 bookings
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm">Previous</Button>
+                <Button variant="default" size="sm">1</Button>
+                <Button variant="outline" size="sm">2</Button>
+                <Button variant="outline" size="sm">Next</Button>
+              </div>
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
