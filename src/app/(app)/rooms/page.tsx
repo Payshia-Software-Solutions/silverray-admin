@@ -1,5 +1,5 @@
 'use client';
-import { PlusCircle, Pencil, Trash2, Search } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Search, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,13 +9,13 @@ import { Input } from '@/components/ui/input';
 
 
 const rooms = [
-  { id: 'RM101', type: 'Single', price: 120, status: 'Available' },
-  { id: 'RM102', type: 'Double', price: 180, status: 'Occupied' },
-  { id: 'RM201', type: 'Suite', price: 350, status: 'Available' },
-  { id: 'RM202', type: 'Double', price: 180, status: 'Maintenance' },
-  { id: 'RM301', type: 'Single', price: 120, status: 'Available' },
-  { id: 'RM302', type: 'Suite', price: 350, status: 'Occupied' },
-  { id: 'RM401', type: 'Penthouse', price: 800, status: 'Available' },
+  { id: 'RM101', type: 'Single', price: 120, status: 'Available', occupancy: 1 },
+  { id: 'RM102', type: 'Double', price: 180, status: 'Occupied', occupancy: 2 },
+  { id: 'RM201', type: 'Suite', price: 350, status: 'Available', occupancy: 4 },
+  { id: 'RM202', type: 'Double', price: 180, status: 'Maintenance', occupancy: 2 },
+  { id: 'RM301', type: 'Single', price: 120, status: 'Available', occupancy: 1 },
+  { id: 'RM302', type: 'Suite', price: 350, status: 'Occupied', occupancy: 4 },
+  { id: 'RM401', type: 'Penthouse', price: 800, status: 'Available', occupancy: 6 },
 ];
 
 const statusVariant = {
@@ -54,6 +54,7 @@ export default function RoomsPage() {
                 <TableHead>Type</TableHead>
                 <TableHead>Price/Night</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Occupancy</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -67,6 +68,12 @@ export default function RoomsPage() {
                     <Badge variant={statusVariant[room.status as keyof typeof statusVariant]}>
                       {room.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      {room.occupancy}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon">
