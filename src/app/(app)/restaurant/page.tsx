@@ -76,10 +76,7 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between items-center gap-2 p-4 pt-0">
-                <Button variant="outline" size="sm">
-                  <Eye className="mr-2 h-4 w-4" /> View Bookings
-                </Button>
+              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
                     <Edit className="h-4 w-4" />
@@ -122,10 +119,7 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between items-center gap-2 p-4 pt-0">
-                <Button variant="outline" size="sm">
-                  <Eye className="mr-2 h-4 w-4" /> View Bookings
-                </Button>
+              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
                     <Edit className="h-4 w-4" />
@@ -168,10 +162,7 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between items-center gap-2 p-4 pt-0">
-                <Button variant="outline" size="sm">
-                  <Eye className="mr-2 h-4 w-4" /> View Bookings
-                </Button>
+              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
                 <div className="flex gap-2">
                   <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
                     <Edit className="h-4 w-4" />
