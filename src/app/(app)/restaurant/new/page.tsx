@@ -223,6 +223,16 @@ export default function NewRestaurantVenuePage() {
                         data-ai-hint="outdoor restaurant"
                     />
                 </div>
+                <div className="relative">
+                    <Image 
+                        src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyZXN0YXVyYW50fGVufDB8fHx8MTc1Mjg0NTg1MHww&ixlib=rb-4.1.0&q=80&w=1080"
+                        alt="Restaurant bar area"
+                        width={200}
+                        height={150}
+                        className="rounded-lg object-cover aspect-[4/3]"
+                        data-ai-hint="restaurant bar"
+                    />
+                </div>
             </div>
           </CardContent>
         </Card>
