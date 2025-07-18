@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -195,7 +196,7 @@ export default function NewRestaurantVenuePage() {
                 Delete Venue
             </Button>
             <div className="flex gap-2">
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" asChild><Link href="/restaurant">Cancel</Link></Button>
                 <Button>Save Changes</Button>
             </div>
         </div>

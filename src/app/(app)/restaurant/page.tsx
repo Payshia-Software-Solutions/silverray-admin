@@ -348,7 +348,7 @@ export default function RestaurantDiningPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button>
+                <Button onClick={() => router.push('/restaurant/reservations/new')}>
                   <Plus className="mr-2 h-4 w-4" /> Add New Reservation
                 </Button>
               </div>
