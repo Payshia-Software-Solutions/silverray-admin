@@ -15,13 +15,24 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { User, Shield, Upload, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { User, Shield, Upload, Eye, EyeOff, UserPlus, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 export default function AddNewAdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleCreateAccount = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -130,12 +141,29 @@ export default function AddNewAdminPage() {
           <Button variant="outline" asChild>
             <Link href="/user-management">Cancel</Link>
           </Button>
-          <Button>
+          <Button onClick={handleCreateAccount}>
             <UserPlus className="mr-2 h-4 w-4" />
             Create Account
           </Button>
         </div>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-blue-100 rounded-full mb-4">
+                      <div className="p-2 bg-blue-200 rounded-full">
+                         <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Admin Account Created !</h2>
+                  <p className="text-muted-foreground">The new admin account is ready to be used.</p>
+                  <DialogClose asChild>
+                      <Button className="mt-6 w-full" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
