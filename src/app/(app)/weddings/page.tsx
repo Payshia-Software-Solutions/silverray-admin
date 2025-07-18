@@ -22,7 +22,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
@@ -33,6 +32,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const weddingPackages = [
   {
@@ -43,6 +43,8 @@ const weddingPackages = [
     inclusions: 'Premium Catering, Luxury Décor, Ceremony ...',
     maxGuests: 200,
     status: 'Active',
+    image: 'https://images.unsplash.com/photo-1595431677320-991c68277257?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwaGFsbCUyMGdvbGR8ZW58MHx8fHwxNzUyODQzMjQwfDA&ixlib=rb-4.1.0&q=80&w=1080',
+    imageHint: 'wedding hall gold'
   },
   {
     name: 'Diamond Bliss',
@@ -52,6 +54,8 @@ const weddingPackages = [
     inclusions: 'Premium Catering, Luxury Décor, Ceremony ...',
     maxGuests: 300,
     status: 'Active',
+    image: 'https://images.unsplash.com/photo-1550081692-564a275a4073?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBkZWNvcmF0aW9ufGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080',
+    imageHint: 'wedding table decoration'
   },
 ];
 
@@ -170,8 +174,13 @@ export default function WeddingManagementPage() {
                   {weddingPackages.map((pkg, index) => (
                     <TableRow key={index}>
                       <TableCell className="font-medium">
-                        {pkg.name}
-                        <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                        <div className="flex items-center gap-3">
+                          <Image src={pkg.image} alt={pkg.name} width={64} height={48} className="rounded-md object-cover" data-ai-hint={pkg.imageHint} />
+                          <div>
+                            {pkg.name}
+                            <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>{pkg.price}</TableCell>
                       <TableCell>{pkg.halls}</TableCell>
