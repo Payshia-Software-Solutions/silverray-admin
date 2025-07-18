@@ -19,15 +19,37 @@ import {
   DialogDescription as DialogDesc,
   DialogClose,
 } from '@/components/ui/dialog';
-import { Info, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Info, UploadCloud, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function NewMealItemPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleAddMealItem = () => {
     // In a real app, you would handle form submission here.
     setShowSuccessDialog(true);
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    // Also reset the file input if needed
+    const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
   };
 
   return (
@@ -141,21 +163,31 @@ export default function NewMealItemPage() {
             <CardTitle>Meal Image</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center w-full">
-              <label
-                htmlFor="dropzone-file"
-                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    <span className="font-semibold text-primary">Drop your image here, or browse</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
+            {!imagePreview ? (
+                <div className="flex items-center justify-center w-full">
+                <label
+                    htmlFor="dropzone-file"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground">
+                        <span className="font-semibold text-primary">Drop your image here, or browse</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
+                    </div>
+                    <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
+                </label>
                 </div>
-                <Input id="dropzone-file" type="file" className="hidden" />
-              </label>
-            </div>
+            ) : (
+                <div className="relative w-full max-w-sm mx-auto">
+                    <Image src={imagePreview} alt="Meal preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
+                    <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove image</span>
+                    </Button>
+                </div>
+            )}
           </CardContent>
         </Card>
 
