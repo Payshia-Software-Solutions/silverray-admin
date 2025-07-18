@@ -11,6 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -18,13 +27,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Calendar as CalendarIcon, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
 export default function NewDiningReservationPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleCreateReservation = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -210,8 +225,25 @@ export default function NewDiningReservationPage() {
           <Button variant="outline" asChild>
             <Link href="/restaurant">Cancel</Link>
           </Button>
-          <Button>+ Create Reservation</Button>
+          <Button onClick={handleCreateReservation}>+ Create Reservation</Button>
         </div>
+
+        <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-md">
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created Reservation!</h2>
+                    <p className="text-muted-foreground">A confirmation email has been sent to the guest.</p>
+                    <DialogClose asChild>
+                        <Button className="mt-6 w-full" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                    </DialogClose>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
