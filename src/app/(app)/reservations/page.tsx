@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const stats = [
   {
@@ -102,6 +103,7 @@ const statusVariant = {
 } as const;
 
 export default function ReservationsPage() {
+  const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
 
   return (
@@ -155,7 +157,7 @@ export default function ReservationsPage() {
                 />
               </PopoverContent>
             </Popover>
-            <Button>
+            <Button onClick={() => router.push('/reservations/new')}>
               <Plus className="mr-2 h-4 w-4" />
               Add New Booking
             </Button>
