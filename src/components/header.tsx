@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
   '/rooms': { title: 'Rooms Management', description: 'View, add, edit, or delete hotel rooms.' },
-  '/reservations': { title: 'Reservations', description: 'Manage all guest reservations and their status.' },
+  '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
   '/restaurant/new': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' },
   '/restaurant/menu/new': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' },
@@ -19,7 +19,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'User Management', description: 'Manage admin accounts and permissions' },
-  '/rooms/new': { title: 'Create New Booking', description: 'Create New Booking' },
+  '/rooms/new': { title: 'Create New Room', description: 'Add a new room to your hotel.' },
   '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
 
   // Add other pages here
