@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,9 +10,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,6 +36,7 @@ import {
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function NewRestaurantVenuePage() {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -191,10 +204,29 @@ export default function NewRestaurantVenuePage() {
         </Card>
 
         <div className="flex justify-between items-center">
-            <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Venue
-            </Button>
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Venue
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    Main Restaurant
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="sm:justify-center">
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <X className="h-5 w-5" />
+                  </button>
+              </AlertDialogContent>
+            </AlertDialog>
             <div className="flex gap-2">
                 <Button variant="outline" asChild><Link href="/restaurant">Cancel</Link></Button>
                 <Button>Save Changes</Button>
