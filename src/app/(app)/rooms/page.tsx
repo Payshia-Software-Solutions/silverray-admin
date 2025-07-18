@@ -1,10 +1,11 @@
 'use client';
-import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 
 const rooms = [
@@ -26,9 +27,16 @@ const statusVariant = {
 export default function RoomsPage() {
   const router = useRouter();
   return (
-    <>
-      <div className="flex items-center justify-between mb-8">
-        <div></div>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search by room number, type..."
+            className="w-full rounded-lg bg-background pl-8"
+          />
+        </div>
         <Button onClick={() => router.push('/rooms/new')}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add New Room
@@ -76,6 +84,6 @@ export default function RoomsPage() {
           </Table>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
