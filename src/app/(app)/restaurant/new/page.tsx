@@ -196,6 +196,29 @@ export default function NewRestaurantVenuePage() {
                     <Input id="dropzone-file" type="file" className="hidden" />
                 </label>
              </div>
+             <div className="pt-6 flex flex-wrap gap-4">
+                <div className="relative">
+                    <Image 
+                        src="https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080" 
+                        alt="Restaurant interior" 
+                        width={200} 
+                        height={150} 
+                        className="rounded-lg object-cover aspect-[4/3]"
+                        data-ai-hint="restaurant interior" 
+                    />
+                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
+                </div>
+                 <div className="relative">
+                    <Image 
+                        src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyZXN0YXVyYW50fGVufDB8fHx8MTc1Mjg0NTg1MHww&ixlib=rb-4.1.0&q=80&w=1080"
+                        alt="Restaurant outdoor seating"
+                        width={200}
+                        height={150}
+                        className="rounded-lg object-cover aspect-[4/3]"
+                        data-ai-hint="outdoor restaurant"
+                    />
+                </div>
+            </div>
           </CardContent>
         </Card>
 
