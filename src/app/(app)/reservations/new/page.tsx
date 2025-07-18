@@ -11,6 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -18,7 +26,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, CheckCircle, X } from 'lucide-react';
+import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, CheckCircle, X, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -26,6 +34,12 @@ import Link from 'next/link';
 export default function NewBookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(undefined);
   const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(undefined);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  const handleCreateBooking = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -207,11 +221,31 @@ export default function NewBookingPage() {
                 
                  <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" asChild><Link href="/reservations">Cancel</Link></Button>
-                    <Button>+ Create Booking</Button>
+                    <Button onClick={handleCreateBooking}>+ Create Booking</Button>
                 </div>
             </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+              <DialogHeader className="sr-only">
+                  <DialogTitle>Success</DialogTitle>
+                  <DialogDescription>A new booking has been successfully created.</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-blue-100 rounded-full mb-4">
+                      <div className="p-2 bg-blue-200 rounded-full">
+                         <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Created BK-001 !</h2>
+                  <DialogClose asChild>
+                      <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
