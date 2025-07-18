@@ -76,15 +76,8 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
+              <CardFooter className="flex justify-center p-4 pt-0">
+                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
               </CardFooter>
             </Card>
             <Card className="flex flex-col">
@@ -119,15 +112,8 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
+              <CardFooter className="flex justify-center p-4 pt-0">
+                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
               </CardFooter>
             </Card>
             <Card className="flex flex-col">
@@ -162,15 +148,8 @@ export default function RestaurantDiningPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end items-center gap-2 p-4 pt-0">
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => router.push('/restaurant/new')}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
+              <CardFooter className="flex justify-center p-4 pt-0">
+                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
               </CardFooter>
             </Card>
           </div>
