@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 
 export default function NewWeddingBookingPage() {
   const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined);
