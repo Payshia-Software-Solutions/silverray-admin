@@ -181,11 +181,11 @@ export default function NewRestaurantVenuePage() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               <div className="relative group">
-                <Image src="https://placehold.co/200x150" alt="Restaurant interior" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant interior" />
+                <Image src="https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Restaurant interior" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant interior" />
                  <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
               </div>
-              <Image src="https://placehold.co/200x150" alt="Restaurant bar" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant bar" />
-              <Image src="https://placehold.co/200x150" alt="Outdoor seating" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="outdoor seating" />
+              <Image src="https://images.unsplash.com/photo-1556911899-5df3026220fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZXN0YXVyYW50JTIwYmFyfGVufDB8fHx8MTc1MjgzNzgxNHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Restaurant bar" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="restaurant bar" />
+              <Image src="https://images.unsplash.com/photo-1667420818475-889eae449a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwc2VhdGluZ3xlbnwwfHx8fDE3NTI4Mzc4MTR8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Outdoor seating" width={200} height={150} className="rounded-lg object-cover w-full aspect-[4/3]" data-ai-hint="outdoor seating" />
               <Button variant="outline" className="w-full aspect-[4/3] flex flex-col items-center justify-center gap-2">
                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
                  <span className="text-sm">Add Image</span>
