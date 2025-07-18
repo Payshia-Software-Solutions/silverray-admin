@@ -175,6 +175,9 @@ export default function NewWeddingPackagePage() {
                  <div className="relative">
                     <Image src="https://images.unsplash.com/photo-1579344475510-53c8253138b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2VyZW1vbnklMjBhcmNofGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding ceremony" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding ceremony arch" />
                 </div>
+                 <div className="relative">
+                    <Image src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZmxvd2Vyc3xlbnwwfHx8fDE3NTI4NDM0NDF8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding flowers" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding flowers" />
+                </div>
             </div>
           </CardContent>
         </Card>
