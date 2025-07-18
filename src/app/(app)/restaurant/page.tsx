@@ -78,7 +78,7 @@ export default function RestaurantDiningPage() {
           </TabsList>
           <div className="ml-auto">
             <Button onClick={() => router.push('/restaurant/new')}>
-              <Plus className="mr-2 h-4 w-4" /> Add New Item
+              <Plus className="mr-2 h-4 w-4" /> Add New Venue
             </Button>
           </div>
         </div>
@@ -223,7 +223,7 @@ export default function RestaurantDiningPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
+                <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
                 <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
               </div>
             </CardContent>
