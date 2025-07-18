@@ -45,6 +45,7 @@ const menuItems = [
         name: 'Grilled Atlantic Salmon',
         subtext: 'Fresh, premium quality',
         image: 'https://placehold.co/40x40',
+        imageHint: 'grilled salmon',
         category: 'Main Courses',
         categoryColor: 'bg-blue-100 text-blue-700',
         price: 'LKR. 2300',
@@ -56,6 +57,7 @@ const menuItems = [
         name: 'Caesar Salad',
         subtext: 'Classic recipe',
         image: 'https://placehold.co/40x40',
+        imageHint: 'caesar salad',
         category: 'Starters',
         categoryColor: 'bg-green-100 text-green-700',
         price: 'LKR. 800',
@@ -67,6 +69,7 @@ const menuItems = [
         name: 'Chocolate Lava Cake',
         subtext: 'Signature dessert',
         image: 'https://placehold.co/40x40',
+        imageHint: 'lava cake',
         category: 'Desserts',
         categoryColor: 'bg-purple-100 text-purple-700',
         price: 'LKR. 600',
@@ -109,6 +112,7 @@ const reservations = [
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('dining-venues');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState('');
@@ -157,7 +161,7 @@ export default function RestaurantDiningPage() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="dining-venues" className="space-y-4">
+      <Tabs defaultValue="dining-venues" className="space-y-4" onValueChange={setActiveTab}>
         <div className="flex justify-between items-center">
           <TabsList>
             <TabsTrigger value="dining-venues">
@@ -173,10 +177,12 @@ export default function RestaurantDiningPage() {
               Reservations
             </TabsTrigger>
           </TabsList>
-           <Button onClick={() => router.push('/restaurant/new')}>
+          {activeTab === 'dining-venues' && (
+            <Button onClick={() => router.push('/restaurant/new')}>
               <Plus className="mr-2 h-4 w-4" />
-              Add New Item
+              Add New Venue
             </Button>
+          )}
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -226,7 +232,7 @@ export default function RestaurantDiningPage() {
         <TabsContent value="menu-items" className="space-y-4">
           <Card>
             <CardContent className="p-4 space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Select Restaurant:</span>
                   <Select defaultValue="main-restaurant">
@@ -240,8 +246,10 @@ export default function RestaurantDiningPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
-                <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
+                  <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -280,7 +288,7 @@ export default function RestaurantDiningPage() {
                             <TableRow key={index}>
                                 <TableCell>
                                     <div className="flex items-center gap-3">
-                                        <Image src={item.image} alt={item.name} width={40} height={40} className="rounded-md" data-ai-hint="food dish" />
+                                        <Image src={item.image} alt={item.name} width={40} height={40} className="rounded-md" data-ai-hint={item.imageHint} />
                                         <div>
                                             <p className="font-medium">{item.name}</p>
                                             <p className="text-xs text-muted-foreground">{item.subtext}</p>
@@ -477,4 +485,5 @@ export default function RestaurantDiningPage() {
       </Dialog>
     </div>
   );
-}
+
+    
