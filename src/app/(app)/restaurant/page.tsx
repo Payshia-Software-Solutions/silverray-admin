@@ -158,7 +158,7 @@ export default function RestaurantDiningPage() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="dining-venues" className="space-y-4">
-        <div className="flex items-center">
+        <div className="flex justify-between items-center">
           <TabsList>
             <TabsTrigger value="dining-venues">
               <Utensils className="mr-2 h-4 w-4" />
@@ -173,6 +173,10 @@ export default function RestaurantDiningPage() {
               Reservations
             </TabsTrigger>
           </TabsList>
+           <Button onClick={() => router.push('/restaurant/new')}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Venue
+            </Button>
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
