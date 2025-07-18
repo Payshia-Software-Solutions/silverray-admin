@@ -1,7 +1,7 @@
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle2, XCircle, ShieldCheck, Shield, ShieldX } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { CheckCircle2, XCircle, ShieldCheck, Shield, ShieldX, Key } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface PermissionItemProps {
   text: string;
@@ -26,7 +26,7 @@ const RolesPermissions: React.FC = () => {
       <p className="text-sm text-muted-foreground mb-4">Manage role-based access controls and permissions for your team</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -36,16 +36,22 @@ const RolesPermissions: React.FC = () => {
               <ShieldCheck className="w-8 h-8 text-purple-500" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow">
             <PermissionItem text="User Management" granted />
             <PermissionItem text="Booking Management" granted />
             <PermissionItem text="Restaurant Management" granted />
             <PermissionItem text="Website Content" granted />
             <PermissionItem text="System Settings" granted />
           </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              <Key className="mr-2 h-4 w-4" />
+              Manage
+            </Button>
+          </CardFooter>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
              <div className="flex justify-between items-start">
               <div>
@@ -55,16 +61,22 @@ const RolesPermissions: React.FC = () => {
               <Shield className="w-8 h-8 text-blue-500" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow">
             <PermissionItem text="View/Edit Bookings" granted />
             <PermissionItem text="Room Management" granted />
             <PermissionItem text="User Management" granted={false} />
             <PermissionItem text="Restaurant Management" granted={false} />
             <PermissionItem text="System Settings" granted={false} />
           </CardContent>
+           <CardFooter>
+            <Button variant="outline" className="w-full">
+              <Key className="mr-2 h-4 w-4" />
+              Manage
+            </Button>
+          </CardFooter>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
@@ -74,13 +86,19 @@ const RolesPermissions: React.FC = () => {
                 <ShieldX className="w-8 h-8 text-orange-500" />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow">
             <PermissionItem text="View/Edit Restaurant Reservations" granted />
             <PermissionItem text="Manage Menus & Venues" granted />
             <PermissionItem text="User Management" granted={false} />
             <PermissionItem text="Booking Management" granted={false} />
             <PermissionItem text="System Settings" granted={false} />
           </CardContent>
+           <CardFooter>
+            <Button variant="outline" className="w-full">
+              <Key className="mr-2 h-4 w-4" />
+              Manage
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>
