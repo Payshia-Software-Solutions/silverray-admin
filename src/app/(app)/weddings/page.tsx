@@ -94,207 +94,207 @@ export default function WeddingManagementPage() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="wedding-packages" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="wedding-packages">Wedding Packages</TabsTrigger>
-          <TabsTrigger value="wedding-bookings">Wedding Bookings</TabsTrigger>
-        </TabsList>
-        <TabsContent value="wedding-packages" className="space-y-4">
-          <Card>
-             <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                    <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Search packages..."
-                        className="w-full rounded-lg bg-background pl-8"
-                    />
-                    </div>
-                     <Popover>
-                        <PopoverTrigger asChild>
-                        <Button
-                            variant={'outline'}
-                            className={cn(
-                            'w-[180px] justify-start text-left font-normal',
-                            !date && 'text-muted-foreground'
-                            )}
-                        >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {date ? format(date, 'PPP') : <span>mm/dd/yyyy</span>}
-                        </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <Button className="ml-auto">
-                        <Plus className="mr-2 h-4 w-4" /> Add New Wedding Package
-                    </Button>
-                </div>
-             </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Package Name</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Halls Included</TableHead>
-                    <TableHead>Other Including's</TableHead>
-                    <TableHead>Max Guests</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                 {weddingPackages.map((pkg, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      {pkg.name}
-                      <p className="text-xs text-muted-foreground">{pkg.description}</p>
-                    </TableCell>
-                    <TableCell>{pkg.price}</TableCell>
-                    <TableCell>{pkg.halls}</TableCell>
-                     <TableCell>{pkg.inclusions}</TableCell>
-                    <TableCell>{pkg.maxGuests}</TableCell>
-                    <TableCell>
-                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
-                           {pkg.status}
-                        </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                           <Eye className="h-4 w-4" />
-                           <span className="sr-only">View</span>
-                         </Button>
-                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                         </AlertDialogTrigger>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <Tabs defaultValue="wedding-packages" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="wedding-packages">Wedding Packages</TabsTrigger>
+            <TabsTrigger value="wedding-bookings">Wedding Bookings</TabsTrigger>
+          </TabsList>
+          <TabsContent value="wedding-packages" className="space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                      <div className="relative flex-1">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                          type="search"
+                          placeholder="Search packages..."
+                          className="w-full rounded-lg bg-background pl-8"
+                      />
                       </div>
-                    </TableCell>
-                  </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="wedding-bookings" className="space-y-4">
-             <Card>
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                        <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search bookings..."
-                            className="w-full rounded-lg bg-background pl-8"
-                        />
-                        </div>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                            <Button
-                                variant={'outline'}
-                                className={cn(
-                                'w-[180px] justify-start text-left font-normal',
-                                !date && 'text-muted-foreground'
-                                )}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {date ? format(date, 'PPP') : <span>mm/dd/yyyy</span>}
-                            </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={setDate}
-                                initialFocus
-                            />
-                            </PopoverContent>
-                        </Popover>
-                        <Button className="ml-auto">
-                            <Plus className="mr-2 h-4 w-4" /> Add New Wedding Booking
-                        </Button>
-                    </div>
-                </CardContent>
+                      <Popover>
+                          <PopoverTrigger asChild>
+                          <Button
+                              variant={'outline'}
+                              className={cn(
+                              'w-[180px] justify-start text-left font-normal',
+                              !date && 'text-muted-foreground'
+                              )}
+                          >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {date ? format(date, 'PPP') : <span>mm/dd/yyyy</span>}
+                          </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                          <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={setDate}
+                              initialFocus
+                          />
+                          </PopoverContent>
+                      </Popover>
+                      <Button className="ml-auto">
+                          <Plus className="mr-2 h-4 w-4" /> Add New Wedding Package
+                      </Button>
+                  </div>
+              </CardContent>
             </Card>
             <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Booking ID</TableHead>
-                                <TableHead>Couple Names</TableHead>
-                                <TableHead>Wedding Date</TableHead>
-                                <TableHead>Package</TableHead>
-                                <TableHead>Hall(s)</TableHead>
-                                <TableHead>Guests</TableHead>
-                                <TableHead>Total Price</TableHead>
-                                <TableHead>Payment</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {weddingBookings.map((booking, index) => (
-                                <TableRow key={index}>
-                                    <TableCell className="font-semibold text-primary">{booking.id}</TableCell>
-                                    <TableCell>{booking.couple}</TableCell>
-                                    <TableCell>{booking.date}</TableCell>
-                                    <TableCell>{booking.package}</TableCell>
-                                    <TableCell>{booking.halls}</TableCell>
-                                    <TableCell>{booking.guests}</TableCell>
-                                    <TableCell>{booking.price}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" className={cn('border-transparent', booking.paymentColor)}>{booking.payment}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" className={cn('border-transparent', booking.statusColor)}>{booking.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <Eye className="h-4 w-4" />
-                                                <span className="sr-only">View</span>
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <Trash2 className="h-4 w-4" />
-                                                <span className="sr-only">Delete</span>
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-                <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-                    <div className="text-sm text-muted-foreground">
-                        Showing 1 to {weddingBookings.length} of 47 results
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">Previous</Button>
-                        <Button variant="default" size="sm">1</Button>
-                        <Button variant="outline" size="sm">2</Button>
-                        <Button variant="outline" size="sm">Next</Button>
-                    </div>
-                </CardFooter>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Package Name</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Halls Included</TableHead>
+                      <TableHead>Other Including's</TableHead>
+                      <TableHead>Max Guests</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                  {weddingPackages.map((pkg, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {pkg.name}
+                        <p className="text-xs text-muted-foreground">{pkg.description}</p>
+                      </TableCell>
+                      <TableCell>{pkg.price}</TableCell>
+                      <TableCell>{pkg.halls}</TableCell>
+                      <TableCell>{pkg.inclusions}</TableCell>
+                      <TableCell>{pkg.maxGuests}</TableCell>
+                      <TableCell>
+                          <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                            {pkg.status}
+                          </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">View</span>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                          </AlertDialogTrigger>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
             </Card>
-        </TabsContent>
-      </Tabs>
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          </TabsContent>
+          <TabsContent value="wedding-bookings" className="space-y-4">
+              <Card>
+                  <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                          <div className="relative flex-1">
+                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                              type="search"
+                              placeholder="Search bookings..."
+                              className="w-full rounded-lg bg-background pl-8"
+                          />
+                          </div>
+                          <Popover>
+                              <PopoverTrigger asChild>
+                              <Button
+                                  variant={'outline'}
+                                  className={cn(
+                                  'w-[180px] justify-start text-left font-normal',
+                                  !date && 'text-muted-foreground'
+                                  )}
+                              >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {date ? format(date, 'PPP') : <span>mm/dd/yyyy</span>}
+                              </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                  mode="single"
+                                  selected={date}
+                                  onSelect={setDate}
+                                  initialFocus
+                              />
+                              </PopoverContent>
+                          </Popover>
+                          <Button className="ml-auto">
+                              <Plus className="mr-2 h-4 w-4" /> Add New Wedding Booking
+                          </Button>
+                      </div>
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardContent className="p-0">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Booking ID</TableHead>
+                                  <TableHead>Couple Names</TableHead>
+                                  <TableHead>Wedding Date</TableHead>
+                                  <TableHead>Package</TableHead>
+                                  <TableHead>Hall(s)</TableHead>
+                                  <TableHead>Guests</TableHead>
+                                  <TableHead>Total Price</TableHead>
+                                  <TableHead>Payment</TableHead>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead className="text-right">Actions</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {weddingBookings.map((booking, index) => (
+                                  <TableRow key={index}>
+                                      <TableCell className="font-semibold text-primary">{booking.id}</TableCell>
+                                      <TableCell>{booking.couple}</TableCell>
+                                      <TableCell>{booking.date}</TableCell>
+                                      <TableCell>{booking.package}</TableCell>
+                                      <TableCell>{booking.halls}</TableCell>
+                                      <TableCell>{booking.guests}</TableCell>
+                                      <TableCell>{booking.price}</TableCell>
+                                      <TableCell>
+                                          <Badge variant="outline" className={cn('border-transparent', booking.paymentColor)}>{booking.payment}</Badge>
+                                      </TableCell>
+                                      <TableCell>
+                                          <Badge variant="outline" className={cn('border-transparent', booking.statusColor)}>{booking.status}</Badge>
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                          <div className="flex items-center justify-end gap-1">
+                                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                  <Eye className="h-4 w-4" />
+                                                  <span className="sr-only">View</span>
+                                              </Button>
+                                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                  <Trash2 className="h-4 w-4" />
+                                                  <span className="sr-only">Delete</span>
+                                              </Button>
+                                          </div>
+                                      </TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </CardContent>
+                  <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+                      <div className="text-sm text-muted-foreground">
+                          Showing 1 to {weddingBookings.length} of 47 results
+                      </div>
+                      <div className="flex items-center space-x-2">
+                          <Button variant="outline" size="sm">Previous</Button>
+                          <Button variant="default" size="sm">1</Button>
+                          <Button variant="outline" size="sm">2</Button>
+                          <Button variant="outline" size="sm">Next</Button>
+                      </div>
+                  </CardFooter>
+              </Card>
+          </TabsContent>
+        </Tabs>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Package ?</AlertDialogTitle>
@@ -306,7 +306,7 @@ export default function WeddingManagementPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
           </AlertDialogFooter>
-           <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+          <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
               <X className="h-5 w-5" />
             </button>
         </AlertDialogContent>
