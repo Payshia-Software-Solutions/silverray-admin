@@ -24,6 +24,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription as DialogDescriptionComponent,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const weddingPackages = [
   {
@@ -79,6 +87,7 @@ const weddingBookings = [
 export default function WeddingManagementPage() {
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
     const [packageToDelete, setPackageToDelete] = useState('');
 
     const handleDeleteClick = (packageName: string) => {
@@ -90,6 +99,7 @@ export default function WeddingManagementPage() {
         console.log(`Deleting ${packageToDelete}`);
         // Add actual delete logic here
         setShowDeleteDialog(false);
+        setShowDeleteSuccessDialog(true);
     }
 
   return (
@@ -311,6 +321,28 @@ export default function WeddingManagementPage() {
             </button>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+             <DialogHeader className="sr-only">
+                  <DialogTitle>Success</DialogTitle>
+                  <DialogDescriptionComponent>The package was successfully deleted.</DialogDescriptionComponent>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-red-100 rounded-full mb-4">
+                      <div className="p-2 bg-red-200 rounded-full">
+                         <Trash2 className="h-8 w-8 text-red-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Package !</h2>
+                  <DialogClose asChild>
+                      <Button className="mt-6 w-full" onClick={() => {
+                        setShowDeleteSuccessDialog(false);
+                        setPackageToDelete('');
+                      }}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
