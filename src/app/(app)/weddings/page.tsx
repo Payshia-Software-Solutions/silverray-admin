@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, Search, Plus, Trash2, Eye, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Search, Plus, Trash2, Eye, X, Info, CheckCircle, Utensils, Users, Flower2, Cake, Camera, Car, Music, BedDouble } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -39,9 +39,19 @@ const weddingPackages = [
   {
     name: 'Silver Grandeur',
     description: 'Premium wedding package with full service',
+    detailedDescription: 'Create unforgettable memories with our Silver Grandeur Wedding Package. This comprehensive package is designed for couples seeking elegance and sophistication for their special day. Perfect for intimate to medium-sized celebrations, this package includes everything you need to make your wedding day magical and stress-free.',
     price: 'LKR. 150,000',
     halls: 'Grand Ballroom, Garden Pavilion',
-    inclusions: 'Premium Catering, Luxury Décor, Ceremony ...',
+    inclusions: [
+      { text: 'Catering for 150 guests', icon: Utensils },
+      { text: 'Dedicated Wedding Planner', icon: Users },
+      { text: 'Premium Floral Decor Package', icon: Flower2 },
+      { text: '3-Tier Wedding Cake', icon: Cake },
+      { text: 'Professional Photography (6 hours)', icon: Camera },
+      { text: 'Bridal Car Decoration', icon: Car },
+      { text: 'Sound & Lighting System', icon: Music },
+      { text: 'Complimentary Bridal Suite', icon: BedDouble },
+    ],
     maxGuests: 200,
     status: 'Active',
     image: 'https://images.unsplash.com/photo-1595431677320-991c68277257?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwaGFsbCUyMGdvbGR8ZW58MHx8fHwxNzUyODQzMjQwfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -50,9 +60,19 @@ const weddingPackages = [
   {
     name: 'Diamond Bliss',
     description: 'Luxury wedding package with exclusive amenities',
-    price: 'LKR. 150,000',
+    detailedDescription: 'Experience the pinnacle of luxury with our Diamond Bliss package. Designed for grand celebrations, this all-inclusive package offers unparalleled service, exquisite culinary creations, and breathtaking decor, ensuring your wedding is a spectacular event to be remembered for a lifetime.',
+    price: 'LKR. 250,000',
     halls: 'Grand Ballroom, Rooftop Terrace',
-    inclusions: 'Premium Catering, Luxury Décor, Ceremony ...',
+    inclusions: [
+      { text: 'Catering for 250 guests', icon: Utensils },
+      { text: 'Dedicated Wedding Planner & Coordinator', icon: Users },
+      { text: 'Luxe Floral & Stage Design', icon: Flower2 },
+      { text: '5-Tier Designer Wedding Cake', icon: Cake },
+      { text: 'Full-Day Videography & Photography', icon: Camera },
+      { text: 'Luxury Bridal Car Service', icon: Car },
+      { text: 'Live Band & DJ', icon: Music },
+      { text: 'Honeymoon Suite for 2 Nights', icon: BedDouble },
+    ],
     maxGuests: 300,
     status: 'Active',
     image: 'https://images.unsplash.com/photo-1550081692-564a275a4073?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBkZWNvcmF0aW9ufGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080',
@@ -89,6 +109,7 @@ const weddingBookings = [
     }
 ];
 
+type WeddingPackage = typeof weddingPackages[0];
 
 export default function WeddingManagementPage() {
     const router = useRouter();
@@ -96,10 +117,15 @@ export default function WeddingManagementPage() {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
     const [packageToDelete, setPackageToDelete] = useState('');
+    const [selectedPackage, setSelectedPackage] = useState<WeddingPackage | null>(null);
 
     const handleDeleteClick = (packageName: string) => {
         setPackageToDelete(packageName);
         setShowDeleteDialog(true);
+    }
+
+    const handleViewClick = (pkg: WeddingPackage) => {
+      setSelectedPackage(pkg);
     }
 
     const handleDeleteConfirm = () => {
@@ -185,7 +211,7 @@ export default function WeddingManagementPage() {
                       </TableCell>
                       <TableCell>{pkg.price}</TableCell>
                       <TableCell>{pkg.halls}</TableCell>
-                      <TableCell>{pkg.inclusions}</TableCell>
+                      <TableCell>{pkg.inclusions.slice(0, 3).map(i => i.text.split(' ')[0]).join(', ')}...</TableCell>
                       <TableCell>{pkg.maxGuests}</TableCell>
                       <TableCell>
                           <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
@@ -194,7 +220,7 @@ export default function WeddingManagementPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewClick(pkg)}>
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                           </Button>
@@ -355,8 +381,49 @@ export default function WeddingManagementPage() {
               </div>
           </DialogContent>
       </Dialog>
+      <Dialog open={!!selectedPackage} onOpenChange={(isOpen) => !isOpen && setSelectedPackage(null)}>
+        <DialogContent className="max-w-3xl p-0">
+          {selectedPackage && (
+            <div>
+              <div className="relative">
+                <Image src={selectedPackage.image} alt={selectedPackage.name} width={800} height={400} className="w-full h-64 object-cover rounded-t-lg" data-ai-hint={selectedPackage.imageHint} />
+                <div className="absolute top-4 right-4 bg-primary/80 backdrop-blur-sm text-primary-foreground p-3 rounded-lg text-right">
+                  <p className="text-sm">Starting From</p>
+                  <p className="text-2xl font-bold">{selectedPackage.price}</p>
+                </div>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Info className="h-5 w-5 text-primary"/>
+                      Package Description
+                  </h3>
+                  <p className="text-muted-foreground bg-secondary/50 p-4 rounded-md">
+                    {selectedPackage.detailedDescription}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-primary"/>
+                      What's Included
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                    {selectedPackage.inclusions.map((item, index) => (
+                      <div key={index} className="flex items-center gap-3 p-2 border rounded-md">
+                        <item.icon className="h-5 w-5 text-primary/80" />
+                        <span className="text-sm text-muted-foreground">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                 <DialogClose asChild>
+                    <Button className="w-full mt-4">Close</Button>
+                </DialogClose>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-    
