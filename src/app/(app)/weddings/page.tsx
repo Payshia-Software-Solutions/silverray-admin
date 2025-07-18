@@ -247,7 +247,7 @@ export default function WeddingManagementPage() {
                               />
                               </PopoverContent>
                           </Popover>
-                          <Button>
+                          <Button onClick={() => router.push('/weddings/booking/new')}>
                               <Plus className="mr-2 h-4 w-4" /> Add New Wedding Booking
                           </Button>
                       </div>
