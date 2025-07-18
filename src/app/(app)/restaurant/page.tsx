@@ -128,7 +128,7 @@ export default function RestaurantDiningPage() {
   const venues = [
       {
         name: 'Main Restaurant',
-        image: 'https://placehold.co/600x400',
+        image: 'https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080',
         imageHint: 'restaurant interior',
         description: 'Elegant fine dining experience with international cuisine and sophisticated ambiance.',
         capacity: 120,
@@ -137,7 +137,7 @@ export default function RestaurantDiningPage() {
       },
       {
         name: 'Cafe 111',
-        image: 'https://placehold.co/600x400',
+        image: 'https://images.unsplash.com/photo-1624583338957-4d155ca886dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2FmZSUyMGludGVyaW9yfGVufDB8fHx8MTc1MjgzNzA2NHww&ixlib=rb-4.1.0&q=80&w=1080',
         imageHint: 'cafe interior',
         description: 'Casual dining spot perfect for coffee, light meals, and relaxed conversations.',
         capacity: 45,
@@ -146,7 +146,7 @@ export default function RestaurantDiningPage() {
       },
       {
         name: 'Indian Restaurant',
-        image: 'https://placehold.co/600x400',
+        image: 'https://images.unsplash.com/photo-1536305030588-45dc07a2a372?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjByZXN0YXVyYW50fGVufDB8fHx8MTc1MjgzNzA2NHww&ixlib=rb-4.1.0&q=80&w=1080',
         imageHint: 'indian restaurant',
         description: 'Authentic Indian cuisine with traditional spices and flavors in a cultural setting.',
         capacity: 80,
