@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,13 +12,25 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 const menuItems = [
     {
@@ -88,6 +101,50 @@ const reservations = [
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [venueToDelete, setVenueToDelete] = useState('');
+
+  const handleDeleteClick = (venueName: string) => {
+    setVenueToDelete(venueName);
+    setShowDeleteDialog(true);
+  }
+
+  const handleDeleteConfirm = () => {
+    console.log(`Deleting ${venueToDelete}`);
+    setShowDeleteDialog(false);
+    setVenueToDelete('');
+    // Here you would add the logic to actually delete the venue
+  }
+
+  const venues = [
+      {
+        name: 'Main Restaurant',
+        image: 'https://placehold.co/600x400',
+        imageHint: 'restaurant interior',
+        description: 'Elegant fine dining experience with international cuisine and sophisticated ambiance.',
+        capacity: 120,
+        hours: '6:00 AM - 11:00 PM',
+        status: 'Active'
+      },
+      {
+        name: 'Cafe 111',
+        image: 'https://placehold.co/600x400',
+        imageHint: 'cafe interior',
+        description: 'Casual dining spot perfect for coffee, light meals, and relaxed conversations.',
+        capacity: 45,
+        hours: '7:00 AM - 10:00 PM',
+        status: 'Active'
+      },
+      {
+        name: 'Indian Restaurant',
+        image: 'https://placehold.co/600x400',
+        imageHint: 'indian restaurant',
+        description: 'Authentic Indian cuisine with traditional spices and flavors in a cultural setting.',
+        capacity: 80,
+        hours: '11:00 AM - 11:00 PM',
+        status: 'Active'
+      }
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,126 +167,47 @@ export default function RestaurantDiningPage() {
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="flex flex-col">
+            {venues.map((venue) => (
+            <Card key={venue.name} className="flex flex-col">
               <div className="relative w-full aspect-video">
                 <Image
-                  src="https://placehold.co/600x400"
-                  alt="Main Restaurant"
+                  src={venue.image}
+                  alt={venue.name}
                   fill
                   className="object-cover rounded-t-lg"
-                  data-ai-hint="restaurant interior"
+                  data-ai-hint={venue.imageHint}
                 />
                 <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                  Active
+                  {venue.status}
                 </span>
               </div>
               <CardContent className="p-4 flex-grow">
                 <h3 className="text-lg font-semibold mb-1">
-                  Main Restaurant
+                  {venue.name}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Elegant fine dining experience with international cuisine and
-                  sophisticated ambiance.
+                  {venue.description}
                 </p>
                 <div className="mt-4 flex justify-between text-sm text-muted-foreground">
                   <div className='flex items-center gap-2'>
                     <Users className="h-4 w-4" />
-                    <span>120 Capacity</span>
+                    <span>{venue.capacity} Capacity</span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Clock className="h-4 w-4" />
-                    <span>6:00 AM - 11:00 PM</span>
+                    <span>{venue.hours}</span>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                 <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                <Button variant="outline" size="icon" className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground">
+                <Button variant="outline" size="icon" className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDeleteClick(venue.name)}>
                   <Trash2 className="h-4 w-4" />
                   <span className="sr-only">Delete</span>
                 </Button>
               </CardFooter>
             </Card>
-            <Card className="flex flex-col">
-              <div className="relative w-full aspect-video">
-                <Image
-                  src="https://placehold.co/600x400"
-                  alt="Cafe 111"
-                  fill
-                  className="object-cover rounded-t-lg"
-                  data-ai-hint="cafe interior"
-                />
-                 <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                  Active
-                </span>
-              </div>
-              <CardContent className="p-4 flex-grow">
-                <h3 className="text-lg font-semibold mb-1">
-                  Cafe 111
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Casual dining spot perfect for coffee, light meals, and
-                  relaxed conversations.
-                </p>
-                <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                   <div className='flex items-center gap-2'>
-                    <Users className="h-4 w-4" />
-                    <span>45 Capacity</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <Clock className="h-4 w-4" />
-                    <span>7:00 AM - 10:00 PM</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
-                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                 <Button variant="outline" size="icon" className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground">
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </CardFooter>
-            </Card>
-            <Card className="flex flex-col">
-              <div className="relative w-full aspect-video">
-                <Image
-                  src="https://placehold.co/600x400"
-                  alt="Indian Restaurant"
-                  fill
-                  className="object-cover rounded-t-lg"
-                  data-ai-hint="indian restaurant"
-                />
-                 <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                  Active
-                </span>
-              </div>
-              <CardContent className="p-4 flex-grow">
-                <h3 className="text-lg font-semibold mb-1">
-                  Indian Restaurant
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Authentic Indian cuisine with traditional spices and flavors
-                  in a cultural setting.
-                </p>
-                 <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                   <div className='flex items-center gap-2'>
-                    <Users className="h-4 w-4" />
-                    <span>80 Capacity</span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <Clock className="h-4 w-4" />
-                    <span>11:00 AM - 11:00 PM</span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
-                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                 <Button variant="outline" size="icon" className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground">
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </CardFooter>
-            </Card>
+            ))}
           </div>
         </TabsContent>
         <TabsContent value="menu-items" className="space-y-4">
@@ -445,6 +423,23 @@ export default function RestaurantDiningPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-red-500 text-lg">
+              {venueToDelete}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+           <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+              <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
