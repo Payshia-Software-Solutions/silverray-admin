@@ -23,6 +23,17 @@ import { cn } from '@/lib/utils';
 import { format, addDays } from 'date-fns';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const activityLog = [
     { text: 'Email confirmation sent', time: 'May 10, 2025 - 10:16 AM' },
@@ -285,7 +296,28 @@ export default function BookingDetailsPage() {
                 <CardTitle className="flex items-center gap-2 text-lg text-red-700"><AlertTriangle className="h-5 w-5"/> Danger Zone</CardTitle>
             </CardHeader>
              <CardContent className="space-y-3">
-                <Button variant="destructive" className="w-full"><X className="mr-2 h-4 w-4"/> Cancel Booking</Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="w-full"><X className="mr-2 h-4 w-4"/> Cancel Booking</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Cancel this Booking?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-center text-red-500 text-lg">
+                            BK-{bookingId}
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Go Back</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-500 hover:bg-red-600">Cancel</AlertDialogAction>
+                        </AlertDialogFooter>
+                        <AlertDialogCancel asChild>
+                            <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </AlertDialogCancel>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"><Trash2 className="mr-2 h-4 w-4"/> Delete Booking</Button>
             </CardContent>
         </Card>
