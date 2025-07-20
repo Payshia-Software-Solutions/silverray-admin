@@ -30,6 +30,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
   '/rooms': ({id}) => ({ title: `Edit Room ${id}`, description: 'Manage hotel rooms, suites, and room types' }),
+  '/reservations': ({id}) => ({ title: `Booking Management (Rooms & Suites)`, description: 'Manage Bookings' }),
 };
 
 
@@ -57,5 +58,3 @@ export function Header() {
     </div>
   );
 }
-
-    

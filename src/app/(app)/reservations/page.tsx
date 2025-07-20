@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const stats = [
   {
@@ -218,9 +219,11 @@ export default function ReservationsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                      <div className="flex justify-end items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                            <span className="sr-only">View</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                            <Link href={`/reservations/${res.id.replace('#', '')}`}>
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View</span>
+                            </Link>
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
                             <Trash2 className="h-4 w-4" />
