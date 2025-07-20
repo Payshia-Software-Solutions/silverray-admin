@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useParams } from 'next/navigation';
 
 const amenities = [
     { id: 'king-bed', label: 'King-size Bed', checked: true },
@@ -54,7 +55,8 @@ const roomImages = [
     { src: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop', hint: 'hotel room view', primary: false },
 ]
 
-export default function EditRoomPage({ params }: { params: { id: string } }) {
+export default function EditRoomPage() {
+  const params = useParams<{ id: string }>();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   return (
@@ -270,3 +272,5 @@ export default function EditRoomPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
+    
