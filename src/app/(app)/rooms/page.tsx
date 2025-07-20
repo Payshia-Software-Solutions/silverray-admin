@@ -20,6 +20,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription as DialogDescriptionComponent,
+  DialogClose,
+} from '@/components/ui/dialog';
+
 
 const rooms = [
   { id: '101', type: 'Deluxe Double Room with Balcony', price: 'LKR. 29500', status: 'Available', occupancy: '2 Adults / 1 Child' },
@@ -38,6 +47,7 @@ const statusVariant = {
 export default function RoomsPage() {
   const router = useRouter();
   const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
 
   const handleDeleteClick = (roomId: string) => {
     setRoomToDelete(roomId);
@@ -50,6 +60,7 @@ export default function RoomsPage() {
   const handleDeleteConfirm = () => {
     console.log(`Deleting room ${roomToDelete}`);
     // Add actual delete logic here
+    setShowDeleteSuccessDialog(true);
     setRoomToDelete(null);
   };
 
@@ -154,6 +165,28 @@ export default function RoomsPage() {
             </button>
         </AlertDialogContent>
       </AlertDialog>
+
+       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+             <DialogHeader className="sr-only">
+                  <DialogTitle>Success</DialogTitle>
+                  <DialogDescriptionComponent>The room was successfully deleted.</DialogDescriptionComponent>
+              </DialogHeader>
+              <div className="flex flex-col items-center justify-center text-center p-8">
+                  <div className="p-4 bg-red-100 rounded-full mb-4">
+                      <div className="p-2 bg-red-200 rounded-full">
+                         <Trash2 className="h-8 w-8 text-red-600" />
+                      </div>
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {roomToDelete}!</h2>
+                  <DialogClose asChild>
+                      <Button className="mt-6 w-full" onClick={() => {
+                        setShowDeleteSuccessDialog(false);
+                      }}>Done</Button>
+                  </DialogClose>
+              </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
