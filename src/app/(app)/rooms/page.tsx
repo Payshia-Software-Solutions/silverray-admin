@@ -70,89 +70,89 @@ export default function RoomsPage() {
             Add New Room
           </Button>
       </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Room Number</TableHead>
-                <TableHead>Room Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Price/Night</TableHead>
-                <TableHead>Occupancy</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rooms.map((room) => (
-                <TableRow key={room.id}>
-                  <TableCell className="font-medium">{room.id}</TableCell>
-                  <TableCell>{room.type}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
-                      {room.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{room.price}</TableCell>
-                  <TableCell>
-                    {room.occupancy}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                            <span className="sr-only">View</span>
-                        </Button>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteClick(room.id)}>
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                          </Button>
-                        </AlertDialogTrigger>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-            <div className="text-sm text-muted-foreground">
-                Showing 1 to 5 of 47 rooms
-            </div>
-            <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                    Previous
-                </Button>
-                <Button variant="default" size="sm">
-                    1
-                </Button>
-                <Button variant="outline" size="sm">
-                    2
-                </Button>
-                <Button variant="outline" size="sm">
-                    Next
-                </Button>
-            </div>
-        </CardFooter>
-      </Card>
-      
       <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Room ?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-center text-red-500 text-lg">
-                      Room Number {roomToDelete}
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="sm:justify-center">
-                  <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-              <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                <X className="h-5 w-5" />
-              </button>
-          </AlertDialogContent>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Room Number</TableHead>
+                  <TableHead>Room Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Price/Night</TableHead>
+                  <TableHead>Occupancy</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rooms.map((room) => (
+                  <TableRow key={room.id}>
+                    <TableCell className="font-medium">{room.id}</TableCell>
+                    <TableCell>{room.type}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
+                        {room.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{room.price}</TableCell>
+                    <TableCell>
+                      {room.occupancy}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end items-center gap-2">
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View</span>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteClick(room.id)}>
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+              <div className="text-sm text-muted-foreground">
+                  Showing 1 to 5 of 47 rooms
+              </div>
+              <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm">
+                      Previous
+                  </Button>
+                  <Button variant="default" size="sm">
+                      1
+                  </Button>
+                  <Button variant="outline" size="sm">
+                      2
+                  </Button>
+                  <Button variant="outline" size="sm">
+                      Next
+                  </Button>
+              </div>
+          </CardFooter>
+        </Card>
+        
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Room ?</AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    Room Number {roomToDelete}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+                <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+            <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+              <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
       </AlertDialog>
     </div>
   );
