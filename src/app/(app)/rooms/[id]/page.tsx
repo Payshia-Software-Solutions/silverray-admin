@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2 } from 'lucide-react';
+import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -19,6 +20,17 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Image from 'next/image';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const amenities = [
     { id: 'king-bed', label: 'King-size Bed', checked: true },
@@ -43,6 +55,7 @@ const roomImages = [
 ]
 
 export default function EditRoomPage({ params }: { params: { id: string } }) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   return (
     <div className="space-y-6">
@@ -221,10 +234,32 @@ export default function EditRoomPage({ params }: { params: { id: string } }) {
       </div>
 
       <div className="flex justify-between items-center">
-        <Button variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Room
-        </Button>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Room
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader className="sr-only">
+                    <AlertDialogTitle>Delete Room</AlertDialogTitle>
+                    <AlertDialogDescription>Are you sure you want to delete this room?</AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="text-center">
+                    <h2 className="text-xl font-bold mb-2">Do you want to Delete this Room ?</h2>
+                    <p className="text-lg text-red-500">Room Number {params.id}</p>
+                </div>
+                <AlertDialogFooter className="sm:justify-center">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+        </AlertDialog>
+
         <div className="flex justify-end gap-2">
             <Button variant="outline" asChild>
                 <Link href="/rooms">Cancel</Link>
