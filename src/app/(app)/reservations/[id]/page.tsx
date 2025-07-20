@@ -55,6 +55,7 @@ export default function BookingDetailsPage() {
     const params = useParams<{ id: string }>();
     const bookingId = params.id;
     const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
+    const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
 
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(new Date('2025-06-15'));
   const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(new Date('2025-06-18'));
@@ -62,6 +63,10 @@ export default function BookingDetailsPage() {
   const handleCancelBooking = () => {
     // In a real app, you would handle cancellation logic here
     setShowCancelSuccessDialog(true);
+  }
+
+  const handleDeleteBooking = () => {
+      setShowDeleteSuccessDialog(true);
   }
 
   return (
@@ -328,7 +333,23 @@ export default function BookingDetailsPage() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"><Trash2 className="mr-2 h-4 w-4"/> Delete Booking</Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"><Trash2 className="mr-2 h-4 w-4"/> Delete Booking</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Booking?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-center text-red-500 text-lg">
+                                BK-{bookingId}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="sm:justify-center">
+                            <AlertDialogCancel>Go Back</AlertDialogCancel>
+                            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteBooking}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </CardContent>
         </Card>
       </div>
@@ -344,6 +365,24 @@ export default function BookingDetailsPage() {
                   <Trash2 className="h-8 w-8 text-red-500" />
               </div>
               <h2 className="text-xl font-bold mb-2">Successfully Cancelled BK-{bookingId} !</h2>
+              <DialogClose asChild>
+                  <Button className="mt-6">Done</Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+      </Dialog>
+      
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent>
+            <DialogHeader className='sr-only'>
+              <DialogTitleComponent>Booking Deleted</DialogTitleComponent>
+              <DialogDescription>The booking has been successfully deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mb-4">
+                  <Trash2 className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Deleted BK-{bookingId} !</h2>
               <DialogClose asChild>
                   <Button className="mt-6">Done</Button>
               </DialogClose>
