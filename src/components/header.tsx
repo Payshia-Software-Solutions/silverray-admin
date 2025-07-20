@@ -31,6 +31,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
   '/rooms': ({id}) => ({ title: `Edit Room ${id}`, description: 'Manage hotel rooms, suites, and room types' }),
   '/reservations': ({id}) => ({ title: `Booking Management (Rooms & Suites)`, description: 'Manage Bookings' }),
+  '/weddings/booking': ({id}) => ({ title: `Booking #${id}`, description: 'Details for wedding booking' }),
 };
 
 
@@ -41,9 +42,12 @@ export function Header() {
     const pathSegments = pathname.split('/').filter(Boolean);
     
     if (pathSegments.length > 1) {
-      const pageKey = `/${pathSegments[0]}`;
+      let pageKey = `/${pathSegments[0]}`;
+      if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking') {
+        pageKey = '/weddings/booking';
+      }
       if (dynamicPageInfo[pageKey]) {
-        const params = { id: pathSegments[1] }; // a bit of a hack for now
+        const params = { id: pathSegments.slice(-1)[0] };
         return dynamicPageInfo[pageKey](params);
       }
     }

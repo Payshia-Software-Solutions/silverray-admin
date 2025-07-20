@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const weddingPackages = [
   {
@@ -82,7 +83,7 @@ const weddingPackages = [
 
 const weddingBookings = [
     {
-        id: '#WB2024001',
+        id: 'WB2024001',
         couple: 'Mr. & Mrs. Silva',
         date: 'June 15, 2025',
         package: 'Silver Grandeur',
@@ -95,7 +96,7 @@ const weddingBookings = [
         statusColor: 'bg-blue-100 text-blue-700'
     },
     {
-        id: '#WB2024002',
+        id: 'WB2024002',
         couple: 'Kalum & Nilmini',
         date: 'July 22, 2025',
         package: 'Golden Elegance',
@@ -314,9 +315,11 @@ export default function WeddingManagementPage() {
                                       </TableCell>
                                       <TableCell className="text-right">
                                           <div className="flex items-center justify-end gap-1">
-                                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                <Link href={`/weddings/booking/${booking.id.replace('#','')}`}>
                                                   <Eye className="h-4 w-4" />
                                                   <span className="sr-only">View</span>
+                                                </Link>
                                               </Button>
                                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                                   <Trash2 className="h-4 w-4" />
