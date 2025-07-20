@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2, X } from 'lucide-react';
+import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -60,10 +60,18 @@ export default function EditRoomPage() {
   const params = useParams<{ id: string }>();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+
 
   const handleDelete = () => {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
+  }
+
+  const handleSave = () => {
+    setShowSaveConfirmDialog(false);
+    setShowSaveSuccessDialog(true);
   }
   
   return (
@@ -273,7 +281,27 @@ export default function EditRoomPage() {
             <Button variant="outline" asChild>
                 <Link href="/rooms">Cancel</Link>
             </Button>
-            <Button>Save Changes</Button>
+            <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
+              <AlertDialogTrigger asChild>
+                <Button>Save Changes</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader className="sr-only">
+                    <AlertDialogTitle>Update Room</AlertDialogTitle>
+                    <AlertDialogDescription>Are you sure you want to update this room?</AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="text-center p-4">
+                    <h2 className="text-2xl font-bold mb-4">Do you want to Update this Room ?</h2>
+                </div>
+                <AlertDialogFooter className="sm:justify-center">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSave}>Save Changes</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+            </AlertDialog>
         </div>
       </div>
       
@@ -297,6 +325,25 @@ export default function EditRoomPage() {
                   </DialogClose>
               </div>
           </DialogContent>
+      </Dialog>
+      <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+                <DialogTitleComponent>Success</DialogTitleComponent>
+                <DialogDescriptionComponent>The room was successfully updated.</DialogDescriptionComponent>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8">
+                <div className="p-4 bg-blue-100 rounded-full mb-4">
+                    <div className="p-2 bg-blue-200 rounded-full">
+                        <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-bold mb-2">Successfully Updated Room {params.id}!</h2>
+                <DialogClose asChild>
+                    <Button className="mt-6 w-full" onClick={() => setShowSaveSuccessDialog(false)}>Done</Button>
+                </DialogClose>
+            </div>
+        </DialogContent>
       </Dialog>
     </div>
   );
