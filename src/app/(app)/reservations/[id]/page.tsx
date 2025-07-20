@@ -33,7 +33,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-  AlertDialogClose,
 } from "@/components/ui/alert-dialog";
 import {
   Dialog,
@@ -327,11 +326,6 @@ export default function BookingDetailsPage() {
                         <AlertDialogCancel>Go Back</AlertDialogCancel>
                         <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleCancelBooking}>Cancel</AlertDialogAction>
                         </AlertDialogFooter>
-                        <AlertDialogClose asChild>
-                            <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </AlertDialogClose>
                     </AlertDialogContent>
                 </AlertDialog>
                 <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"><Trash2 className="mr-2 h-4 w-4"/> Delete Booking</Button>
