@@ -28,6 +28,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 
 const rooms = [
@@ -48,6 +49,7 @@ export default function RoomsPage() {
   const router = useRouter();
   const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedRoomId, setDeletedRoomId] = useState<string | null>(null);
 
   const handleDeleteClick = (roomId: string) => {
     setRoomToDelete(roomId);
@@ -58,10 +60,13 @@ export default function RoomsPage() {
   };
 
   const handleDeleteConfirm = () => {
-    console.log(`Deleting room ${roomToDelete}`);
-    // Add actual delete logic here
-    setShowDeleteSuccessDialog(true);
-    setRoomToDelete(null);
+    if (roomToDelete) {
+      console.log(`Deleting room ${roomToDelete}`);
+      setDeletedRoomId(roomToDelete);
+      // Add actual delete logic here
+      setShowDeleteSuccessDialog(true);
+      setRoomToDelete(null);
+    }
   };
 
 
@@ -111,9 +116,11 @@ export default function RoomsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                            <Link href={`/rooms/${room.id}`}>
                               <Eye className="h-4 w-4" />
                               <span className="sr-only">View</span>
+                            </Link>
                           </Button>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteClick(room.id)}>
@@ -150,12 +157,14 @@ export default function RoomsPage() {
         </Card>
         
         <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Room ?</AlertDialogTitle>
-                <AlertDialogDescription className="text-center text-red-500 text-lg">
-                    Room Number {roomToDelete}
-                </AlertDialogDescription>
+            <AlertDialogHeader className="sr-only">
+                <AlertDialogTitle>Delete Room</AlertDialogTitle>
+                <AlertDialogDescription>Are you sure you want to delete this room?</AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="text-center">
+              <h2 className="text-xl font-bold mb-2">Do you want to Delete this Room ?</h2>
+              <p className="text-lg text-red-500">Room Number {roomToDelete}</p>
+            </div>
             <AlertDialogFooter className="sm:justify-center">
                 <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
                 <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
@@ -178,7 +187,7 @@ export default function RoomsPage() {
                          <Trash2 className="h-8 w-8 text-red-600" />
                       </div>
                   </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {roomToDelete}!</h2>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {deletedRoomId}!</h2>
                   <DialogClose asChild>
                       <Button className="mt-6 w-full" onClick={() => {
                         setShowDeleteSuccessDialog(false);

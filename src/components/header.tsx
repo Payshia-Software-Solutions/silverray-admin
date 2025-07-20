@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
   '/rooms': { title: 'Rooms Management', description: 'View, add, edit, or delete hotel rooms.' },
+  '/rooms/new': { title: 'Create New Room', description: 'Add a new room to your hotel.' },
   '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/reservations/new': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
@@ -22,17 +23,30 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'User Management', description: 'Manage admin accounts and permissions' },
-  '/rooms/new': { title: 'Create New Room', description: 'Add a new room to your hotel.' },
   '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
 
   // Add other pages here
 };
 
+const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
+  '/rooms': ({id}) => ({ title: `Room Management / Room ${id}`, description: 'Manage hotel rooms, suites, and room types' }),
+};
 
 
 export function Header() {
   const pathname = usePathname();
+
   const { title, description } = useMemo(() => {
+    const pathSegments = pathname.split('/').filter(Boolean);
+    
+    if (pathSegments.length > 1) {
+      const pageKey = `/${pathSegments[0]}`;
+      if (dynamicPageInfo[pageKey]) {
+        const params = { id: pathSegments[1] }; // a bit of a hack for now
+        return dynamicPageInfo[pageKey](params);
+      }
+    }
+
     return pageInfo[pathname] ?? { title: 'Page Not Found', description: '' };
   }, [pathname]);
 
@@ -43,5 +57,3 @@ export function Header() {
     </div>
   );
 }
-
-    
