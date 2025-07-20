@@ -1,6 +1,7 @@
 
 'use client';
-import { Plus, Search, Eye, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Search, Eye, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -8,6 +9,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const rooms = [
   { id: '101', type: 'Deluxe Double Room with Balcony', price: 'LKR. 29500', status: 'Available', occupancy: '2 Adults / 1 Child' },
@@ -25,6 +37,23 @@ const statusVariant = {
 
 export default function RoomsPage() {
   const router = useRouter();
+  const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (roomId: string) => {
+    setRoomToDelete(roomId);
+  };
+
+  const handleCancelDelete = () => {
+    setRoomToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    console.log(`Deleting room ${roomToDelete}`);
+    // Add actual delete logic here
+    setRoomToDelete(null);
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg shadow-sm">
@@ -74,10 +103,12 @@ export default function RoomsPage() {
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteClick(room.id)}>
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                          </Button>
+                        </AlertDialogTrigger>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -105,6 +136,24 @@ export default function RoomsPage() {
             </div>
         </CardFooter>
       </Card>
+      
+      <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Room ?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center text-red-500 text-lg">
+                      Room Number {roomToDelete}
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="sm:justify-center">
+                  <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+              <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                <X className="h-5 w-5" />
+              </button>
+          </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
