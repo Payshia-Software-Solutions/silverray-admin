@@ -34,6 +34,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle as DialogTitleComponent
+} from '@/components/ui/dialog';
+
 
 const activityLog = [
     { text: 'Email confirmation sent', time: 'May 10, 2025 - 10:16 AM' },
@@ -45,9 +54,15 @@ const activityLog = [
 export default function BookingDetailsPage() {
     const params = useParams<{ id: string }>();
     const bookingId = params.id;
+    const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
 
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(new Date('2025-06-15'));
   const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(new Date('2025-06-18'));
+
+  const handleCancelBooking = () => {
+    // In a real app, you would handle cancellation logic here
+    setShowCancelSuccessDialog(true);
+  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
@@ -309,19 +324,38 @@ export default function BookingDetailsPage() {
                         </AlertDialogHeader>
                         <AlertDialogFooter className="sm:justify-center">
                         <AlertDialogCancel>Go Back</AlertDialogCancel>
-                        <AlertDialogAction className="bg-red-500 hover:bg-red-600">Cancel</AlertDialogAction>
+                        <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleCancelBooking}>Cancel</AlertDialogAction>
                         </AlertDialogFooter>
-                        <AlertDialogCancel asChild>
+                        <AlertDialogClose asChild>
                             <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
                                 <X className="h-5 w-5" />
                             </button>
-                        </AlertDialogCancel>
+                        </AlertDialogClose>
                     </AlertDialogContent>
                 </AlertDialog>
                 <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"><Trash2 className="mr-2 h-4 w-4"/> Delete Booking</Button>
             </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showCancelSuccessDialog} onOpenChange={setShowCancelSuccessDialog}>
+          <DialogContent>
+            <DialogHeader className='sr-only'>
+              <DialogTitleComponent>Booking Cancelled</DialogTitleComponent>
+              <DialogDescription>The booking has been successfully cancelled.</DialogDescription>
+            </DialogHeader>
+            <div className="text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mb-4">
+                  <Trash2 className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Cancelled BK-{bookingId} !</h2>
+              <DialogClose asChild>
+                  <Button className="mt-6">Done</Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
