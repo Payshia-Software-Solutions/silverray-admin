@@ -61,53 +61,57 @@ export default function EditRestaurantReservationPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/restaurant">
-                  Restaurant & Dining
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/restaurant">Reservations</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Edit Reservation</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex items-center gap-4 mt-2">
-            <h1 className="text-3xl font-bold">
-              Edit & View: John Smith - #{id}
-            </h1>
-            <Badge className="bg-green-100 text-green-700 border-green-200">
-              Confirmed
-            </Badge>
-          </div>
-          <p className="text-muted-foreground">
-            Modify reservation details and manage booking status
-          </p>
+      <div className="flex items-center justify-between">
+        <div>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/restaurant">
+                    Restaurant & Dining
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/restaurant">Reservations</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Edit Reservation</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div className="flex items-center gap-4 mt-2">
+              <h1 className="text-3xl font-bold">
+                Edit & View: John Smith - #{id}
+              </h1>
+              <Badge className="bg-green-100 text-green-700 border-green-200">
+                Confirmed
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">
+              Modify reservation details and manage booking status
+            </p>
+        </div>
       </div>
 
       <Card>
         <CardContent className="p-4">
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-between gap-2">
                 <Button variant="outline">
                     <Save className="mr-2 h-4 w-4" /> Save Changes
                 </Button>
-                <Button variant="outline">Cancel</Button>
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                    <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
-                </Button>
-                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
-                    <Mail className="mr-2 h-4 w-4" /> Send Email
-                </Button>
-                <Button variant="destructive">
-                    <X className="mr-2 h-4 w-4" /> Cancel Reservation
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline">Cancel</Button>
+                    <Button className="bg-green-600 hover:bg-green-700 text-white">
+                        <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
+                    </Button>
+                    <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
+                        <Mail className="mr-2 h-4 w-4" /> Send Email
+                    </Button>
+                    <Button variant="destructive">
+                        <X className="mr-2 h-4 w-4" /> Cancel Reservation
+                    </Button>
+                </div>
             </div>
         </CardContent>
       </Card>
