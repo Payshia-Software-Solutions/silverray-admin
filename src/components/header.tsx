@@ -56,7 +56,7 @@ export function Header() {
             break;
           }
         }
-        if (match) {
+        if (match && Object.keys(params).length > 0) {
           return dynamicPageInfo[key](params);
         }
       }
