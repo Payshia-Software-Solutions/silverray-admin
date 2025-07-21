@@ -12,15 +12,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  params: paramsProp,
 }: Readonly<{
   children: React.ReactNode;
-  params: { [key: string]: string | string[] | undefined };
 }>) {
-  // Prevent bundler from eliminating `params` through tree-shaking by using `React.use`
-  // as recommended by Next.js for handling dynamic APIs.
-  const params = React.use(Promise.resolve(paramsProp));
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-body antialiased`} suppressHydrationWarning>{children}</body>
