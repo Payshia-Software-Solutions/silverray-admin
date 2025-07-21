@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Clock, Trash2, X } from 'lucide-react';
+import { Bold, Italic, List, Plus, Clock, Trash2, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
@@ -31,6 +31,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription as DialogDescriptionComponent,
+  DialogHeader as DialogHeaderComponent,
+  DialogTitle as DialogTitleComponent
+} from '@/components/ui/dialog';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
@@ -39,10 +47,12 @@ export default function EditExperiencePage() {
     const experienceId = params.id as string;
     const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
+    const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
 
     const handleSave = () => {
         // In a real app, you would handle the save logic here
         setShowSaveConfirmDialog(false);
+        setShowSaveSuccessDialog(true);
     };
 
   return (
@@ -243,6 +253,27 @@ export default function EditExperiencePage() {
           </CardContent>
         </Card>
       </div>
+
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+              <DialogTitleComponent>Successfully Updated!</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+              <div className="mx-auto bg-blue-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                  <div className="p-2 bg-blue-200 rounded-full">
+                    <CheckCircle2 className="h-10 w-10 text-blue-600" />
+                  </div>
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Updated {experienceTitle} !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowSaveSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
