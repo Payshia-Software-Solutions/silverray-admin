@@ -124,6 +124,7 @@ export default function RestaurantDiningPage() {
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState('');
   const [showDeleteItemDialog, setShowDeleteItemDialog] = useState(false);
+  const [showDeleteItemSuccessDialog, setShowDeleteItemSuccessDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   const handleDeleteClick = (venueName: string) => {
@@ -147,7 +148,7 @@ export default function RestaurantDiningPage() {
     console.log(`Deleting ${itemToDelete?.name}`);
     // Here you would add the logic to delete the item
     setShowDeleteItemDialog(false);
-    setItemToDelete(null);
+    setShowDeleteItemSuccessDialog(true);
   }
 
   const venues = [
@@ -514,15 +515,11 @@ export default function RestaurantDiningPage() {
       </Dialog>
       <AlertDialog open={showDeleteItemDialog} onOpenChange={setShowDeleteItemDialog}>
             <AlertDialogContent className="sm:max-w-md">
-                <AlertDialogHeader className="sr-only">
-                  <AlertDialogTitle>Delete Meal</AlertDialogTitle>
-                  <AlertDialogDescription>Are you sure you want to delete this meal?</AlertDialogDescription>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Meal ?</AlertDialogTitle>
                 </AlertDialogHeader>
-                <div className="text-center p-4">
-                    <h2 className="text-2xl font-bold">Do you want to Delete this Meal ?</h2>
-                </div>
                 <AlertDialogFooter className="sm:justify-center gap-4">
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={() => setShowDeleteItemDialog(false)}>Cancel</AlertDialogCancel>
                     <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteItemConfirm}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
                 <button onClick={() => setShowDeleteItemDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
@@ -530,8 +527,27 @@ export default function RestaurantDiningPage() {
                 </button>
             </AlertDialogContent>
         </AlertDialog>
+      <Dialog open={showDeleteItemSuccessDialog} onOpenChange={setShowDeleteItemSuccessDialog}>
+          <DialogContent className="sm:max-w-xs">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Successfully Deleted!</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                  <Trash2 className="h-10 w-10 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Deleted !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => {
+                  setShowDeleteItemSuccessDialog(false);
+                  setItemToDelete(null);
+                }}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-    
