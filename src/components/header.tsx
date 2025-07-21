@@ -39,30 +39,35 @@ export function Header() {
   const pathname = usePathname();
 
   const { title, description } = useMemo(() => {
+    // First, check for an exact match in static pages
+    if (pageInfo[pathname]) {
+      return pageInfo[pathname];
+    }
+    
+    // Then, check for dynamic routes
     const pathSegments = pathname.split('/').filter(Boolean);
     
-    // Check for dynamic routes
-    for (const key in dynamicPageInfo) {
-      const dynamicSegments = key.split('/').filter(Boolean);
-      if (pathSegments.length === dynamicSegments.length) {
+    for (const routePattern in dynamicPageInfo) {
+      const patternSegments = routePattern.split('/').filter(Boolean);
+      if (pathSegments.length === patternSegments.length) {
         const params: { [key: string]: string } = {};
         let match = true;
-        for (let i = 0; i < dynamicSegments.length; i++) {
-          if (dynamicSegments[i].startsWith('[') && dynamicSegments[i].endsWith(']')) {
-            const paramName = dynamicSegments[i].slice(1, -1);
+        for (let i = 0; i < patternSegments.length; i++) {
+          if (patternSegments[i].startsWith('[') && patternSegments[i].endsWith(']')) {
+            const paramName = patternSegments[i].slice(1, -1);
             params[paramName] = pathSegments[i];
-          } else if (pathSegments[i] !== dynamicSegments[i]) {
+          } else if (pathSegments[i] !== patternSegments[i]) {
             match = false;
             break;
           }
         }
-        if (match && Object.keys(params).length > 0) {
-          return dynamicPageInfo[key](params);
+        if (match) {
+          return dynamicPageInfo[routePattern](params);
         }
       }
     }
 
-    return pageInfo[pathname] ?? { title: 'Page Not Found', description: '' };
+    return { title: 'Page Not Found', description: '' };
   }, [pathname]);
 
   return (
