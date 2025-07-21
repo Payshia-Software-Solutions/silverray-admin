@@ -49,6 +49,8 @@ export default function EditExperiencePage() {
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
     const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+    const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+    const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
 
     const handleSave = () => {
         // In a real app, you would handle the save logic here
@@ -58,8 +60,9 @@ export default function EditExperiencePage() {
     
     const handleDelete = () => {
         // In a real app, you would handle the delete logic here
+        setDeletedExperienceTitle(experienceTitle);
         setShowDeleteConfirmDialog(false);
-        // Then likely show a success message
+        setShowDeleteSuccessDialog(true);
     };
 
   return (
@@ -299,6 +302,28 @@ export default function EditExperiencePage() {
                 </button>
             </DialogClose>
           </DialogContent>
+      </Dialog>
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+                <DialogTitleComponent>Success</DialogTitleComponent>
+                <DialogDescriptionComponent>The experience was successfully deleted.</DialogDescriptionComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                   <div className="p-3 bg-red-200 rounded-full">
+                        <Trash2 className="h-8 w-8 text-red-600" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-bold">Successfully Deleted {deletedExperienceTitle} !</h2>
+            </div>
+            <DialogClose asChild>
+              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </button>
+            </DialogClose>
+        </DialogContent>
       </Dialog>
     </div>
   );
