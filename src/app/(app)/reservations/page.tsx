@@ -25,9 +25,29 @@ import { Calendar } from '@/components/ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader as DialogHeaderComponent,
+  DialogTitle as DialogTitleComponent,
+  DialogDescription as DialogDescriptionComponent,
+  DialogClose,
+} from '@/components/ui/dialog';
+
 
 const stats = [
   {
@@ -93,6 +113,8 @@ const reservations = [
   },
 ];
 
+type Reservation = typeof reservations[0];
+
 const paymentVariant = {
   Paid: 'bg-green-100 text-green-700',
   Pending: 'bg-yellow-100 text-yellow-700',
@@ -106,6 +128,23 @@ const statusVariant = {
 export default function ReservationsPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [bookingToDelete, setBookingToDelete] = useState<Reservation | null>(null);
+
+  const handleDeleteClick = (reservation: Reservation) => {
+    setBookingToDelete(reservation);
+  };
+
+  const handleCancelDelete = () => {
+    setBookingToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (bookingToDelete) {
+      console.log(`Deleting booking ${bookingToDelete.id}`);
+      // Add actual delete logic here
+      setBookingToDelete(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -165,97 +204,118 @@ export default function ReservationsPage() {
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Booking ID</TableHead>
-                <TableHead className="w-[200px]">Guest</TableHead>
-                <TableHead>Room</TableHead>
-                <TableHead>Check-in</TableHead>
-                <TableHead>Check-out</TableHead>
-                <TableHead>Guests</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reservations.map((res) => (
-                <TableRow key={res.id}>
-                  <TableCell className="font-semibold text-primary">{res.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={res.avatar} alt={res.guest} data-ai-hint={res.avatarHint} />
-                        <AvatarFallback>{res.guest.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{res.guest}</p>
-                        <p className="text-xs text-muted-foreground">{res.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-medium text-sm">{res.roomType}</p>
-                    <p className="text-xs text-muted-foreground">{res.roomNumber}</p>
-                  </TableCell>
-                  <TableCell>{res.checkIn}</TableCell>
-                  <TableCell>{res.checkOut}</TableCell>
-                  <TableCell>{res.guests}</TableCell>
-                  <TableCell>{res.total}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment as keyof typeof paymentVariant])}>
-                      {res.payment}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn('border-transparent', statusVariant[res.status as keyof typeof statusVariant])}>
-                      {res.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                     <div className="flex justify-end items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                            <Link href={`/reservations/${res.id.replace('#', '')}`}>
-                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                              <span className="sr-only">View</span>
-                            </Link>
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
-                            <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
-                    </div>
-                  </TableCell>
+      
+      <AlertDialog open={!!bookingToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Booking ID</TableHead>
+                  <TableHead className="w-[200px]">Guest</TableHead>
+                  <TableHead>Room</TableHead>
+                  <TableHead>Check-in</TableHead>
+                  <TableHead>Check-out</TableHead>
+                  <TableHead>Guests</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-         <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-            <div className="text-sm text-muted-foreground">
-                Showing 1 to {reservations.length} of 247 bookings
-            </div>
-            <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                    Previous
-                </Button>
-                <Button variant="default" size="sm">
-                    1
-                </Button>
-                <Button variant="outline" size="sm">
-                    2
-                </Button>
-                <Button variant="outline" size="sm">
-                    Next
-                </Button>
-            </div>
-        </CardFooter>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {reservations.map((res) => (
+                  <TableRow key={res.id}>
+                    <TableCell className="font-semibold text-primary">{res.id}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={res.avatar} alt={res.guest} data-ai-hint={res.avatarHint} />
+                          <AvatarFallback>{res.guest.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{res.guest}</p>
+                          <p className="text-xs text-muted-foreground">{res.email}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium text-sm">{res.roomType}</p>
+                      <p className="text-xs text-muted-foreground">{res.roomNumber}</p>
+                    </TableCell>
+                    <TableCell>{res.checkIn}</TableCell>
+                    <TableCell>{res.checkOut}</TableCell>
+                    <TableCell>{res.guests}</TableCell>
+                    <TableCell>{res.total}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment as keyof typeof paymentVariant])}>
+                        {res.payment}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={cn('border-transparent', statusVariant[res.status as keyof typeof statusVariant])}>
+                        {res.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                       <div className="flex justify-end items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                              <Link href={`/reservations/${res.id.replace('#', '')}`}>
+                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                <span className="sr-only">View</span>
+                              </Link>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(res)}>
+                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+           <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+              <div className="text-sm text-muted-foreground">
+                  Showing 1 to {reservations.length} of 247 bookings
+              </div>
+              <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm">
+                      Previous
+                  </Button>
+                  <Button variant="default" size="sm">
+                      1
+                  </Button>
+                  <Button variant="outline" size="sm">
+                      2
+                  </Button>
+                  <Button variant="outline" size="sm">
+                      Next
+                  </Button>
+              </div>
+          </CardFooter>
+        </Card>
+
+        <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Booking ?</AlertDialogTitle>
+              <AlertDialogDescription className="text-center text-red-500 text-lg">
+                {bookingToDelete?.id.replace('#', 'BK-')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+              <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+            <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
