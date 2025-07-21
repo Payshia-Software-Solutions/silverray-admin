@@ -180,10 +180,10 @@ export default function ExperienceBookingsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
                         <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
                         <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                       </Button>
                     </div>
