@@ -59,10 +59,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
               </Button>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">User Profile</span>
-              </Button>
               <div className="flex items-center gap-3">
                  <Avatar>
                     <AvatarImage src="https://placehold.co/40x40.png" alt="User Saman" data-ai-hint="person portrait" />
