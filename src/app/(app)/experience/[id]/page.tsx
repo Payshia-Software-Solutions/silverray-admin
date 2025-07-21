@@ -90,6 +90,7 @@ export default function ExperienceBookingsPage() {
   const experienceId = params.id as string;
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
 
   const handleDeleteClick = (booking: Booking) => {
     setBookingToDelete(booking);
@@ -104,6 +105,7 @@ export default function ExperienceBookingsPage() {
       console.log(`Deleting booking ${bookingToDelete.id}`);
       // Add actual delete logic here
       setBookingToDelete(null);
+      setShowDeleteSuccessDialog(true);
     }
   };
 
@@ -274,6 +276,24 @@ export default function ExperienceBookingsPage() {
             </button>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-xs">
+            <DialogHeaderComponent className="sr-only">
+              <DialogTitleComponent>Successfully Deleted!</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                  <Trash2 className="h-10 w-10 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Deleted Booking !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
