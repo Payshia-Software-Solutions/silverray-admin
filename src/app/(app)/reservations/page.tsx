@@ -225,8 +225,8 @@ export default function ReservationsPage() {
                               <span className="sr-only">View</span>
                             </Link>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                            <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                             <span className="sr-only">Delete</span>
                         </Button>
                     </div>
