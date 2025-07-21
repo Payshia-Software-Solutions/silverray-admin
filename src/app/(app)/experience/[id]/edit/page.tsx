@@ -42,6 +42,12 @@ import {
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
+const initialImages = [
+    { src: 'https://placehold.co/200x150', alt: 'Tea plantation', hint: 'tea plantation worker', primary: true },
+    { src: 'https://placehold.co/200x150', alt: 'Tea processing', hint: 'tea factory interior', primary: false },
+    { src: 'https://placehold.co/200x150', alt: 'Tea tasting', hint: 'tea cups tasting', primary: false },
+];
+
 export default function EditExperiencePage() {
     const params = useParams();
     const experienceId = params.id as string;
@@ -51,6 +57,7 @@ export default function EditExperiencePage() {
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
     const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
+    const [images, setImages] = useState(initialImages);
 
     const handleSave = () => {
         // In a real app, you would handle the save logic here
@@ -63,6 +70,22 @@ export default function EditExperiencePage() {
         setDeletedExperienceTitle(experienceTitle);
         setShowDeleteConfirmDialog(false);
         setShowDeleteSuccessDialog(true);
+    };
+
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImages([...images, { 
+                    src: reader.result as string, 
+                    alt: 'New image', 
+                    hint: 'uploaded image', 
+                    primary: false 
+                }]);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
   return (
@@ -261,23 +284,20 @@ export default function EditExperiencePage() {
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold">Image Gallery</h3>
             <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
-            <div className="flex gap-4 items-center">
-                <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Tea plantation" width={200} height={150} className="rounded-lg" data-ai-hint="tea plantation worker" />
-                    <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
-                </div>
-                 <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Tea processing" width={200} height={150} className="rounded-lg" data-ai-hint="tea factory interior" />
-                </div>
-                 <div className="relative">
-                    <Image src="https://placehold.co/200x150" alt="Tea tasting" width={200} height={150} className="rounded-lg" data-ai-hint="tea cups tasting" />
-                </div>
-                 <div className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
+            <div className="flex gap-4 items-center flex-wrap">
+                {images.map((image, index) => (
+                    <div key={index} className="relative">
+                        <Image src={image.src} alt={image.alt} width={200} height={150} className="rounded-lg" data-ai-hint={image.hint} />
+                        {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                    </div>
+                ))}
+                 <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
                     <div className="flex flex-col items-center justify-center">
                         <Plus className="w-8 h-8 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">Add Image</span>
                     </div>
-                </div>
+                    <Input id="image-upload" type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                </label>
             </div>
           </CardContent>
         </Card>
