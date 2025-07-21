@@ -89,7 +89,7 @@ export default function EditRestaurantReservationPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+       <div className="flex items-start justify-between">
         <div>
             <Breadcrumb>
               <BreadcrumbList>
@@ -121,46 +121,45 @@ export default function EditRestaurantReservationPage() {
             </p>
         </div>
       </div>
-
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setShowSaveSuccessDialog(true)}>
-                <Save className="mr-2 h-4 w-4" /> Save Changes
-              </Button>
-              <Button variant="outline">Cancel</Button>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => setShowSaveSuccessDialog(true)}>
+                        <Save className="mr-2 h-4 w-4" /> Save Changes
+                    </Button>
+                    <Button variant="outline">Cancel</Button>
+                </div>
+                <div className="flex items-center gap-2">
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
+                </Button>
+                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
+                    <Mail className="mr-2 h-4 w-4" /> Send Email
+                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                        <X className="mr-2 h-4 w-4" /> Cancel Reservation
+                    </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Meal ?</AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleCancelReservation}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                        <AlertDialogCancel asChild>
+                            <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </AlertDialogCancel>
+                    </AlertDialogContent>
+                </AlertDialog>
+                </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
-                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
-              </Button>
-              <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Mail className="mr-2 h-4 w-4" /> Send Email
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    <X className="mr-2 h-4 w-4" /> Cancel Reservation
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Cancel this Reservation ?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="sm:justify-center">
-                      <AlertDialogCancel>Go Back</AlertDialogCancel>
-                      <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleCancelReservation}>Cancel</AlertDialogAction>
-                    </AlertDialogFooter>
-                     <AlertDialogCancel asChild>
-                        <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                            <X className="h-5 w-5" />
-                        </button>
-                     </AlertDialogCancel>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -389,3 +388,4 @@ export default function EditRestaurantReservationPage() {
     </div>
   );
 }
+
