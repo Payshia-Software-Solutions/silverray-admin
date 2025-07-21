@@ -18,6 +18,7 @@ import { CheckCircle, Mail, Minus, Plus, Save, Wallet, X, User } from 'lucide-re
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const activityLog = [
     { text: 'Booking created by Admin Sarah', time: 'Jan 15, 2024 - 10:15 AM', color: 'bg-blue-500' },
