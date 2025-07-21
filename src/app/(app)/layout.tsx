@@ -67,6 +67,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <span className="text-sm font-semibold truncate">User Saman</span>
                     <span className="text-xs text-muted-foreground truncate">Administrator</span>
                  </div>
+                 <Avatar>
+                    <AvatarImage src="https://placehold.co/40x40.png" alt="User Saman" data-ai-hint="person portrait" />
+                    <AvatarFallback>US</AvatarFallback>
+                 </Avatar>
               </div>
             </div>
         </header>
