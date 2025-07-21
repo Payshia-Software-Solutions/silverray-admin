@@ -85,7 +85,7 @@ const menuItems = [
 
 const reservations = [
   {
-    id: '#BK001',
+    id: '#8K001',
     guest: 'John Smith',
     email: 'john@email.com',
     table: 'MR-TB-04',
@@ -425,9 +425,11 @@ export default function RestaurantDiningPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                           <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
-                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                <span className="sr-only">View</span>
+                           <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                <Link href={`/restaurant/reservations/${res.id.replace('#', '')}`}>
+                                    <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                    <span className="sr-only">View</span>
+                                </Link>
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
                                 <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
