@@ -30,6 +30,7 @@ import {
   User,
   X,
   Calendar as CalendarIcon,
+  CheckCircle2,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const activityLog = [
     { text: 'Reservation created', time: 'Jan 10, 2024 at 2:30 PM by Admin A', color: 'bg-blue-500' },
@@ -57,6 +66,7 @@ export default function EditRestaurantReservationPage() {
   const params = useParams();
   const id = params.id as string;
   const [date, setDate] = useState<Date | undefined>(new Date('2024-01-15'));
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
 
 
   return (
@@ -98,7 +108,7 @@ export default function EditRestaurantReservationPage() {
         <CardContent className="p-4">
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowSaveSuccessDialog(true)}>
                         <Save className="mr-2 h-4 w-4" /> Save Changes
                     </Button>
                     <Button variant="outline">Cancel</Button>
@@ -301,6 +311,27 @@ export default function EditRestaurantReservationPage() {
           </Card>
         </div>
       </div>
+
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Successfully Saved Changes!</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="mx-auto bg-blue-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                <div className="p-2 bg-blue-200 rounded-full">
+                  <CheckCircle2 className="h-10 w-10 text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Saved Changes !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
