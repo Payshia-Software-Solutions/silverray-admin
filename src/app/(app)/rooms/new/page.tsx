@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User } from 'lucide-react';
+import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User, X } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -27,6 +27,7 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import Image from 'next/image';
 
 
 const amenities = [
@@ -44,14 +45,40 @@ const amenities = [
     { id: 'room-service', label: 'Room Service' },
 ]
 
+const initialImageSlots = Array(4).fill(null);
+
 export default function AddNewRoomPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(initialImageSlots);
 
   const handleCreateRoom = () => {
     // In a real app, you would handle form submission here.
     setShowSuccessDialog(true);
   };
   
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImagePreviews = [...imagePreviews];
+        newImagePreviews[index] = reader.result as string;
+        setImagePreviews(newImagePreviews);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImagePreviews = [...imagePreviews];
+    newImagePreviews[index] = null;
+    setImagePreviews(newImagePreviews);
+    const fileInput = document.getElementById(`image-upload-${index}`) as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -204,18 +231,28 @@ export default function AddNewRoomPage() {
                 </h3>
             </div>
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map(i => (
-                     <div key={i} className="flex items-center justify-center w-full">
-                      <label
-                        htmlFor={`image-upload-${i}`}
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                      >
-                        <div className="flex flex-col items-center justify-center">
-                          <Plus className="w-8 h-8 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">Add Image</p>
-                        </div>
-                        <Input id={`image-upload-${i}`} type="file" className="hidden" />
-                      </label>
+                {imagePreviews.map((preview, index) => (
+                    <div key={index} className="flex items-center justify-center w-full">
+                        {preview ? (
+                            <div className="relative w-full h-32">
+                                <Image src={preview} alt={`Room image preview ${index + 1}`} layout="fill" className="rounded-lg object-cover" />
+                                <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
+                                    <X className="h-4 w-4" />
+                                    <span className="sr-only">Remove image</span>
+                                </Button>
+                            </div>
+                        ) : (
+                            <label
+                                htmlFor={`image-upload-${index}`}
+                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                            >
+                                <div className="flex flex-col items-center justify-center">
+                                    <Plus className="w-8 h-8 text-muted-foreground" />
+                                    <p className="text-sm text-muted-foreground">Add Image</p>
+                                </div>
+                                <Input id={`image-upload-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} accept="image/png, image/jpeg" />
+                            </label>
+                        )}
                     </div>
                 ))}
             </div>
