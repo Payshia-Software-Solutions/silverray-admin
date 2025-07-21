@@ -30,7 +30,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
   '/rooms/[id]': ({id}) => ({ title: `Rooms Management`, description: `Editing Room ${id}` }),
-  '/reservations/[id]': ({id}) => ({ title: `Booking Management`, description: `Details for Booking #${id}` }),
+  '/reservations/[id]': ({id}) => ({ title: `Booking Management (Rooms & Suites)`, description: `Details for Booking #${id}` }),
   '/weddings/booking/[id]': ({id}) => ({ title: `Booking #${id}`, description: 'Details for wedding booking' }),
 };
 
