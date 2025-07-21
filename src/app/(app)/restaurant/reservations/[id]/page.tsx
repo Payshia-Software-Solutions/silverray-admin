@@ -61,7 +61,7 @@ export default function EditRestaurantReservationPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
             <Breadcrumb>
               <BreadcrumbList>
@@ -97,11 +97,13 @@ export default function EditRestaurantReservationPage() {
       <Card>
         <CardContent className="p-4">
             <div className="flex items-center justify-between gap-2">
-                <Button variant="outline">
-                    <Save className="mr-2 h-4 w-4" /> Save Changes
-                </Button>
                 <div className="flex items-center gap-2">
+                    <Button variant="outline">
+                        <Save className="mr-2 h-4 w-4" /> Save Changes
+                    </Button>
                     <Button variant="outline">Cancel</Button>
+                </div>
+                <div className="flex items-center gap-2">
                     <Button className="bg-green-600 hover:bg-green-700 text-white">
                         <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
                     </Button>
