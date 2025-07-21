@@ -18,7 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { UploadCloud, Trash2, X } from 'lucide-react';
+import { UploadCloud, Trash2, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -47,6 +47,8 @@ export default function EditMenuItemPage() {
   const params = useParams();
   const id = params.id as string;
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+
 
   // This would be fetched from a DB in a real app based on the id
   const menuItem = {
@@ -66,6 +68,11 @@ export default function EditMenuItemPage() {
   const handleDelete = () => {
     // In a real app, you would handle the deletion logic here
     setShowDeleteSuccessDialog(true);
+  }
+
+  const handleSave = () => {
+    // In a real app, you would handle the save logic here
+    setShowSaveSuccessDialog(true);
   }
 
   return (
@@ -235,7 +242,7 @@ export default function EditMenuItemPage() {
             <Button variant="outline" asChild>
                 <Link href="/restaurant">Cancel</Link>
             </Button>
-            <Button>Save Changes</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
         </div>
       </div>
       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
@@ -248,6 +255,26 @@ export default function EditMenuItemPage() {
                   <Trash2 className="h-10 w-10 text-red-600" />
               </div>
               <h2 className="text-xl font-bold mb-2">Successfully Deleted !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+              <DialogTitleComponent>Successfully Saved Changes!</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="mx-auto bg-blue-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                <div className="p-2 bg-blue-200 rounded-full">
+                  <CheckCircle2 className="h-10 w-10 text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Saved Changes !</h2>
             </div>
             <DialogClose asChild>
                 <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
