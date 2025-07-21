@@ -24,8 +24,10 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 
 export default function EditMenuItemPage() {
-  const params = useParams<{ id: string }>();
-  // This would be fetched from a DB in a real app
+  const params = useParams();
+  const id = params.id as string;
+
+  // This would be fetched from a DB in a real app based on the id
   const menuItem = {
     id: 'grilled-atlantic-salmon',
     name: 'Grilled Atlantic Salmon',
