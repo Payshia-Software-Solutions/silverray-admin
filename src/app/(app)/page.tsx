@@ -1,3 +1,4 @@
+
 'use client';
 
 import { 
@@ -21,12 +22,12 @@ import { cn } from '@/lib/utils';
 
 
 const quickActions = [
-  { label: 'New Booking', icon: Plus, href: '/reservations' },
-  { label: 'Manage Rooms', icon: BedDouble, href: '/rooms' },
-  { label: 'New Experience', icon: Star, href: '/experience' },
-  { label: 'Wedding Package', icon: Heart, href: '/weddings' },
-  { label: 'View Messages', icon: Mail, href: '/messages' },
-  { label: 'Dining Reservations', icon: UtensilsCrossed, href: '/restaurant' },
+  { label: 'New Booking', icon: Plus, href: '/reservations', color: 'text-blue-500', bgColor: 'bg-blue-100' },
+  { label: 'Manage Rooms', icon: BedDouble, href: '/rooms', color: 'text-green-500', bgColor: 'bg-green-100' },
+  { label: 'New Experience', icon: Star, href: '/experience', color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
+  { label: 'Wedding Package', icon: Heart, href: '/weddings', color: 'text-red-500', bgColor: 'bg-red-100' },
+  { label: 'View Messages', icon: Mail, href: '/messages', color: 'text-purple-500', bgColor: 'bg-purple-100' },
+  { label: 'Dining Reservations', icon: UtensilsCrossed, href: '/restaurant', color: 'text-orange-500', bgColor: 'bg-orange-100' },
 ];
 
 const recentActivity = [
@@ -91,8 +92,8 @@ export default function DashboardPage() {
           {quickActions.map((action) => (
             <Link href={action.href} key={action.label}>
               <Card className="hover:bg-primary/5 hover:shadow-lg transition-all text-center p-4 h-full flex flex-col items-center justify-center">
-                <div className="p-3 bg-primary/10 rounded-lg mb-2">
-                  <action.icon className="h-6 w-6 text-primary" />
+                <div className={cn("p-3 rounded-lg mb-2", action.bgColor)}>
+                  <action.icon className={cn("h-6 w-6", action.color)} />
                 </div>
                 <p className="font-medium text-sm">{action.label}</p>
               </Card>
