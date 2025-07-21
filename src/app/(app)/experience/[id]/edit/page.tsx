@@ -16,10 +16,21 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Clock, Trash2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Clock, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
 
@@ -27,6 +38,12 @@ export default function EditExperiencePage() {
     const params = useParams();
     const experienceId = params.id as string;
     const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
+
+    const handleSave = () => {
+        // In a real app, you would handle the save logic here
+        setShowSaveConfirmDialog(false);
+    };
 
   return (
     <div className="space-y-6">
@@ -44,7 +61,23 @@ export default function EditExperiencePage() {
       
       <div className="flex justify-end gap-2">
         <Button variant="outline" asChild><Link href={`/experience/${experienceId}`}>Cancel</Link></Button>
-        <Button variant="default">Save Changes</Button>
+        <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
+            <AlertDialogTrigger asChild>
+                <Button variant="default">Save Changes</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Update this Experience ?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="sm:justify-center">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSave}>Save Changes</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+        </AlertDialog>
         <Button variant="destructive">Delete Experience</Button>
       </div>
 
