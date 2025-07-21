@@ -19,6 +19,18 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from 'react';
 
 const activityLog = [
     { text: 'Booking created by Admin Sarah', time: 'Jan 15, 2024 - 10:15 AM', color: 'bg-blue-500' },
@@ -30,6 +42,7 @@ export default function ViewExperienceBookingPage() {
   const params = useParams();
   const { id: experienceId, bookingId } = params as { id: string; bookingId: string };
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
  
   return (
     <div className="space-y-6">
@@ -66,7 +79,26 @@ export default function ViewExperienceBookingPage() {
             <div className="flex-grow"/>
             <Button variant="outline" className="bg-yellow-500 text-yellow-900 hover:bg-yellow-600 hover:text-white"><Wallet className="mr-2 h-4 w-4"/>Record Payment</Button>
             <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700"><Mail className="mr-2 h-4 w-4"/>Send Confirmation</Button>
-            <Button variant="destructive"><X className="mr-2 h-4 w-4"/>Cancel Booking</Button>
+             <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive"><X className="mr-2 h-4 w-4"/>Cancel Booking</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Cancel this Booking?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-center text-red-500 text-lg">
+                           BK-{bookingId}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Go Back</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700">Cancel</AlertDialogAction>
+                    </AlertDialogFooter>
+                    <button onClick={() => setShowCancelDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                    </button>
+                </AlertDialogContent>
+             </AlertDialog>
         </div>
         
       <div className="space-y-6">
