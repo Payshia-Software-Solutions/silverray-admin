@@ -14,7 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { CheckCircle, Mail, Minus, Plus, Save, Wallet, X, User, Trash2 } from 'lucide-react';
+import { CheckCircle, Mail, Minus, Plus, Save, Wallet, X, User, Trash2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,7 @@ export default function ViewExperienceBookingPage() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
  
   const handleCancelBooking = () => {
     setShowCancelDialog(false);
@@ -61,7 +62,7 @@ export default function ViewExperienceBookingPage() {
 
   const handleSaveChanges = () => {
     setShowSaveConfirmDialog(false);
-    // Logic to show success dialog will be added in a subsequent step
+    setShowSaveSuccessDialog(true);
   }
 
   return (
@@ -326,6 +327,27 @@ export default function ViewExperienceBookingPage() {
             </div>
             <DialogClose asChild>
                 <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowCancelSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
+      
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+              <DialogTitleComponent>Successfully Updated!</DialogTitleComponent>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="mx-auto bg-blue-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                <div className="p-2 bg-blue-200 rounded-full">
+                  <CheckCircle2 className="h-10 w-10 text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Updated Booking !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowSaveSuccessDialog(false)}>
                     <X className="h-5 w-5" />
                 </button>
             </DialogClose>
