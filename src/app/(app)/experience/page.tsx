@@ -156,12 +156,12 @@ export default function ExperienceManagementPage() {
                   ))}
               </div>
               <div className="mt-auto flex justify-between items-center pt-2 gap-2">
-                <Button className="w-full">View Bookings</Button>
+                <Button className="w-full" variant="default">View Bookings</Button>
                 <Button variant="outline" size="icon">
                     <Pencil className="h-4 w-4"/>
                     <span className="sr-only">Edit</span>
                 </Button>
-                 <Button variant="outline" size="icon" className="text-red-500 hover:bg-red-500 hover:text-white">
+                 <Button variant="destructive" size="icon">
                    <Trash2 className="h-4 w-4"/>
                    <span className="sr-only">Delete</span>
                 </Button>

@@ -203,7 +203,7 @@ export default function ContactMessagesPage() {
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500 hover:bg-red-500/10">
+                        <Button variant="destructive" size="icon" className="h-8 w-8">
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Delete</span>
                         </Button>

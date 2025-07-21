@@ -220,7 +220,7 @@ export default function RestaurantDiningPage() {
               </CardContent>
               <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                 <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                <Button variant="outline" size="icon" className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDeleteClick(venue.name)}>
+                <Button variant="destructive" size="icon" onClick={() => handleDeleteClick(venue.name)}>
                   <Trash2 className="h-4 w-4" />
                   <span className="sr-only">Delete</span>
                 </Button>
@@ -308,7 +308,7 @@ export default function RestaurantDiningPage() {
                                         <Button variant="ghost" size="icon" className="h-8 w-8">
                                             <Eye className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <Button variant="destructive" size="icon" className="h-8 w-8">
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -420,7 +420,7 @@ export default function RestaurantDiningPage() {
                            <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Eye className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="destructive" size="icon" className="h-8 w-8">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>

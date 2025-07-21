@@ -226,7 +226,7 @@ export default function WeddingManagementPage() {
                             <span className="sr-only">View</span>
                           </Button>
                           <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-500 hover:bg-red-500/10" onClick={() => handleDeleteClick(pkg.name)}>
+                              <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Delete</span>
                               </Button>
@@ -321,7 +321,7 @@ export default function WeddingManagementPage() {
                                                   <span className="sr-only">View</span>
                                                 </Link>
                                               </Button>
-                                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                              <Button variant="destructive" size="icon" className="h-8 w-8">
                                                   <Trash2 className="h-4 w-4" />
                                                   <span className="sr-only">Delete</span>
                                               </Button>
