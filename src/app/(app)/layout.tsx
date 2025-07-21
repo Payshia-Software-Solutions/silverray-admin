@@ -1,4 +1,7 @@
 
+'use client';
+
+import React from 'react';
 import {
   SidebarProvider,
   Sidebar,
@@ -17,7 +20,9 @@ import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
 import Link from 'next/link';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children, params: paramsProp }: { children: React.ReactNode, params: any }) {
+  const params = React.use(Promise.resolve(paramsProp));
+
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
@@ -54,7 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="flex h-auto items-center gap-4 border-b bg-card px-6 py-4 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
             <SidebarTrigger className="md:hidden" />
             <Header />
-            <div className="flex-1 flex justify-end items-center gap-4">
+            <div className="ml-auto flex items-center gap-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
