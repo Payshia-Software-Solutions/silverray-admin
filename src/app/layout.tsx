@@ -12,15 +12,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  params
+  params: paramsProp,
 }: Readonly<{
   children: React.ReactNode;
   params: { [key: string]: string | string[] | undefined };
 }>) {
-  // Prevent bundler from eliminating `params` through tree-shaking
-  if (process.env.NODE_ENV === 'development') {
-    React.use(Promise.resolve(params));
-  }
+  // Prevent bundler from eliminating `params` through tree-shaking by using `React.use`
+  // as recommended by Next.js for handling dynamic APIs.
+  const params = React.use(Promise.resolve(paramsProp));
 
   return (
     <html lang="en" suppressHydrationWarning>
