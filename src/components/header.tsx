@@ -34,6 +34,7 @@ const dynamicPageInfo: { [key: string]: (params: any) => { title: string; descri
   '^/weddings/booking/([^/]+)$': (params) => ({ title: `Booking #${params[0]}`, description: 'Details for wedding booking' }),
   '^/restaurant/menu/([^/]+)$': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
   '^/restaurant/reservations/([^/]+)$': (params) => ({ title: 'Restaurant & Dining', description: `Details for reservation #${params[0]}` }),
+  '^/experience/([^/]+)/bookings/new$': (params) => ({ title: 'Experience Management', description: 'Create a new booking for this experience.' }),
   '^/experience/([^/]+)$': (params) => {
     const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
