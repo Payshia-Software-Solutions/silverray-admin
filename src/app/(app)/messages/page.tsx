@@ -199,12 +199,12 @@ export default function ContactMessagesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                             <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="destructive" size="icon" className="h-8 w-8">
-                            <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
+                            <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                             <span className="sr-only">Delete</span>
                         </Button>
                     </div>

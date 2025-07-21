@@ -149,16 +149,16 @@ export function AdminUsersTable() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                        <Pencil className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                         <span className="sr-only">Edit</span>
                       </Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Key className="h-4 w-4" />
+                       <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                        <Key className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                         <span className="sr-only">Permissions</span>
                       </Button>
-                      <Button variant="destructive" size="icon" className="h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
+                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                         <span className="sr-only">Delete</span>
                       </Button>
                     </div>
