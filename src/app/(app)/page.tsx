@@ -185,13 +185,13 @@ function StatCard({ title, value, description, Icon, iconBgColor, iconColor }: S
         <Card>
             <CardHeader className="p-4">
                 <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-muted-foreground">{title}</p>
+                    <p className="text-sm font-medium text-foreground">{title}</p>
                     <div className={cn("p-2 rounded-lg", iconBgColor)}>
                         <Icon className={cn("h-5 w-5", iconColor)} />
                     </div>
                 </div>
                 <h3 className="text-3xl font-bold">{value}</h3>
-                <p className="text-xs text-muted-foreground">{description}</p>
+                <p className="text-xs text-foreground">{description}</p>
             </CardHeader>
         </Card>
     );
