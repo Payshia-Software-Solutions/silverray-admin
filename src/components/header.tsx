@@ -29,9 +29,9 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 };
 
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
-  '/rooms': ({id}) => ({ title: `Edit Room ${id}`, description: 'Manage hotel rooms, suites, and room types' }),
-  '/reservations': ({id}) => ({ title: `Booking Management (Rooms & Suites)`, description: 'Manage Bookings' }),
-  '/weddings/booking': ({id}) => ({ title: `Booking #${id}`, description: 'Details for wedding booking' }),
+  '/rooms/[id]': ({id}) => ({ title: `Rooms Management`, description: `Editing Room ${id}` }),
+  '/reservations/[id]': ({id}) => ({ title: `Booking Management`, description: `Details for Booking #${id}` }),
+  '/weddings/booking/[id]': ({id}) => ({ title: `Booking #${id}`, description: 'Details for wedding booking' }),
 };
 
 
@@ -41,14 +41,24 @@ export function Header() {
   const { title, description } = useMemo(() => {
     const pathSegments = pathname.split('/').filter(Boolean);
     
-    if (pathSegments.length > 1) {
-      let pageKey = `/${pathSegments[0]}`;
-      if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking') {
-        pageKey = '/weddings/booking';
-      }
-      if (dynamicPageInfo[pageKey]) {
-        const params = { id: pathSegments.slice(-1)[0] };
-        return dynamicPageInfo[pageKey](params);
+    // Check for dynamic routes
+    for (const key in dynamicPageInfo) {
+      const dynamicSegments = key.split('/').filter(Boolean);
+      if (pathSegments.length === dynamicSegments.length) {
+        const params: { [key: string]: string } = {};
+        let match = true;
+        for (let i = 0; i < dynamicSegments.length; i++) {
+          if (dynamicSegments[i].startsWith('[') && dynamicSegments[i].endsWith(']')) {
+            const paramName = dynamicSegments[i].slice(1, -1);
+            params[paramName] = pathSegments[i];
+          } else if (pathSegments[i] !== dynamicSegments[i]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) {
+          return dynamicPageInfo[key](params);
+        }
       }
     }
 
