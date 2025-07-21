@@ -52,10 +52,16 @@ export default function ViewExperienceBookingPage() {
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
+  const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
  
   const handleCancelBooking = () => {
     setShowCancelDialog(false);
     setShowCancelSuccessDialog(true);
+  }
+
+  const handleSaveChanges = () => {
+    setShowSaveConfirmDialog(false);
+    // Logic to show success dialog will be added in a subsequent step
   }
 
   return (
@@ -88,7 +94,23 @@ export default function ViewExperienceBookingPage() {
         </div>
         
         <div className="flex gap-2 flex-wrap">
-            <Button><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+            <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
+                <AlertDialogTrigger asChild>
+                    <Button><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Update Booking ?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-yellow-500 text-yellow-900 hover:bg-yellow-600" onClick={handleSaveChanges}>Save Changes</AlertDialogAction>
+                    </AlertDialogFooter>
+                    <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                    </button>
+                </AlertDialogContent>
+            </AlertDialog>
             <Button variant="outline">Cancel</Button>
             <div className="flex-grow"/>
             <Button variant="outline" className="bg-yellow-500 text-yellow-900 hover:bg-yellow-600 hover:text-white"><Wallet className="mr-2 h-4 w-4"/>Record Payment</Button>
