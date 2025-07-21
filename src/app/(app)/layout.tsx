@@ -20,9 +20,7 @@ import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
 import Link from 'next/link';
 
-export default function AppLayout({ children, params: paramsProp }: { children: React.ReactNode, params: any }) {
-  const params = React.use(Promise.resolve(paramsProp));
-
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
