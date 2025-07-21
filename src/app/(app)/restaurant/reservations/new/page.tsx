@@ -234,16 +234,16 @@ export default function NewDiningReservationPage() {
                     <DialogTitle>Success</DialogTitle>
                     <DialogDescription>A new dining reservation has been successfully created.</DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-                    <div className="p-4 bg-blue-100 rounded-full mb-4">
+                <div className="flex flex-col items-center justify-center text-center p-8">
+                    <div className="p-3 bg-blue-100 rounded-full mb-4">
                         <div className="p-2 bg-blue-200 rounded-full">
-                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                           <CheckCircle2 className="h-6 w-6 text-blue-600" />
                         </div>
                     </div>
                     <h2 className="text-xl font-bold mb-2">Successfully Created Reservation!</h2>
                     <p className="text-muted-foreground">A confirmation email has been sent to the guest.</p>
                     <DialogClose asChild>
-                        <Button className="mt-6 w-full" onClick={() => setShowSuccessDialog(false)}>Done</Button>
+                        <Button className="mt-6 w-full bg-primary hover:bg-primary/90" onClick={() => setShowSuccessDialog(false)}>Done</Button>
                     </DialogClose>
                 </div>
             </DialogContent>
