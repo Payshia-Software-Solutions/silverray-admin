@@ -148,14 +148,14 @@ export function AdminUsersTable() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" className="h-8">
-                            <Pencil className="mr-2 h-3.5 w-3.5" />
-                            Edit
+                    <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
+                            <Pencil className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                            <span className="sr-only">Edit</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="h-8">
-                            <Key className="mr-2 h-3.5 w-3.5" />
-                            Reset Password
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
+                            <Key className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                            <span className="sr-only">Reset Password</span>
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
                             <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
