@@ -294,7 +294,7 @@ export default function ViewExperienceBookingPage() {
           <DialogContent>
             <DialogHeader className='sr-only'>
               <DialogTitleComponent>Booking Cancelled</DialogTitleComponent>
-              <Description>The booking has been successfully cancelled.</Description>
+              <DialogDescription>The booking has been successfully cancelled.</DialogDescription>
             </DialogHeader>
             <div className="text-center p-6 flex flex-col items-center">
                 <div className="p-3 bg-red-100 rounded-full mb-4">
