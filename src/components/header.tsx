@@ -29,9 +29,10 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 };
 
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
-  '/rooms/[id]': ({id}) => ({ title: `Rooms Management`, description: `Editing Room ${id}` }),
-  '/reservations/[id]': ({id}) => ({ title: `Booking Management (Rooms & Suites)`, description: `Details for Booking #${id}` }),
-  '/weddings/booking/[id]': ({id}) => ({ title: `Booking #${id}`, description: 'Details for wedding booking' }),
+  '^/rooms/([^/]+)$': (params) => ({ title: 'Rooms Management', description: `Editing Room ${params[0]}` }),
+  '^/reservations/([^/]+)$': (params) => ({ title: 'Booking Management (Rooms & Suites)', description: `Details for Booking #${params[0]}` }),
+  '^/weddings/booking/([^/]+)$': (params) => ({ title: `Booking #${params[0]}`, description: 'Details for wedding booking' }),
+  '^/restaurant/menu/([^/]+)$': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
 };
 
 
@@ -45,26 +46,12 @@ export function Header() {
     }
     
     // Then, check for dynamic routes
-    const pathSegments = pathname.split('/').filter(Boolean);
-    
     for (const routePattern in dynamicPageInfo) {
-      const patternSegments = routePattern.split('/').filter(Boolean);
-      if (pathSegments.length === patternSegments.length) {
-        const params: { [key: string]: string } = {};
-        let match = true;
-        for (let i = 0; i < patternSegments.length; i++) {
-          if (patternSegments[i].startsWith('[') && patternSegments[i].endsWith(']')) {
-            const paramName = patternSegments[i].slice(1, -1);
-            params[paramName] = pathSegments[i];
-          } else if (pathSegments[i] !== patternSegments[i]) {
-            match = false;
-            break;
-          }
-        }
+        const regex = new RegExp(routePattern);
+        const match = pathname.match(regex);
         if (match) {
-          return dynamicPageInfo[routePattern](params);
+            return dynamicPageInfo[routePattern](match.slice(1));
         }
-      }
     }
 
     return { title: 'Page Not Found', description: '' };

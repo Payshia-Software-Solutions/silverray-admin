@@ -38,10 +38,12 @@ import {
   DialogDescription as DialogDescriptionComponent, // Renamed to avoid conflict
   DialogClose,
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 
 const menuItems = [
     {
+        id: 'grilled-salmon',
         name: 'Grilled Atlantic Salmon',
         subtext: 'Fresh, premium quality',
         image: 'https://placehold.co/40x40',
@@ -54,6 +56,7 @@ const menuItems = [
         statusColor: 'bg-green-100 text-green-700'
     },
     {
+        id: 'caesar-salad',
         name: 'Caesar Salad',
         subtext: 'Classic recipe',
         image: 'https://placehold.co/40x40',
@@ -66,6 +69,7 @@ const menuItems = [
         statusColor: 'bg-green-100 text-green-700'
     },
     {
+        id: 'lava-cake',
         name: 'Chocolate Lava Cake',
         subtext: 'Signature dessert',
         image: 'https://placehold.co/40x40',
@@ -305,8 +309,10 @@ export default function RestaurantDiningPage() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
-                                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                            <Link href={`/restaurant/menu/${item.id}`}>
+                                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                            </Link>
                                         </Button>
                                         <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
                                             <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
@@ -487,5 +493,6 @@ export default function RestaurantDiningPage() {
   );
 
     
+
 
 
