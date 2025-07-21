@@ -18,10 +18,21 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { UploadCloud, Trash2 } from 'lucide-react';
+import { UploadCloud, Trash2, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function EditMenuItemPage() {
   const params = useParams();
@@ -180,10 +191,31 @@ export default function EditMenuItemPage() {
         </div>
       </div>
        <div className="flex justify-between items-center mt-6">
-        <Button variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Item
-        </Button>
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Item
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Meal ?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    {menuItem.name}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="sm:justify-center">
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                 <AlertDialogCancel asChild>
+                    <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                        <X className="h-5 w-5" />
+                    </button>
+                 </AlertDialogCancel>
+            </AlertDialogContent>
+        </AlertDialog>
         <div className="flex gap-2">
             <Button variant="outline" asChild>
                 <Link href="/restaurant">Cancel</Link>
