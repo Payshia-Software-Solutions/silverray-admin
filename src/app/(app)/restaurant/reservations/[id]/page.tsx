@@ -54,6 +54,17 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const activityLog = [
     { text: 'Reservation created', time: 'Jan 10, 2024 at 2:30 PM by Admin A', color: 'bg-blue-500' },
@@ -111,7 +122,6 @@ export default function EditRestaurantReservationPage() {
                     <Button variant="outline" onClick={() => setShowSaveSuccessDialog(true)}>
                         <Save className="mr-2 h-4 w-4" /> Save Changes
                     </Button>
-                    <Button variant="outline">Cancel</Button>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button className="bg-green-600 hover:bg-green-700 text-white">
@@ -120,9 +130,27 @@ export default function EditRestaurantReservationPage() {
                     <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
                         <Mail className="mr-2 h-4 w-4" /> Send Email
                     </Button>
-                    <Button variant="destructive">
-                        <X className="mr-2 h-4 w-4" /> Cancel Reservation
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive">
+                            <X className="mr-2 h-4 w-4" /> Cancel Reservation
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Cancel this Reservation ?</AlertDialogTitle>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="sm:justify-center">
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction className="bg-red-500 hover:bg-red-600">Cancel Reservation</AlertDialogAction>
+                          </AlertDialogFooter>
+                          <AlertDialogCancel asChild>
+                              <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                                  <X className="h-5 w-5" />
+                              </button>
+                          </AlertDialogCancel>
+                      </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
         </CardContent>
