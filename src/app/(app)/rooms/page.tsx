@@ -118,7 +118,7 @@ export default function RoomsPage() {
                       <div className="flex justify-end items-center gap-2">
                           <Button variant="ghost" size="icon" className="h-8 w-8 group" asChild>
                             <Link href={`/rooms/${room.id}`}>
-                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-blue-600" />
+                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                               <span className="sr-only">View</span>
                             </Link>
                           </Button>
