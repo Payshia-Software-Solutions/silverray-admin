@@ -127,6 +127,7 @@ export default function RestaurantDiningPage() {
   const [showDeleteItemSuccessDialog, setShowDeleteItemSuccessDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [showDeleteReservationDialog, setShowDeleteReservationDialog] = useState(false);
+  const [showDeleteReservationSuccessDialog, setShowDeleteReservationSuccessDialog] = useState(false);
   const [reservationToDelete, setReservationToDelete] = useState<typeof reservations[0] | null>(null);
 
   const handleDeleteClick = (venueName: string) => {
@@ -162,6 +163,7 @@ export default function RestaurantDiningPage() {
     console.log(`Deleting reservation ${reservationToDelete?.id}`);
     // Here you would add the logic to delete the reservation
     setShowDeleteReservationDialog(false);
+    setShowDeleteReservationSuccessDialog(true);
   };
 
   const venues = [
@@ -573,6 +575,27 @@ export default function RestaurantDiningPage() {
                 <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => {
                   setShowDeleteItemSuccessDialog(false);
                   setItemToDelete(null);
+                }}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
+      <Dialog open={showDeleteReservationSuccessDialog} onOpenChange={setShowDeleteReservationSuccessDialog}>
+          <DialogContent className="sm:max-w-xs">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Successfully Deleted!</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                  <Trash2 className="h-10 w-10 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Deleted !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => {
+                  setShowDeleteReservationSuccessDialog(false);
+                  setReservationToDelete(null);
                 }}>
                     <X className="h-5 w-5" />
                 </button>
