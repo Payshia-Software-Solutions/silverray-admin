@@ -1,3 +1,4 @@
+
 import { Hotel } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +12,7 @@ export function AppLogo({ className }: { className?: string }) {
         </CardContent>
       </Card>
       <div className='flex flex-col'>
-        <span className="text-lg font-bold tracking-tight text-sidebar-foreground">Grand Silver Ray</span>
+        <span className="text-lg font-bold tracking-tight text-blue-800">Grand Silver Ray</span>
         <span className="text-xs text-sidebar-foreground/70">Hotel Admin</span>
       </div>
     </div>
