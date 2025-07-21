@@ -21,6 +21,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader as DialogHeaderComponent,
+  DialogTitle as DialogTitleComponent,
+  DialogDescription as DialogDescriptionComponent,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const stats = [
   { label: 'Total Experiences', value: '12', icon: Star, color: 'text-blue-500', bgColor: 'bg-blue-100' },
@@ -108,6 +116,8 @@ type Experience = typeof experiences[0];
 export default function ExperienceManagementPage() {
   const router = useRouter();
   const [experienceToDelete, setExperienceToDelete] = useState<Experience | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
 
   const handleDeleteClick = (experience: Experience) => {
     setExperienceToDelete(experience);
@@ -121,7 +131,9 @@ export default function ExperienceManagementPage() {
     if (experienceToDelete) {
       console.log(`Deleting ${experienceToDelete.title}`);
       // Add actual delete logic here
+      setDeletedExperienceTitle(experienceToDelete.title);
       setExperienceToDelete(null);
+      setShowDeleteSuccessDialog(true);
     }
   };
 
@@ -229,6 +241,27 @@ export default function ExperienceManagementPage() {
               </button>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+                <DialogTitleComponent>Success</DialogTitleComponent>
+                <DialogDescriptionComponent>The experience was successfully deleted.</DialogDescriptionComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                   <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold">Successfully Deleted {deletedExperienceTitle} !</h2>
+            </div>
+            <DialogClose asChild>
+              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </button>
+            </DialogClose>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
