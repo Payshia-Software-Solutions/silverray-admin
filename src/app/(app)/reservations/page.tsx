@@ -129,6 +129,8 @@ export default function ReservationsPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [bookingToDelete, setBookingToDelete] = useState<Reservation | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedBookingId, setDeletedBookingId] = useState('');
 
   const handleDeleteClick = (reservation: Reservation) => {
     setBookingToDelete(reservation);
@@ -140,9 +142,10 @@ export default function ReservationsPage() {
 
   const handleDeleteConfirm = () => {
     if (bookingToDelete) {
-      console.log(`Deleting booking ${bookingToDelete.id}`);
-      // Add actual delete logic here
+      setDeletedBookingId(bookingToDelete.id.replace('#', 'BK-'));
+      // In a real app, you would handle the deletion logic here
       setBookingToDelete(null);
+      setShowDeleteSuccessDialog(true);
     }
   };
 
@@ -316,6 +319,28 @@ export default function ReservationsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+                <DialogTitleComponent>Successfully Deleted</DialogTitleComponent>
+                <DialogDescriptionComponent>The booking was successfully deleted.</DialogDescriptionComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                   <div className="p-2 bg-red-100 rounded-full">
+                        <Trash2 className="h-8 w-8 text-red-600" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-bold">Successfully Deleted {deletedBookingId} !</h2>
+            </div>
+            <DialogClose asChild>
+              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </button>
+            </DialogClose>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
