@@ -305,7 +305,7 @@ export default function RestaurantDiningPage() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
                                             <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                         </Button>
                                         <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
@@ -417,7 +417,7 @@ export default function RestaurantDiningPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                           <Button variant="ghost" size="icon" className="h-8 w-8 group">
+                           <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
                                 <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
@@ -487,4 +487,5 @@ export default function RestaurantDiningPage() {
   );
 
     
+
 
