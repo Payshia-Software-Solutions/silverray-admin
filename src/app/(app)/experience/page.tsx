@@ -161,8 +161,8 @@ export default function ExperienceManagementPage() {
                     <Pencil className="h-4 w-4"/>
                     <span className="sr-only">Edit</span>
                 </Button>
-                 <Button variant="destructive" size="icon">
-                   <Trash2 className="h-4 w-4"/>
+                 <Button variant="ghost" size="icon" className="group hover:bg-red-100">
+                   <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500"/>
                    <span className="sr-only">Delete</span>
                 </Button>
               </div>
