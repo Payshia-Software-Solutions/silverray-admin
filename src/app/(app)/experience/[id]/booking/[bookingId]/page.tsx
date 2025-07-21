@@ -14,7 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { CheckCircle, Mail, Minus, Plus, Save, Wallet, X, User } from 'lucide-react';
+import { CheckCircle, Mail, Minus, Plus, Save, Wallet, X, User, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle as DialogTitleComponent
+} from '@/components/ui/dialog';
 import { useState } from 'react';
 
 const activityLog = [
@@ -43,7 +51,13 @@ export default function ViewExperienceBookingPage() {
   const { id: experienceId, bookingId } = params as { id: string; bookingId: string };
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
  
+  const handleCancelBooking = () => {
+    setShowCancelDialog(false);
+    setShowCancelSuccessDialog(true);
+  }
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -92,7 +106,7 @@ export default function ViewExperienceBookingPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter className="sm:justify-center">
                         <AlertDialogCancel>Go Back</AlertDialogCancel>
-                        <AlertDialogAction className="bg-red-600 hover:bg-red-700">Cancel</AlertDialogAction>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleCancelBooking}>Cancel</AlertDialogAction>
                     </AlertDialogFooter>
                     <button onClick={() => setShowCancelDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
                         <X className="h-5 w-5" />
@@ -275,6 +289,26 @@ export default function ViewExperienceBookingPage() {
         </Card>
         
       </div>
+
+       <Dialog open={showCancelSuccessDialog} onOpenChange={setShowCancelSuccessDialog}>
+          <DialogContent>
+            <DialogHeader className='sr-only'>
+              <DialogTitleComponent>Booking Cancelled</DialogTitleComponent>
+              <Description>The booking has been successfully cancelled.</Description>
+            </DialogHeader>
+            <div className="text-center p-6 flex flex-col items-center">
+                <div className="p-3 bg-red-100 rounded-full mb-4">
+                    <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Successfully Cancelled BK-{bookingId} !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowCancelSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
