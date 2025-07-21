@@ -196,299 +196,314 @@ export default function RestaurantDiningPage() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="dining-venues" className="space-y-4" onValueChange={setActiveTab}>
-        <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="dining-venues">
-              <Utensils className="mr-2 h-4 w-4" />
-              Dining Venues
-            </TabsTrigger>
-            <TabsTrigger value="menu-items">
-              <ClipboardList className="mr-2 h-4 w-4" />
-              Menu Items
-            </TabsTrigger>
-            <TabsTrigger value="reservations">
-              <CalendarCheck className="mr-2 h-4 w-4" />
-              Reservations
-            </TabsTrigger>
-          </TabsList>
-          {activeTab === 'dining-venues' && (
-            <Button onClick={() => router.push('/restaurant/new')}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add New Venue
-            </Button>
-          )}
-        </div>
-        <TabsContent value="dining-venues" className="space-y-4">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {venues.map((venue) => (
-            <Card key={venue.name} className="flex flex-col">
-              <div className="relative w-full aspect-video">
-                <Image
-                  src={venue.image}
-                  alt={venue.name}
-                  fill
-                  className="object-cover rounded-t-lg"
-                  data-ai-hint={venue.imageHint}
-                />
-                <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                  {venue.status}
-                </span>
-              </div>
-              <CardContent className="p-4 flex-grow">
-                <h3 className="text-lg font-semibold mb-1">
-                  {venue.name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {venue.description}
-                </p>
-                <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                  <div className='flex items-center gap-2'>
-                    <Users className="h-4 w-4" />
-                    <span>{venue.capacity} Capacity</span>
+      <AlertDialog open={showDeleteReservationDialog} onOpenChange={setShowDeleteReservationDialog}>
+        <Tabs defaultValue="dining-venues" className="space-y-4" onValueChange={setActiveTab}>
+          <div className="flex justify-between items-center">
+            <TabsList>
+              <TabsTrigger value="dining-venues">
+                <Utensils className="mr-2 h-4 w-4" />
+                Dining Venues
+              </TabsTrigger>
+              <TabsTrigger value="menu-items">
+                <ClipboardList className="mr-2 h-4 w-4" />
+                Menu Items
+              </TabsTrigger>
+              <TabsTrigger value="reservations">
+                <CalendarCheck className="mr-2 h-4 w-4" />
+                Reservations
+              </TabsTrigger>
+            </TabsList>
+            {activeTab === 'dining-venues' && (
+              <Button onClick={() => router.push('/restaurant/new')}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add New Venue
+              </Button>
+            )}
+          </div>
+          <TabsContent value="dining-venues" className="space-y-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {venues.map((venue) => (
+              <Card key={venue.name} className="flex flex-col">
+                <div className="relative w-full aspect-video">
+                  <Image
+                    src={venue.image}
+                    alt={venue.name}
+                    fill
+                    className="object-cover rounded-t-lg"
+                    data-ai-hint={venue.imageHint}
+                  />
+                  <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                    {venue.status}
+                  </span>
+                </div>
+                <CardContent className="p-4 flex-grow">
+                  <h3 className="text-lg font-semibold mb-1">
+                    {venue.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {venue.description}
+                  </p>
+                  <div className="mt-4 flex justify-between text-sm text-muted-foreground">
+                    <div className='flex items-center gap-2'>
+                      <Users className="h-4 w-4" />
+                      <span>{venue.capacity} Capacity</span>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <Clock className="h-4 w-4" />
+                      <span>{venue.hours}</span>
+                    </div>
                   </div>
-                  <div className='flex items-center gap-2'>
-                    <Clock className="h-4 w-4" />
-                    <span>{venue.hours}</span>
+                </CardContent>
+                <CardFooter className="flex justify-between p-4 pt-0 gap-2">
+                  <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
+                  <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue.name)}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+              ))}
+            </div>
+          </TabsContent>
+          <TabsContent value="menu-items" className="space-y-4">
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Select Restaurant:</span>
+                    <Select defaultValue="main-restaurant">
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select a restaurant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
+                        <SelectItem value="cafe-111">Cafe 111</SelectItem>
+                        <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
+                    <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between p-4 pt-0 gap-2">
-                <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue.name)}>
-                  <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                  <span className="sr-only">Delete</span>
-                </Button>
+            </Card>
+             <Card>
+              <CardContent className="p-4 space-y-4">
+                  <div className="flex items-center gap-4">
+                      <div className="relative flex-1">
+                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input placeholder="Search menu items..." className="pl-8" />
+                      </div>
+                      <Select>
+                          <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="main-courses">Main Courses</SelectItem>
+                              <SelectItem value="starters">Starters</SelectItem>
+                              <SelectItem value="desserts">Desserts</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div className="rounded-md border">
+                      <Table>
+                          <TableHeader>
+                          <TableRow>
+                              <TableHead className="w-[250px]">Item Name</TableHead>
+                              <TableHead>Category</TableHead>
+                              <TableHead>Price</TableHead>
+                              <TableHead>Description</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                          {menuItems.map((item, index) => (
+                              <TableRow key={index}>
+                                  <TableCell>
+                                      <div className="flex items-center gap-3">
+                                          <Image src={item.image} alt={item.name} width={40} height={40} className="rounded-md" data-ai-hint={item.imageHint} />
+                                          <div>
+                                              <p className="font-medium">{item.name}</p>
+                                              <p className="text-xs text-muted-foreground">{item.subtext}</p>
+                                          </div>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell>
+                                      <Badge variant="outline" className={item.categoryColor}>{item.category}</Badge>
+                                  </TableCell>
+                                  <TableCell>{item.price}</TableCell>
+                                  <TableCell className="max-w-xs truncate">{item.description}</TableCell>
+                                  <TableCell>
+                                      <Badge variant="outline" className={item.statusColor}>{item.status}</Badge>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                      <div className="flex justify-end gap-1">
+                                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                              <Link href={`/restaurant/menu/${item.id}`}>
+                                                  <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                                  <span className="sr-only">View</span>
+                                              </Link>
+                                          </Button>
+                                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteItemClick(item)}>
+                                              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                              <span className="sr-only">Delete</span>
+                                          </Button>
+                                      </div>
+                                  </TableCell>
+                              </TableRow>
+                          ))}
+                          </TableBody>
+                      </Table>
+                  </div>
+                   <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div>Showing 1 to 3 of 12 results</div>
+                      <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm">Previous</Button>
+                          <Button variant="default" size="sm">1</Button>
+                          <Button variant="outline" size="sm">2</Button>
+                          <Button variant="outline" size="sm">Next</Button>
+                      </div>
+                  </div>
+              </CardContent>
+             </Card>
+          </TabsContent>
+          <TabsContent value="reservations" className="space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">Select Restaurant:</span>
+                    <Select defaultValue="main-restaurant">
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select a restaurant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
+                        <SelectItem value="cafe-111">Cafe 111</SelectItem>
+                        <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={() => router.push('/restaurant/reservations/new')}>
+                    <Plus className="mr-2 h-4 w-4" /> Add New Reservation
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search by guest, booking ID..." className="pl-8" />
+                  </div>
+                  <Select>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Filter by Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Booking ID</TableHead>
+                      <TableHead>Guest</TableHead>
+                      <TableHead>Table Number</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Time in</TableHead>
+                      <TableHead>Time out</TableHead>
+                      <TableHead>Guests</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reservations.map((res, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-semibold">{res.id}</TableCell>
+                        <TableCell>
+                          <div className="font-medium">{res.guest}</div>
+                          <div className="text-xs text-muted-foreground">{res.email}</div>
+                        </TableCell>
+                        <TableCell>{res.table}</TableCell>
+                        <TableCell>{res.date}</TableCell>
+                        <TableCell>{res.timeIn}</TableCell>
+                        <TableCell>{res.timeOut}</TableCell>
+                        <TableCell>{res.guests}</TableCell>
+                        <TableCell>{res.total}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={res.payment === 'Paid' ? 'text-green-700 bg-green-100' : 'text-yellow-700 bg-yellow-100'}>
+                            {res.payment}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={res.status === 'Confirmed' ? 'text-blue-700 bg-blue-100' : 'text-yellow-700 bg-yellow-100'}>
+                            {res.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                  <Link href={`/restaurant/reservations/${res.id.replace('#', '')}`}>
+                                      <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                      <span className="sr-only">View</span>
+                                  </Link>
+                              </Button>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteReservationClick(res)}>
+                                      <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                      <span className="sr-only">Delete</span>
+                                  </Button>
+                              </AlertDialogTrigger>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+                <div className="text-sm text-muted-foreground">
+                  Showing 1 to {reservations.length} of 247 bookings
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm">Previous</Button>
+                  <Button variant="default" size="sm">1</Button>
+                  <Button variant="outline" size="sm">2</Button>
+                  <Button variant="outline" size="sm">Next</Button>
+                </div>
               </CardFooter>
             </Card>
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="menu-items" className="space-y-4">
-          <Card>
-            <CardContent className="p-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Select Restaurant:</span>
-                  <Select defaultValue="main-restaurant">
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select a restaurant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
-                      <SelectItem value="cafe-111">Cafe 111</SelectItem>
-                      <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button onClick={() => router.push('/restaurant/menu/new')}><Plus className="mr-2 h-4 w-4" /> Add New Meal</Button>
-                  <Button variant="outline"><Settings className="mr-2 h-4 w-4" /> Manage Category</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-           <Card>
-            <CardContent className="p-4 space-y-4">
-                <div className="flex items-center gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search menu items..." className="pl-8" />
-                    </div>
-                    <Select>
-                        <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Select Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="main-courses">Main Courses</SelectItem>
-                            <SelectItem value="starters">Starters</SelectItem>
-                            <SelectItem value="desserts">Desserts</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[250px]">Item Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {menuItems.map((item, index) => (
-                            <TableRow key={index}>
-                                <TableCell>
-                                    <div className="flex items-center gap-3">
-                                        <Image src={item.image} alt={item.name} width={40} height={40} className="rounded-md" data-ai-hint={item.imageHint} />
-                                        <div>
-                                            <p className="font-medium">{item.name}</p>
-                                            <p className="text-xs text-muted-foreground">{item.subtext}</p>
-                                        </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className={item.categoryColor}>{item.category}</Badge>
-                                </TableCell>
-                                <TableCell>{item.price}</TableCell>
-                                <TableCell className="max-w-xs truncate">{item.description}</TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className={item.statusColor}>{item.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-1">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                            <Link href={`/restaurant/menu/${item.id}`}>
-                                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                                <span className="sr-only">View</span>
-                                            </Link>
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteItemClick(item)}>
-                                            <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                            <span className="sr-only">Delete</span>
-                                        </Button>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                </div>
-                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div>Showing 1 to 3 of 12 results</div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">Previous</Button>
-                        <Button variant="default" size="sm">1</Button>
-                        <Button variant="outline" size="sm">2</Button>
-                        <Button variant="outline" size="sm">Next</Button>
-                    </div>
-                </div>
-            </CardContent>
-           </Card>
-        </TabsContent>
-        <TabsContent value="reservations" className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">Select Restaurant:</span>
-                  <Select defaultValue="main-restaurant">
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select a restaurant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="main-restaurant">Main Restaurant</SelectItem>
-                      <SelectItem value="cafe-111">Cafe 111</SelectItem>
-                      <SelectItem value="indian-restaurant">Indian Restaurant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={() => router.push('/restaurant/reservations/new')}>
-                  <Plus className="mr-2 h-4 w-4" /> Add New Reservation
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search by guest, booking ID..." className="pl-8" />
-                </div>
-                <Select>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Filter by Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Booking ID</TableHead>
-                    <TableHead>Guest</TableHead>
-                    <TableHead>Table Number</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time in</TableHead>
-                    <TableHead>Time out</TableHead>
-                    <TableHead>Guests</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {reservations.map((res, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-semibold">{res.id}</TableCell>
-                      <TableCell>
-                        <div className="font-medium">{res.guest}</div>
-                        <div className="text-xs text-muted-foreground">{res.email}</div>
-                      </TableCell>
-                      <TableCell>{res.table}</TableCell>
-                      <TableCell>{res.date}</TableCell>
-                      <TableCell>{res.timeIn}</TableCell>
-                      <TableCell>{res.timeOut}</TableCell>
-                      <TableCell>{res.guests}</TableCell>
-                      <TableCell>{res.total}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={res.payment === 'Paid' ? 'text-green-700 bg-green-100' : 'text-yellow-700 bg-yellow-100'}>
-                          {res.payment}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={res.status === 'Confirmed' ? 'text-blue-700 bg-blue-100' : 'text-yellow-700 bg-yellow-100'}>
-                          {res.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                           <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                <Link href={`/restaurant/reservations/${res.id.replace('#', '')}`}>
-                                    <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                    <span className="sr-only">View</span>
-                                </Link>
-                            </Button>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteReservationClick(res)}>
-                                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                    <span className="sr-only">Delete</span>
-                                </Button>
-                            </AlertDialogTrigger>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-            <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-              <div className="text-sm text-muted-foreground">
-                Showing 1 to {reservations.length} of 247 bookings
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">Previous</Button>
-                <Button variant="default" size="sm">1</Button>
-                <Button variant="outline" size="sm">2</Button>
-                <Button variant="outline" size="sm">Next</Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+        <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Reservation ?</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center gap-4">
+                <AlertDialogCancel onClick={() => setShowDeleteReservationDialog(false)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteReservationConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+            <button onClick={() => setShowDeleteReservationDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -506,6 +521,7 @@ export default function RestaurantDiningPage() {
             </button>
         </AlertDialogContent>
       </AlertDialog>
+
        <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
           <DialogContent className="sm:max-w-md">
              <DialogHeader className="sr-only">
@@ -563,20 +579,6 @@ export default function RestaurantDiningPage() {
             </DialogClose>
           </DialogContent>
       </Dialog>
-      <AlertDialog open={showDeleteReservationDialog} onOpenChange={setShowDeleteReservationDialog}>
-          <AlertDialogContent className="sm:max-w-md">
-              <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Reservation ?</AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="sm:justify-center gap-4">
-                  <AlertDialogCancel onClick={() => setShowDeleteReservationDialog(false)}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteReservationConfirm}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-              <button onClick={() => setShowDeleteReservationDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
-                  <X className="h-5 w-5" />
-              </button>
-          </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
