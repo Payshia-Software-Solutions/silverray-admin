@@ -33,10 +33,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription as DialogDescriptionComponent,
+    DialogHeader as DialogHeaderComponent,
+    DialogTitle as DialogTitleComponent,
+} from '@/components/ui/dialog';
+
 
 export default function EditMenuItemPage() {
   const params = useParams();
   const id = params.id as string;
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
 
   // This would be fetched from a DB in a real app based on the id
   const menuItem = {
@@ -52,6 +62,11 @@ export default function EditMenuItemPage() {
     imageHint: 'grilled salmon dish'
   };
   const [imagePreview, setImagePreview] = useState<string | null>(menuItem.image);
+
+  const handleDelete = () => {
+    // In a real app, you would handle the deletion logic here
+    setShowDeleteSuccessDialog(true);
+  }
 
   return (
     <div className="space-y-6">
@@ -207,7 +222,7 @@ export default function EditMenuItemPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter className="sm:justify-center">
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+                  <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDelete}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
                  <AlertDialogCancel asChild>
                     <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
@@ -223,6 +238,24 @@ export default function EditMenuItemPage() {
             <Button>Save Changes</Button>
         </div>
       </div>
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent className="sm:max-w-xs">
+            <DialogHeaderComponent className="sr-only">
+              <DialogTitleComponent>Successfully Deleted!</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                  <Trash2 className="h-10 w-10 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Deleted !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
