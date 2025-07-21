@@ -94,7 +94,7 @@ export default function EditRestaurantReservationPage() {
 
       <Card>
         <CardContent className="p-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2">
                 <Button variant="outline">
                     <Save className="mr-2 h-4 w-4" /> Save Changes
                 </Button>
