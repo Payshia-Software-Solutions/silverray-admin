@@ -17,6 +17,7 @@ const stats = [
 
 const experiences = [
     {
+        id: 'tea-factory-tour',
         title: 'Tea Factory Tour',
         details: [
             { icon: Clock, text: '90 minutes' },
@@ -28,6 +29,7 @@ const experiences = [
         status: 'Active',
     },
     {
+        id: 'sunrise-yoga-session',
         title: 'Sunrise Yoga Session',
         details: [
             { icon: Clock, text: '60 minutes' },
@@ -39,6 +41,7 @@ const experiences = [
         status: 'Active',
     },
     {
+        id: 'cultural-dance-performance',
         title: 'Cultural Dance Performance',
         details: [
             { icon: Clock, text: '45 minutes' },
@@ -50,6 +53,7 @@ const experiences = [
         status: 'Seasonal',
     },
     {
+        id: 'sapphire-trail-adventure',
         title: 'Sapphire Trail Adventure',
         details: [
             { icon: Clock, text: '3 hours' },
@@ -61,6 +65,7 @@ const experiences = [
         status: 'Active',
     },
     {
+        id: 'cooking-masterclass',
         title: 'Cooking Masterclass',
         details: [
             { icon: Clock, text: '2 hours' },
@@ -72,6 +77,7 @@ const experiences = [
         status: 'Inactive',
     },
     {
+        id: 'bird-watching-tour',
         title: 'Bird Watching Tour',
         details: [
             { icon: Clock, text: '2.5 hours' },
@@ -156,7 +162,7 @@ export default function ExperienceManagementPage() {
                   ))}
               </div>
               <div className="mt-auto flex justify-between items-center pt-2 gap-2">
-                <Button className="w-full" variant="default">View Bookings</Button>
+                <Button className="w-full" variant="default" onClick={() => router.push(`/experience/${experience.id}`)}>View Bookings</Button>
                 <Button variant="outline" size="icon">
                     <Pencil className="h-4 w-4"/>
                     <span className="sr-only">Edit</span>
