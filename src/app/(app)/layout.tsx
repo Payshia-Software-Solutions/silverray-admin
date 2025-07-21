@@ -1,3 +1,4 @@
+
 import {
   SidebarProvider,
   Sidebar,
@@ -63,14 +64,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="sr-only">User Profile</span>
               </Button>
               <div className="flex items-center gap-3">
-                 <div className="flex flex-col text-right">
-                    <span className="text-sm font-semibold truncate">User Saman</span>
-                    <span className="text-xs text-muted-foreground truncate">Administrator</span>
-                 </div>
                  <Avatar>
                     <AvatarImage src="https://placehold.co/40x40.png" alt="User Saman" data-ai-hint="person portrait" />
                     <AvatarFallback>US</AvatarFallback>
                  </Avatar>
+                 <div className="flex flex-col text-left">
+                    <span className="text-sm font-semibold truncate">User Saman</span>
+                    <span className="text-xs text-muted-foreground truncate">Administrator</span>
+                 </div>
               </div>
             </div>
         </header>
