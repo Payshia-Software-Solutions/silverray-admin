@@ -1,14 +1,26 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Star, CheckCircle, Calendar, Clock, DollarSign, Users, Ticket, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, Star, CheckCircle, Calendar, Clock, DollarSign, Users, Ticket, Pencil, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const stats = [
   { label: 'Total Experiences', value: '12', icon: Star, color: 'text-blue-500', bgColor: 'bg-blue-100' },
@@ -91,9 +103,28 @@ const experiences = [
     },
 ];
 
+type Experience = typeof experiences[0];
 
 export default function ExperienceManagementPage() {
   const router = useRouter();
+  const [experienceToDelete, setExperienceToDelete] = useState<Experience | null>(null);
+
+  const handleDeleteClick = (experience: Experience) => {
+    setExperienceToDelete(experience);
+  };
+
+  const handleCancelDelete = () => {
+    setExperienceToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (experienceToDelete) {
+      console.log(`Deleting ${experienceToDelete.title}`);
+      // Add actual delete logic here
+      setExperienceToDelete(null);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -129,56 +160,75 @@ export default function ExperienceManagementPage() {
         </Button>
       </div>
 
-      {/* Experiences Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {experiences.map((experience, index) => (
-          <Card key={index} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-            <div className="relative w-full h-48">
-              <Image
-                src={experience.image}
-                alt={experience.title}
-                fill
-                className="object-cover"
-                data-ai-hint={experience.imageHint}
-              />
-               {experience.status && (
-                <span className={cn(
-                    'absolute top-2 right-2 px-2.5 py-1 text-xs font-semibold rounded-full text-white',
-                    experience.status === 'Active' && 'bg-green-500',
-                    experience.status === 'Seasonal' && 'bg-orange-500',
-                    experience.status === 'Inactive' && 'bg-gray-500'
-                )}>
-                  {experience.status}
-                </span>
-               )}
-            </div>
-            <CardContent className="p-4 flex flex-col flex-grow">
-              <h3 className="text-lg font-semibold mb-2">{experience.title}</h3>
-              <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
-                  {experience.details.map((detail, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                          <detail.icon className="h-4 w-4"/>
-                          <span>{detail.text}</span>
-                      </div>
-                  ))}
+      <AlertDialog open={!!experienceToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
+        {/* Experiences Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {experiences.map((experience, index) => (
+            <Card key={index} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+              <div className="relative w-full h-48">
+                <Image
+                  src={experience.image}
+                  alt={experience.title}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={experience.imageHint}
+                />
+                 {experience.status && (
+                  <span className={cn(
+                      'absolute top-2 right-2 px-2.5 py-1 text-xs font-semibold rounded-full text-white',
+                      experience.status === 'Active' && 'bg-green-500',
+                      experience.status === 'Seasonal' && 'bg-orange-500',
+                      experience.status === 'Inactive' && 'bg-gray-500'
+                  )}>
+                    {experience.status}
+                  </span>
+                 )}
               </div>
-              <div className="mt-auto flex justify-between items-center pt-2 gap-2">
-                <Button className="w-full" variant="default" onClick={() => router.push(`/experience/${experience.id}`)}>View Bookings</Button>
-                <Button asChild variant="outline" size="icon">
-                  <Link href={`/experience/${experience.id}/edit`}>
-                    <Pencil className="h-4 w-4"/>
-                    <span className="sr-only">Edit</span>
-                  </Link>
-                </Button>
-                 <Button variant="ghost" size="icon" className="group hover:bg-red-100">
-                   <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500"/>
-                   <span className="sr-only">Delete</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <CardContent className="p-4 flex flex-col flex-grow">
+                <h3 className="text-lg font-semibold mb-2">{experience.title}</h3>
+                <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
+                    {experience.details.map((detail, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                            <detail.icon className="h-4 w-4"/>
+                            <span>{detail.text}</span>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-auto flex justify-between items-center pt-2 gap-2">
+                  <Button className="w-full" variant="default" onClick={() => router.push(`/experience/${experience.id}`)}>View Bookings</Button>
+                  <Button asChild variant="outline" size="icon">
+                    <Link href={`/experience/${experience.id}/edit`}>
+                      <Pencil className="h-4 w-4"/>
+                      <span className="sr-only">Edit</span>
+                    </Link>
+                  </Button>
+                   <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(experience)}>
+                     <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500"/>
+                     <span className="sr-only">Delete</span>
+                    </Button>
+                   </AlertDialogTrigger>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Experience ?</AlertDialogTitle>
+              <AlertDialogDescription className="text-center text-red-500 text-lg">
+                {experienceToDelete?.title}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+              <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+             <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                <X className="h-5 w-5" />
+              </button>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
