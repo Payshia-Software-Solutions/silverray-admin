@@ -11,6 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -18,7 +26,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Calendar as CalendarIcon, Minus, Plus, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Minus, Plus, CheckCircle, X, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -27,9 +35,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function NewExperienceBookingPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const params = useParams();
   const experienceId = params.id as string;
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  const handleCreateBooking = () => {
+    // In a real app, you would handle form submission here.
+    setShowSuccessDialog(true);
+  };
 
   const LeafIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -198,9 +212,31 @@ export default function NewExperienceBookingPage() {
         
         <div className="flex justify-end gap-2">
             <Button variant="outline" asChild><Link href={`/experience/${experienceId}`}>Cancel</Link></Button>
-            <Button>Create Booking</Button>
+            <Button onClick={handleCreateBooking}>Create Booking</Button>
         </div>
       </div>
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+            <DialogContent className="sm:max-w-sm p-8">
+                <DialogHeader className="sr-only">
+                    <DialogTitle>Success</DialogTitle>
+                    <DialogDescription>Booking created successfully.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center text-center">
+                    <div className="p-3 bg-blue-100 rounded-full mb-4">
+                        <div className="p-2 bg-blue-200 rounded-full">
+                           <CheckCircle2 className="h-6 w-6 text-blue-600" />
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">Successfully Created Booking !</h2>
+                </div>
+                <DialogClose asChild>
+                    <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Close</span>
+                    </button>
+                </DialogClose>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
