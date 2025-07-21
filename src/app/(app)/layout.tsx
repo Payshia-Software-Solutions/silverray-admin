@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, Bell } from 'lucide-react';
+import { LogOut, Settings, Bell, User } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
@@ -57,6 +57,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
+              </Button>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+                <span className="sr-only">User Profile</span>
               </Button>
               <div className="flex items-center gap-3">
                  <div className="flex flex-col text-right">
