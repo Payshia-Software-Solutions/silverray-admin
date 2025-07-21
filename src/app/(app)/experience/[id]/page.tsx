@@ -4,7 +4,7 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Eye, Trash2 } from 'lucide-react';
+import { Search, Plus, Eye, Trash2, X } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,6 +19,26 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader as DialogHeaderComponent,
+  DialogTitle as DialogTitleComponent,
+  DialogDescription as DialogDescriptionComponent,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const bookings = [
   {
@@ -51,6 +71,8 @@ const bookings = [
   },
 ];
 
+type Booking = typeof bookings[0];
+
 const paymentVariant = {
   Paid: 'bg-green-100 text-green-700',
   Pending: 'bg-yellow-100 text-yellow-700',
@@ -67,6 +89,24 @@ export default function ExperienceBookingsPage() {
   const params = useParams();
   const experienceId = params.id as string;
   const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+
+  const handleDeleteClick = (booking: Booking) => {
+    setBookingToDelete(booking);
+  };
+
+  const handleCancelDelete = () => {
+    setBookingToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (bookingToDelete) {
+      console.log(`Deleting booking ${bookingToDelete.id}`);
+      // Add actual delete logic here
+      setBookingToDelete(null);
+    }
+  };
+
 
   const LeafIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -129,6 +169,7 @@ export default function ExperienceBookingsPage() {
         </Button>
       </div>
 
+    <AlertDialog open={!!bookingToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -185,9 +226,11 @@ export default function ExperienceBookingsPage() {
                           <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                         </Link>
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
-                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                      </Button>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(booking)}>
+                          <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                        </Button>
+                      </AlertDialogTrigger>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -215,6 +258,22 @@ export default function ExperienceBookingsPage() {
             </div>
         </CardFooter>
       </Card>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Booking ?</AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    {bookingToDelete?.id}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+                <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+             <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                <X className="h-5 w-5" />
+            </button>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
