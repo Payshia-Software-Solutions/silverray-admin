@@ -18,6 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import Link from 'next/link';
 
 const bookings = [
   {
@@ -121,8 +122,10 @@ export default function ExperienceBookingsPage() {
             className="w-full rounded-lg bg-background pl-8"
           />
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Booking
+        <Button asChild>
+          <Link href={`/experience/${experienceId}/bookings/new`}>
+            <Plus className="mr-2 h-4 w-4" /> Add Booking
+          </Link>
         </Button>
       </div>
 
