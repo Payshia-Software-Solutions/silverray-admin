@@ -78,6 +78,13 @@ export default function EditRestaurantReservationPage() {
   const id = params.id as string;
   const [date, setDate] = useState<Date | undefined>(new Date('2024-01-15'));
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+  const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
+
+
+  const handleCancelReservation = () => {
+    // In a real app, you would handle cancellation logic here
+    setShowCancelSuccessDialog(true);
+  }
 
 
   return (
@@ -122,6 +129,7 @@ export default function EditRestaurantReservationPage() {
                     <Button variant="outline" onClick={() => setShowSaveSuccessDialog(true)}>
                         <Save className="mr-2 h-4 w-4" /> Save Changes
                     </Button>
+                     <Button variant="outline">Cancel</Button>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button className="bg-green-600 hover:bg-green-700 text-white">
@@ -141,14 +149,14 @@ export default function EditRestaurantReservationPage() {
                             <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Cancel this Reservation ?</AlertDialogTitle>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="sm:justify-center">
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-red-500 hover:bg-red-600">Cancel Reservation</AlertDialogAction>
+                            <AlertDialogCancel>Go Back</AlertDialogCancel>
+                            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleCancelReservation}>Cancel</AlertDialogAction>
                           </AlertDialogFooter>
-                          <AlertDialogCancel asChild>
+                           <AlertDialogCancel asChild>
                               <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
                                   <X className="h-5 w-5" />
                               </button>
-                          </AlertDialogCancel>
+                           </AlertDialogCancel>
                       </AlertDialogContent>
                     </AlertDialog>
                 </div>
@@ -360,6 +368,25 @@ export default function EditRestaurantReservationPage() {
             </DialogClose>
           </DialogContent>
       </Dialog>
+      
+      <Dialog open={showCancelSuccessDialog} onOpenChange={setShowCancelSuccessDialog}>
+          <DialogContent>
+            <DialogHeader className='sr-only'>
+              <DialogTitle>Reservation Cancelled</DialogTitle>
+              <DialogDescription>The reservation has been successfully cancelled.</DialogDescription>
+            </DialogHeader>
+            <div className="text-center p-6">
+              <div className="mx-auto bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mb-4">
+                  <Trash2 className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Cancelled Reservation !</h2>
+              <DialogClose asChild>
+                  <Button className="mt-6">Done</Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
