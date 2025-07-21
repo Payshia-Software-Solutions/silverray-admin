@@ -156,7 +156,7 @@ export default function ExperienceManagementPage() {
                   ))}
               </div>
               <div className="mt-auto flex justify-between items-center pt-2 gap-2">
-                <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">View Bookings</Button>
+                <Button className="w-full">View Bookings</Button>
                 <Button variant="outline" size="icon">
                     <Pencil className="h-4 w-4"/>
                     <span className="sr-only">Edit</span>
