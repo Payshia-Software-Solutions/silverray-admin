@@ -92,25 +92,25 @@ export default function EditRestaurantReservationPage() {
             Modify reservation details and manage booking status
           </p>
         </div>
-        <div className="flex items-center gap-2">
-            <Button variant="outline">
-                <Save className="mr-2 h-4 w-4" /> Save Changes
-            </Button>
-            <Button variant="outline">Cancel</Button>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
-            </Button>
-            <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
-                <Mail className="mr-2 h-4 w-4" /> Send Email
-            </Button>
-            <Button variant="destructive">
-                <X className="mr-2 h-4 w-4" /> Cancel Reservation
-            </Button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+           <div className="flex items-center gap-2 justify-end">
+                <Button variant="outline">
+                    <Save className="mr-2 h-4 w-4" /> Save Changes
+                </Button>
+                <Button variant="outline">Cancel</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <CheckCircle className="mr-2 h-4 w-4" /> Mark as Seated
+                </Button>
+                <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white">
+                    <Mail className="mr-2 h-4 w-4" /> Send Email
+                </Button>
+                <Button variant="destructive">
+                    <X className="mr-2 h-4 w-4" /> Cancel Reservation
+                </Button>
+            </div>
           <Card>
             <CardHeader>
               <CardTitle>Guest Information</CardTitle>
