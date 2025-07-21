@@ -48,11 +48,18 @@ export default function EditExperiencePage() {
     const experienceTitle = experienceId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
     const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+    const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
 
     const handleSave = () => {
         // In a real app, you would handle the save logic here
         setShowSaveConfirmDialog(false);
         setShowSaveSuccessDialog(true);
+    };
+    
+    const handleDelete = () => {
+        // In a real app, you would handle the delete logic here
+        setShowDeleteConfirmDialog(false);
+        // Then likely show a success message
     };
 
   return (
@@ -88,7 +95,26 @@ export default function EditExperiencePage() {
                 </button>
             </AlertDialogContent>
         </AlertDialog>
-        <Button variant="destructive">Delete Experience</Button>
+        <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete Experience</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Experience ?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-center text-red-500 text-lg">
+                      {experienceTitle}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="sm:justify-center">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid gap-6">
