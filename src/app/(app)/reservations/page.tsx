@@ -221,7 +221,7 @@ export default function ReservationsPage() {
                      <div className="flex justify-end items-center gap-1">
                         <Button variant="ghost" size="icon" className="h-8 w-8 group" asChild>
                             <Link href={`/reservations/${res.id.replace('#', '')}`}>
-                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-yellow-600" />
+                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-blue-600" />
                               <span className="sr-only">View</span>
                             </Link>
                         </Button>
