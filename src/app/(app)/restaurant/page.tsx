@@ -83,6 +83,9 @@ const menuItems = [
     }
 ];
 
+type MenuItem = typeof menuItems[0];
+
+
 const reservations = [
   {
     id: '#8K001',
@@ -120,6 +123,8 @@ export default function RestaurantDiningPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [venueToDelete, setVenueToDelete] = useState('');
+  const [showDeleteItemDialog, setShowDeleteItemDialog] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   const handleDeleteClick = (venueName: string) => {
     setVenueToDelete(venueName);
@@ -131,6 +136,18 @@ export default function RestaurantDiningPage() {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
     // Here you would add the logic to actually delete the venue
+  }
+
+  const handleDeleteItemClick = (item: MenuItem) => {
+    setItemToDelete(item);
+    setShowDeleteItemDialog(true);
+  };
+
+  const handleDeleteItemConfirm = () => {
+    console.log(`Deleting ${itemToDelete?.name}`);
+    // Here you would add the logic to delete the item
+    setShowDeleteItemDialog(false);
+    setItemToDelete(null);
   }
 
   const venues = [
@@ -315,7 +332,7 @@ export default function RestaurantDiningPage() {
                                                 <span className="sr-only">View</span>
                                             </Link>
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteItemClick(item)}>
                                             <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                                             <span className="sr-only">Delete</span>
                                         </Button>
@@ -495,6 +512,26 @@ export default function RestaurantDiningPage() {
               </div>
           </DialogContent>
       </Dialog>
+      <AlertDialog open={showDeleteItemDialog} onOpenChange={setShowDeleteItemDialog}>
+            <AlertDialogContent className="sm:max-w-md">
+                <AlertDialogHeader className="sr-only">
+                  <AlertDialogTitle>Delete Meal</AlertDialogTitle>
+                  <AlertDialogDescription>Are you sure you want to delete this meal?</AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="text-center p-4">
+                    <h2 className="text-2xl font-bold">Do you want to Delete this Meal ?</h2>
+                </div>
+                <AlertDialogFooter className="sm:justify-center gap-4">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteItemConfirm}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                <button onClick={() => setShowDeleteItemDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }
+
+    
