@@ -221,13 +221,13 @@ export default function WeddingManagementPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewClick(pkg)}>
-                            <Eye className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" onClick={() => handleViewClick(pkg)}>
+                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                             <span className="sr-only">View</span>
                           </Button>
                           <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteClick(pkg.name)}>
-                                <Trash2 className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(pkg.name)}>
+                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                                 <span className="sr-only">Delete</span>
                               </Button>
                           </AlertDialogTrigger>
@@ -315,14 +315,14 @@ export default function WeddingManagementPage() {
                                       </TableCell>
                                       <TableCell className="text-right">
                                           <div className="flex items-center justify-end gap-1">
-                                              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                              <Button variant="ghost" size="icon" className="h-8 w-8 group" asChild>
                                                 <Link href={`/weddings/booking/${booking.id.replace('#','')}`}>
-                                                  <Eye className="h-4 w-4" />
+                                                  <Eye className="h-4 w-4 text-muted-foreground group-hover:text-blue-600" />
                                                   <span className="sr-only">View</span>
                                                 </Link>
                                               </Button>
-                                              <Button variant="destructive" size="icon" className="h-8 w-8">
-                                                  <Trash2 className="h-4 w-4" />
+                                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100">
+                                                  <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
                                                   <span className="sr-only">Delete</span>
                                               </Button>
                                           </div>
