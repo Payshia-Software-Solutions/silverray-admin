@@ -14,15 +14,13 @@ import {
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, Bell, User } from 'lucide-react';
+import { LogOut, Settings, Bell } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
 import Link from 'next/link';
 
-export default function AppLayout({ children, params: paramsProp }: { children: React.ReactNode, params: any }) {
-  const params = React.use(Promise.resolve(paramsProp));
-
+export default function AppLayout({ children }: { children: React.ReactNode, params: any }) {
   return (
     <SidebarProvider>
       <Sidebar variant="sidebar" collapsible="icon">
