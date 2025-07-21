@@ -18,7 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, CheckCircle, Clock, Mail, Printer, Check, AlertTriangle, X, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, CheckCircle, Clock, Mail, Printer, Check, AlertTriangle, X, Trash2, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, addDays } from 'date-fns';
 import Link from 'next/link';
@@ -54,11 +54,18 @@ const activityLog = [
 export default function BookingDetailsPage() {
     const params = useParams<{ id: string }>();
     const bookingId = params.id;
+    const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
+    const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
     const [showCancelSuccessDialog, setShowCancelSuccessDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
 
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(new Date('2025-06-15'));
   const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(new Date('2025-06-18'));
+
+  const handleSaveChanges = () => {
+    setShowSaveConfirmDialog(false);
+    setShowSaveSuccessDialog(true);
+  }
 
   const handleCancelBooking = () => {
     // In a real app, you would handle cancellation logic here
@@ -85,7 +92,23 @@ export default function BookingDetailsPage() {
         </Breadcrumb>
         
         <div className="flex items-center gap-2 flex-wrap">
-            <Button>Save Changes</Button>
+            <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
+                <AlertDialogTrigger asChild>
+                    <Button>Save Changes</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Update this Booking ?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleSaveChanges}>Save Changes</AlertDialogAction>
+                    </AlertDialogFooter>
+                    <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                    </button>
+                </AlertDialogContent>
+            </AlertDialog>
             <Button variant="outline">Cancel</Button>
             <div className="flex-grow"/>
             <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700 hover:text-white">Record Payment</Button>
@@ -354,6 +377,26 @@ export default function BookingDetailsPage() {
         </Card>
       </div>
 
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+              <DialogTitleComponent>Successfully Updated!</DialogTitleComponent>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8">
+              <div className="mx-auto bg-blue-100 rounded-full h-20 w-20 flex items-center justify-center mb-4">
+                <div className="p-2 bg-blue-200 rounded-full">
+                  <CheckCircle2 className="h-10 w-10 text-blue-600" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold mb-2">Successfully Updated Booking !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowSaveSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
       <Dialog open={showCancelSuccessDialog} onOpenChange={setShowCancelSuccessDialog}>
           <DialogContent>
             <DialogHeader className='sr-only'>
