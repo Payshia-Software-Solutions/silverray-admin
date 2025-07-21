@@ -39,6 +39,10 @@ const dynamicPageInfo: { [key: string]: (params: any) => { title: string; descri
     const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
   },
+  '^/experience/([^/]+)/booking/([^/]+)$': (params) => {
+    const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    return { title: 'Experience Management', description: title };
+  },
   '^/experience/([^/]+)$': (params) => {
     const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
@@ -55,7 +59,9 @@ export function Header() {
   }, []);
 
   const { title, description } = useMemo(() => {
-    if (!isMounted) return { title: '', description: '' };
+    // Wait until the component is mounted to ensure pathname is available
+    if (!isMounted) return { title: 'Loading...', description: 'Please wait...' };
+
     // First, check for an exact match in static pages
     if (pageInfo[pathname]) {
       return pageInfo[pathname];
@@ -70,7 +76,7 @@ export function Header() {
         }
     }
 
-    return { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." };
+    return { title: 'Page Not Found', description: "The page you are looking for does not exist." };
   }, [pathname, isMounted]);
 
   if (!isMounted) {
