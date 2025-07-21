@@ -35,6 +35,10 @@ const dynamicPageInfo: { [key: string]: (params: any) => { title: string; descri
   '^/restaurant/menu/([^/]+)$': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
   '^/restaurant/reservations/([^/]+)$': (params) => ({ title: 'Restaurant & Dining', description: `Details for reservation #${params[0]}` }),
   '^/experience/([^/]+)/bookings/new$': (params) => ({ title: 'Experience Management', description: 'Create a new booking for this experience.' }),
+  '^/experience/([^/]+)/edit$': (params) => {
+    const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    return { title: 'Experience Management', description: title };
+  },
   '^/experience/([^/]+)$': (params) => {
     const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
@@ -51,6 +55,7 @@ export function Header() {
   }, []);
 
   const { title, description } = useMemo(() => {
+    if (!isMounted) return { title: '', description: '' };
     // First, check for an exact match in static pages
     if (pageInfo[pathname]) {
       return pageInfo[pathname];
@@ -66,7 +71,7 @@ export function Header() {
     }
 
     return { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." };
-  }, [pathname]);
+  }, [pathname, isMounted]);
 
   if (!isMounted) {
     return (

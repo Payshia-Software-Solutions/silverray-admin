@@ -8,6 +8,7 @@ import { Search, Plus, Star, CheckCircle, Calendar, Clock, DollarSign, Users, Ti
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const stats = [
   { label: 'Total Experiences', value: '12', icon: Star, color: 'text-blue-500', bgColor: 'bg-blue-100' },
@@ -163,9 +164,11 @@ export default function ExperienceManagementPage() {
               </div>
               <div className="mt-auto flex justify-between items-center pt-2 gap-2">
                 <Button className="w-full" variant="default" onClick={() => router.push(`/experience/${experience.id}`)}>View Bookings</Button>
-                <Button variant="outline" size="icon">
+                <Button asChild variant="outline" size="icon">
+                  <Link href={`/experience/${experience.id}/edit`}>
                     <Pencil className="h-4 w-4"/>
                     <span className="sr-only">Edit</span>
+                  </Link>
                 </Button>
                  <Button variant="ghost" size="icon" className="group hover:bg-red-100">
                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500"/>
