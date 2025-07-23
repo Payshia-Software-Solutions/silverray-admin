@@ -1,16 +1,14 @@
--- SQL Schema for Hotel Management System in 3rd Normal Form (3NF)
 
--- =================================================================
--- Table for User and Access Control
--- =================================================================
+-- Roles table for user access control
 CREATE TABLE Roles (
     id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     permissions JSON,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Users table for admin accounts
 CREATE TABLE Users (
     id VARCHAR(255) PRIMARY KEY,
     roleId VARCHAR(255) NOT NULL,
@@ -25,23 +23,18 @@ CREATE TABLE Users (
     FOREIGN KEY (roleId) REFERENCES Roles(id) ON DELETE RESTRICT
 );
 
--- =================================================================
--- Central Guest Information Table
--- =================================================================
+-- Guests table for central guest management
 CREATE TABLE Guests (
     id VARCHAR(255) PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    phone VARCHAR(255),
+    phone VARCHAR(50),
     address TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
--- =================================================================
--- Tables for Room Management
--- =================================================================
+-- RoomTypes table for defining categories of rooms
 CREATE TABLE RoomTypes (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -49,15 +42,16 @@ CREATE TABLE RoomTypes (
     shortDescription TEXT,
     adults INT NOT NULL,
     children INT DEFAULT 0,
-    roomSize JSON, -- { "width": 450, "height": 450, "unit": "sqft" }
+    roomSize JSON,
     pricePerNight DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
-    amenities JSON, -- ["king-bed", "wifi"]
-    images JSON, -- [{ "src": "url", "alt": "text", "hint": "...", "primary": true }]
+    amenities JSON,
+    images JSON,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Rooms table for individual physical rooms
 CREATE TABLE Rooms (
     id VARCHAR(255) PRIMARY KEY,
     roomTypeId VARCHAR(255) NOT NULL,
@@ -68,6 +62,7 @@ CREATE TABLE Rooms (
     FOREIGN KEY (roomTypeId) REFERENCES RoomTypes(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
+-- RoomBookings table for room reservations
 CREATE TABLE RoomBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -91,17 +86,14 @@ CREATE TABLE RoomBookings (
     CONSTRAINT chk_dates CHECK (checkOutDate > checkInDate)
 );
 
-
--- =================================================================
--- Table for Experience Management
--- =================================================================
+-- Experiences table for guest activities
 CREATE TABLE Experiences (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     shortDescription TEXT,
     detailedDescription TEXT,
-    duration VARCHAR(100),
-    pricePerAdult DECIMAL(10, 2) NOT NULL,
+    duration VARCHAR(255),
+    pricePerAdult DECIMAL(10, 2),
     pricePerChild DECIMAL(10, 2),
     currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
     maxParticipants INT,
@@ -114,6 +106,7 @@ CREATE TABLE Experiences (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- ExperienceBookings table for experience reservations
 CREATE TABLE ExperienceBookings (
     id VARCHAR(255) PRIMARY KEY,
     experienceId VARCHAR(255) NOT NULL,
@@ -132,10 +125,7 @@ CREATE TABLE ExperienceBookings (
     FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
 );
 
-
--- =================================================================
--- Table for Restaurant Management
--- =================================================================
+-- Restaurants table for dining venues
 CREATE TABLE Restaurants (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -148,6 +138,7 @@ CREATE TABLE Restaurants (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- MenuItems table for restaurant menu items
 CREATE TABLE MenuItems (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -165,6 +156,7 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE
 );
 
+-- RestaurantReservations table for dining reservations
 CREATE TABLE RestaurantReservations (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -185,36 +177,38 @@ CREATE TABLE RestaurantReservations (
     FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
 );
 
-
--- =================================================================
--- Table for Wedding Management
--- =================================================================
+-- WeddingPackages table for wedding offerings
 CREATE TABLE WeddingPackages (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
+    shortDescription TEXT,
+    detailedDescription TEXT,
+    price DECIMAL(12, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
     maxGuests INT,
+    status ENUM('Active', 'Inactive', 'Seasonal') NOT NULL DEFAULT 'Active',
     inclusions JSON,
     associatedHallIds JSON,
-    status ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     images JSON,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- WeddingBookings table for wedding reservations
 CREATE TABLE WeddingBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
     packageId VARCHAR(255) NOT NULL,
-    hallId VARCHAR(255),
+    hallId VARCHAR(255) NOT NULL,
     weddingDate DATE NOT NULL,
+    weddingTime TIME,
     expectedGuests INT NOT NULL,
-    totalPrice DECIMAL(10, 2) NOT NULL,
-    amountPaid DECIMAL(10, 2) DEFAULT 0.00,
+    totalPrice DECIMAL(12, 2) NOT NULL,
+    amountPaid DECIMAL(12, 2) DEFAULT 0.00,
     paymentStatus ENUM('Deposit Paid', 'Full Paid', 'Pending') NOT NULL DEFAULT 'Pending',
-    bookingStatus ENUM('Confirmed', 'Pending', 'Cancelled') NOT NULL DEFAULT 'Pending',
+    paymentMethod ENUM('Credit Card', 'Bank Transfer', 'Cash'),
+    bookingStatus ENUM('Confirmed', 'Pending', 'Tentative', 'Cancelled') NOT NULL DEFAULT 'Pending',
+    bookingSource ENUM('Website', 'Phone Call', 'Referral'),
     additionalServices JSON,
     internalNotes TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
