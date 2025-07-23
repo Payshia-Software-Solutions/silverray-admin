@@ -1,39 +1,49 @@
--- SQL schema for the hotel management system, designed in 3rd Normal Form (3NF).
+-- This file contains the complete database schema for the Hotel Management System.
+-- It follows 3rd Normal Form (3NF) to ensure data integrity and reduce redundancy.
 
--- -----------------------------------------------------
--- Table `Roles`
--- Stores user roles for access control.
--- -----------------------------------------------------
+-- =================================================================
+-- Table: Roles
+-- Description: Defines the different permission roles for admin users.
+-- =================================================================
 CREATE TABLE Roles (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    permissions JSON,
+    description TEXT,
+    permissions JSON, -- e.g., ["manage_users", "edit_rooms"]
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `Users`
--- Stores admin user accounts.
--- -----------------------------------------------------
+-- Insert default roles
+INSERT INTO Roles (id, name, description, permissions) VALUES
+('super-admin', 'Super Admin', 'Full access to all system features', '["*"]'),
+('booking-manager', 'Booking Manager', 'Manages rooms and reservations', '["manage_bookings", "manage_rooms"]'),
+('restaurant-manager', 'Restaurant Manager', 'Manages dining and menus', '["manage_restaurant"]');
+
+
+-- =================================================================
+-- Table: Users
+-- Description: Stores individual admin user accounts.
+-- =================================================================
 CREATE TABLE Users (
     id VARCHAR(255) PRIMARY KEY,
     roleId VARCHAR(255) NOT NULL,
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     passwordHash VARCHAR(255) NOT NULL,
+    avatarUrl VARCHAR(2048),
     status ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     lastLogin TIMESTAMP,
-    avatarUrl VARCHAR(2048),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (roleId) REFERENCES Roles(id) ON DELETE RESTRICT
 );
 
--- -----------------------------------------------------
--- Table `Guests`
--- A central repository for all non-admin guest information to avoid data duplication.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: Guests
+-- Description: A central table for all non-admin individuals (customers).
+-- =================================================================
 CREATE TABLE Guests (
     id VARCHAR(255) PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
@@ -44,10 +54,11 @@ CREATE TABLE Guests (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `RoomTypes`
--- Defines categories of rooms (e.g., Deluxe, Suite) and their base properties.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: RoomTypes
+-- Description: Defines categories of rooms (e.g., "Deluxe Suite").
+-- =================================================================
 CREATE TABLE RoomTypes (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -58,30 +69,32 @@ CREATE TABLE RoomTypes (
     roomSize JSON, -- e.g., {"width": 450, "height": 450, "unit": "sqft"}
     pricePerNight DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
-    amenities JSON, -- e.g., ["king-bed", "wifi", "balcony"]
-    images JSON, -- e.g., [{"src": "url", "alt": "text", "primary": true}]
+    amenities JSON, -- e.g., ["king-bed", "wifi"]
+    images JSON, -- e.g., [{"src": "url", "alt": "text"}]
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `Rooms`
--- Represents individual, physical rooms in the hotel.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: Rooms
+-- Description: Represents individual, physical hotel rooms.
+-- =================================================================
 CREATE TABLE Rooms (
     id VARCHAR(255) PRIMARY KEY,
     roomTypeId VARCHAR(255) NOT NULL,
-    status ENUM('Available', 'Booked', 'Under Maintenance', 'Cleaning') NOT NULL DEFAULT 'Available',
+    status ENUM('Available', 'Booked', 'Under Maintenance') NOT NULL DEFAULT 'Available',
     notes TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (roomTypeId) REFERENCES RoomTypes(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- -----------------------------------------------------
--- Table `RoomBookings`
--- The central transaction table for room reservations.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: RoomBookings
+-- Description: Links a Guest to a Room for a specific stay.
+-- =================================================================
 CREATE TABLE RoomBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -96,7 +109,7 @@ CREATE TABLE RoomBookings (
     discountCode VARCHAR(255),
     paymentStatus ENUM('Paid', 'Pending', 'Due') NOT NULL DEFAULT 'Pending',
     paymentMethod ENUM('Credit Card', 'Cash', 'Bank Transfer'),
-    bookingStatus ENUM('Confirmed', 'Pending', 'Cancelled', 'CheckedIn', 'CheckedOut') NOT NULL DEFAULT 'Pending',
+    bookingStatus ENUM('Confirmed', 'Pending', 'Cancelled') NOT NULL DEFAULT 'Pending',
     bookingSource ENUM('Online', 'Phone Call', 'Walk-in') NOT NULL DEFAULT 'Online',
     specialRequests TEXT,
     internalNotes TEXT,
@@ -107,26 +120,28 @@ CREATE TABLE RoomBookings (
     CONSTRAINT chk_dates CHECK (checkOutDate > checkInDate)
 );
 
--- -----------------------------------------------------
--- Table `Restaurants`
--- Defines dining venues within the hotel.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: Restaurants
+-- Description: Defines the dining venues in the hotel.
+-- =================================================================
 CREATE TABLE Restaurants (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     capacity INT,
     status ENUM('Active', 'Inactive', 'Seasonal') NOT NULL DEFAULT 'Active',
-    operatingHours JSON,
+    operatingHours JSON, -- e.g., {"Monday": "09:00-22:00"}
     images JSON,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `MenuItems`
--- Stores all items available on restaurant menus.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: MenuItems
+-- Description: Represents items on a restaurant's menu.
+-- =================================================================
 CREATE TABLE MenuItems (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -144,10 +159,11 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE
 );
 
--- -----------------------------------------------------
--- Table `RestaurantReservations`
--- Manages table reservations for dining venues.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: RestaurantReservations
+-- Description: Manages table reservations for dining venues.
+-- =================================================================
 CREATE TABLE RestaurantReservations (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -168,10 +184,11 @@ CREATE TABLE RestaurantReservations (
     FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
 );
 
--- -----------------------------------------------------
--- Table `WeddingPackages`
--- Defines pre-set wedding packages offered by the hotel.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: WeddingPackages
+-- Description: Defines pre-set wedding packages.
+-- =================================================================
 CREATE TABLE WeddingPackages (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -188,10 +205,11 @@ CREATE TABLE WeddingPackages (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `WeddingBookings`
--- Manages bookings for wedding events.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: WeddingBookings
+-- Description: Manages bookings for weddings.
+-- =================================================================
 CREATE TABLE WeddingBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -214,10 +232,11 @@ CREATE TABLE WeddingBookings (
     FOREIGN KEY (packageId) REFERENCES WeddingPackages(id) ON DELETE RESTRICT
 );
 
--- -----------------------------------------------------
--- Table `Experiences`
--- Stores details of guest experiences and activities.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: Experiences
+-- Description: Stores details of guest experiences/activities.
+-- =================================================================
 CREATE TABLE Experiences (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -237,10 +256,11 @@ CREATE TABLE Experiences (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- -----------------------------------------------------
--- Table `ExperienceBookings`
--- Manages bookings for guest experiences.
--- -----------------------------------------------------
+
+-- =================================================================
+-- Table: ExperienceBookings
+-- Description: Manages bookings for guest experiences.
+-- =================================================================
 CREATE TABLE ExperienceBookings (
     id VARCHAR(255) PRIMARY KEY,
     experienceId VARCHAR(255) NOT NULL,
