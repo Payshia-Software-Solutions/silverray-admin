@@ -1,5 +1,4 @@
-
--- Roles table for user access control
+-- Users and Access Control
 CREATE TABLE Roles (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -8,33 +7,32 @@ CREATE TABLE Roles (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Users table for admin accounts
 CREATE TABLE Users (
     id VARCHAR(255) PRIMARY KEY,
     roleId VARCHAR(255) NOT NULL,
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     passwordHash VARCHAR(255) NOT NULL,
+    avatarUrl VARCHAR(2048),
     status ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     lastLogin TIMESTAMP,
-    avatarUrl VARCHAR(2048),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (roleId) REFERENCES Roles(id) ON DELETE RESTRICT
 );
 
--- Guests table for central guest management
+-- Central Guest Information
 CREATE TABLE Guests (
     id VARCHAR(255) PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    phone VARCHAR(50),
+    phone VARCHAR(255),
     address TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- RoomTypes table for defining categories of rooms
+-- Room Management
 CREATE TABLE RoomTypes (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -51,7 +49,6 @@ CREATE TABLE RoomTypes (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Rooms table for individual physical rooms
 CREATE TABLE Rooms (
     id VARCHAR(255) PRIMARY KEY,
     roomTypeId VARCHAR(255) NOT NULL,
@@ -62,7 +59,7 @@ CREATE TABLE Rooms (
     FOREIGN KEY (roomTypeId) REFERENCES RoomTypes(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- RoomBookings table for room reservations
+-- Booking Management
 CREATE TABLE RoomBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -86,46 +83,7 @@ CREATE TABLE RoomBookings (
     CONSTRAINT chk_dates CHECK (checkOutDate > checkInDate)
 );
 
--- Experiences table for guest activities
-CREATE TABLE Experiences (
-    id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    shortDescription TEXT,
-    detailedDescription TEXT,
-    duration VARCHAR(255),
-    pricePerAdult DECIMAL(10, 2),
-    pricePerChild DECIMAL(10, 2),
-    currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
-    maxParticipants INT,
-    meetingPoint VARCHAR(255),
-    inclusions JSON,
-    whatToBring JSON,
-    status ENUM('Active', 'Inactive', 'Seasonal') NOT NULL DEFAULT 'Active',
-    images JSON,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- ExperienceBookings table for experience reservations
-CREATE TABLE ExperienceBookings (
-    id VARCHAR(255) PRIMARY KEY,
-    experienceId VARCHAR(255) NOT NULL,
-    guestId VARCHAR(255) NOT NULL,
-    experienceDate DATE NOT NULL,
-    experienceTime TIME,
-    adults INT NOT NULL,
-    children INT DEFAULT 0,
-    totalPrice DECIMAL(10, 2) NOT NULL,
-    paymentStatus ENUM('Paid', 'Pending') NOT NULL DEFAULT 'Pending',
-    bookingStatus ENUM('Confirmed', 'Cancelled') NOT NULL DEFAULT 'Confirmed',
-    specialRequests TEXT,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (experienceId) REFERENCES Experiences(id) ON DELETE CASCADE,
-    FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
-);
-
--- Restaurants table for dining venues
+-- Restaurant Management
 CREATE TABLE Restaurants (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -138,7 +96,6 @@ CREATE TABLE Restaurants (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- MenuItems table for restaurant menu items
 CREATE TABLE MenuItems (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -156,7 +113,6 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE
 );
 
--- RestaurantReservations table for dining reservations
 CREATE TABLE RestaurantReservations (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -177,7 +133,7 @@ CREATE TABLE RestaurantReservations (
     FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
 );
 
--- WeddingPackages table for wedding offerings
+-- Wedding Management
 CREATE TABLE WeddingPackages (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -194,7 +150,6 @@ CREATE TABLE WeddingPackages (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- WeddingBookings table for wedding reservations
 CREATE TABLE WeddingBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -215,4 +170,43 @@ CREATE TABLE WeddingBookings (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT,
     FOREIGN KEY (packageId) REFERENCES WeddingPackages(id) ON DELETE RESTRICT
+);
+
+-- Experience Management
+CREATE TABLE Experiences (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    shortDescription TEXT,
+    detailedDescription TEXT,
+    duration VARCHAR(255),
+    pricePerAdult DECIMAL(10, 2) NOT NULL,
+    pricePerChild DECIMAL(10, 2),
+    currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
+    maxParticipants INT,
+    meetingPoint VARCHAR(255),
+    inclusions JSON,
+    whatToBring JSON,
+    status ENUM('Active', 'Inactive', 'Seasonal') NOT NULL DEFAULT 'Active',
+    images JSON,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ExperienceBookings (
+    id VARCHAR(255) PRIMARY KEY,
+    experienceId VARCHAR(255) NOT NULL,
+    guestId VARCHAR(255) NOT NULL,
+    experienceDate DATE NOT NULL,
+    experienceTime TIME,
+    adults INT NOT NULL,
+    children INT DEFAULT 0,
+    totalPrice DECIMAL(10, 2) NOT NULL,
+    paymentStatus ENUM('Paid', 'Pending') NOT NULL DEFAULT 'Pending',
+    bookingStatus ENUM('Confirmed', 'Cancelled') NOT NULL DEFAULT 'Confirmed',
+    bookingSource VARCHAR(255),
+    specialRequests TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (experienceId) REFERENCES Experiences(id) ON DELETE CASCADE,
+    FOREIGN KEY (guestId) REFERENCES Guests(id) ON DELETE RESTRICT
 );
