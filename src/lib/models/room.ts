@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Defines the data models for Room and RoomType entities.
  * These interfaces provide a structured blueprint for database tables
