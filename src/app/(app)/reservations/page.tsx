@@ -47,8 +47,10 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getReservations, type ReservationFromApi } from '@/lib/services/api';
+import { getReservations, type ReservationFromApi, deleteRoom } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 
 const stats = [
@@ -98,6 +100,7 @@ const statusVariant = {
 
 export default function ReservationsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [reservations, setReservations] = useState<ReservationFromApi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,18 +133,28 @@ export default function ReservationsPage() {
     setBookingToDelete(null);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (bookingToDelete) {
-      setDeletedBookingId(bookingToDelete.id);
-      // In a real app, you would call an API to delete the booking
-      setReservations(prev => prev.filter(res => res.id !== bookingToDelete.id));
-      setBookingToDelete(null);
-      setShowDeleteSuccessDialog(true);
+      try {
+        await deleteRoom(bookingToDelete.id);
+        setDeletedBookingId(bookingToDelete.id);
+        setReservations(prev => prev.filter(res => res.id !== bookingToDelete.id));
+        setShowDeleteSuccessDialog(true);
+      } catch (error: any) {
+         toast({
+          variant: "destructive",
+          title: "Error Deleting Booking",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setBookingToDelete(null);
+      }
     }
   };
 
   return (
     <div className="space-y-6">
+      <Toaster />
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
@@ -354,4 +367,5 @@ export default function ReservationsPage() {
       </Dialog>
     </div>
   );
-}
+
+    
