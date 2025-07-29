@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/weddings', label: 'Wedding Management', icon: Heart },
   { href: '/website-content', label: 'Website Content', icon: Globe },
   { href: '/user-management', label: 'User Management', icon: UserCog },
+  { href: '/api-example', label: 'API Example', icon: Terminal },
  
 ];
 
