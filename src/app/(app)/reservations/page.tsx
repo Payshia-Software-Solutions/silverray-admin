@@ -231,16 +231,20 @@ export default function ReservationsPage() {
                     <TableRow key={res.id}>
                       <TableCell className="font-semibold text-primary">{res.id}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={`https://placehold.co/40x40.png`} alt={res.guest.fullName} data-ai-hint="person face" />
-                            <AvatarFallback>{res.guest.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-sm">{res.guest.fullName}</p>
-                            <p className="text-xs text-muted-foreground">{res.guest.email}</p>
+                        {res.guest ? (
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={`https://placehold.co/40x40.png`} alt={res.guest.fullName} data-ai-hint="person face" />
+                              <AvatarFallback>{res.guest.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{res.guest.fullName}</p>
+                              <p className="text-xs text-muted-foreground">{res.guest.email}</p>
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <span className="text-muted-foreground">N/A</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <p className="font-medium text-sm">{res.room.room_type_details.name}</p>
