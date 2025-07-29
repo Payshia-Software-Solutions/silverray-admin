@@ -28,6 +28,9 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { createRoom, type RoomFromApi } from '@/lib/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 
 const amenities = [
@@ -50,10 +53,36 @@ const initialImageSlots = Array(4).fill(null);
 export default function AddNewRoomPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(initialImageSlots);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleCreateRoom = () => {
-    // In a real app, you would handle form submission here.
-    setShowSuccessDialog(true);
+  const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    
+    const formData = new FormData(event.currentTarget);
+    const roomData: Omit<RoomFromApi, 'id'> = {
+        // This is a placeholder. You might need to map your form fields to the RoomFromApi type more carefully.
+        type: formData.get('descriptive-title') as string || "Default Type",
+        price: formData.get('price') as string || "0",
+        status: 'Available', // Default status for a new room
+        occupancy: `${formData.get('adults')} Adults / ${formData.get('children')} Children`
+    };
+
+    try {
+      const result = await createRoom(roomData);
+      console.log('Room created:', result);
+      setShowSuccessDialog(true);
+    } catch (error) {
+      console.error('Error creating room:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create the room. Please check the server connection and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -80,7 +109,9 @@ export default function AddNewRoomPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+    <Toaster />
+    <form onSubmit={handleCreateRoom} className="space-y-6">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -105,11 +136,11 @@ export default function AddNewRoomPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="room-number">Room Number</Label>
-                <Input id="room-number" placeholder="e.g., 105" />
+                <Input id="room-number" name="id" placeholder="e.g., 105" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
-                 <Select>
+                 <Select name="room-type">
                   <SelectTrigger id="room-type">
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
@@ -123,11 +154,11 @@ export default function AddNewRoomPage() {
             </div>
              <div className="space-y-2">
                 <Label htmlFor="descriptive-title">Descriptive Title</Label>
-                <Input id="descriptive-title" placeholder="e.g., Mountain View King Suite" />
+                <Input id="descriptive-title" name="descriptive-title" placeholder="e.g., Mountain View King Suite" />
               </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
-              <Textarea id="short-description" placeholder="Brief overview of the room..." />
+              <Textarea id="short-description" name="short-description" placeholder="Brief overview of the room..." />
             </div>
           </CardContent>
         </Card>
@@ -144,25 +175,25 @@ export default function AddNewRoomPage() {
                <div className="space-y-2">
                 <Label htmlFor="adults">Adults</Label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="adults" type="number" defaultValue={0} className="w-16 text-center" />
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                  <Input id="adults" name="adults" type="number" defaultValue={0} className="w-16 text-center" />
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
                <div className="space-y-2">
                 <Label htmlFor="children">Children</Label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="children" type="number" defaultValue={0} className="w-16 text-center" />
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                  <Input id="children" name="children" type="number" defaultValue={0} className="w-16 text-center" />
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
                 <div className="space-y-2">
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input type="number" placeholder="450" className="w-24" />
+                        <Input name="room-width" type="number" placeholder="450" className="w-24" />
                         <span className="text-sm text-muted-foreground">width</span>
-                        <Input type="number" placeholder="450" className="w-24" />
+                        <Input name="room-height" type="number" placeholder="450" className="w-24" />
                         <span className="text-sm text-muted-foreground">height</span>
                     </div>
                 </div>
@@ -183,12 +214,12 @@ export default function AddNewRoomPage() {
                     <Label htmlFor="price">Price per night</Label>
                     <div className="flex items-center">
                         <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">LKR</span>
-                        <Input id="price" type="number" placeholder="25000" className="rounded-l-none" />
+                        <Input id="price" name="price" type="number" placeholder="25000" className="rounded-l-none" />
                     </div>
                  </div>
                  <div className="space-y-2">
                     <Label htmlFor="status">Current Status</Label>
-                     <Select>
+                     <Select name="status">
                         <SelectTrigger id="status">
                             <SelectValue placeholder="Available" />
                         </SelectTrigger>
@@ -214,7 +245,7 @@ export default function AddNewRoomPage() {
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {amenities.map(item => (
                 <div key={item.id} className="flex items-center space-x-2">
-                    <Checkbox id={item.id} />
+                    <Checkbox id={item.id} name="amenities" value={item.id} />
                     <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
                 </div>
                 ))}
@@ -236,7 +267,7 @@ export default function AddNewRoomPage() {
                         {preview ? (
                             <div className="relative w-full h-32">
                                 <Image src={preview} alt={`Room image preview ${index + 1}`} layout="fill" className="rounded-lg object-cover" />
-                                <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
+                                <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
                                     <X className="h-4 w-4" />
                                     <span className="sr-only">Remove image</span>
                                 </Button>
@@ -264,7 +295,9 @@ export default function AddNewRoomPage() {
         <Button variant="outline" asChild>
           <Link href="/rooms">Cancel</Link>
         </Button>
-        <Button onClick={handleCreateRoom}>Create New Room</Button>
+        <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating...' : 'Create New Room'}
+        </Button>
       </div>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
@@ -279,13 +312,14 @@ export default function AddNewRoomPage() {
                            <CheckCircle2 className="h-8 w-8 text-blue-600" />
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Created Room 101 !</h2>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Room!</h2>
                     <DialogClose asChild>
                         <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
                     </DialogClose>
                 </div>
             </DialogContent>
         </Dialog>
-    </div>
+    </form>
+    </>
   );
 }

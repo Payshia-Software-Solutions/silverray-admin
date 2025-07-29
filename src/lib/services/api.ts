@@ -51,7 +51,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
   try {
-    const response = await apiClient.post<{ message: string; id: string }>('/rooms', roomData);
+    const response = await apiClient.post<{ message: string; id: string }>('/rooms/new', roomData);
     return response.data;
   } catch (error) {
     console.error('Failed to create room:', error);
