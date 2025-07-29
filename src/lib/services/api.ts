@@ -43,6 +43,7 @@ export interface RoomFromApi {
     type: string;
     status: 'Available' | 'Booked' | 'Under Maintenance';
     price: string;
+    occupancy?: string; // Made optional to match existing usage
 }
 
 // --- API Functions ---
