@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -25,7 +25,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2, X } from 'lucide-react';
+import { Calendar as CalendarIcon, DollarSign, Clock, UserCheck, Search, Plus, Eye, Trash2, X, Terminal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -47,6 +47,8 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
+import { getReservations, type ReservationFromApi } from '@/lib/services/api';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 const stats = [
@@ -80,59 +82,47 @@ const stats = [
   },
 ];
 
-const reservations = [
-  {
-    id: '#BK001',
-    guest: 'John Smith',
-    email: 'john@email.com',
-    avatar: 'https://placehold.co/40x40.png',
-    avatarHint: 'man face colorful',
-    roomType: 'Deluxe Suite',
-    roomNumber: 'Room 205',
-    checkIn: 'June 15, 2025',
-    checkOut: 'June 18, 2025',
-    guests: '2 Adults',
-    total: 'LKR. 24,500',
-    payment: 'Paid',
-    status: 'Confirmed',
-  },
-  {
-    id: '#BK002',
-    guest: 'Emily Davis',
-    email: 'emily@email.com',
-    avatar: 'https://placehold.co/40x40.png',
-    avatarHint: 'woman face smiling',
-    roomType: 'Standard Room',
-    roomNumber: 'Room 102',
-    checkIn: 'Aug 28, 2025',
-    checkOut: 'Aug 22, 2025',
-    guests: '1 Adult',
-    total: 'LKR. 24,500',
-    payment: 'Pending',
-    status: 'Pending',
-  },
-];
-
-type Reservation = typeof reservations[0];
-
 const paymentVariant = {
   Paid: 'bg-green-100 text-green-700',
   Pending: 'bg-yellow-100 text-yellow-700',
+  Due: 'bg-red-100 text-red-700',
 } as const;
 
 const statusVariant = {
   Confirmed: 'bg-blue-100 text-blue-700',
   Pending: 'bg-yellow-100 text-yellow-700',
+  CheckedIn: 'bg-indigo-100 text-indigo-700',
+  CheckedOut: 'bg-gray-100 text-gray-700',
+  Cancelled: 'bg-red-100 text-red-700',
 } as const;
 
 export default function ReservationsPage() {
   const router = useRouter();
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [bookingToDelete, setBookingToDelete] = useState<Reservation | null>(null);
+  const [reservations, setReservations] = useState<ReservationFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<ReservationFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletedBookingId, setDeletedBookingId] = useState('');
 
-  const handleDeleteClick = (reservation: Reservation) => {
+  useEffect(() => {
+    async function fetchReservations() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getReservations();
+        setReservations(data);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred while fetching reservations.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchReservations();
+  }, []);
+
+  const handleDeleteClick = (reservation: ReservationFromApi) => {
     setBookingToDelete(reservation);
   };
 
@@ -142,8 +132,9 @@ export default function ReservationsPage() {
 
   const handleDeleteConfirm = () => {
     if (bookingToDelete) {
-      setDeletedBookingId(bookingToDelete.id.replace('#', 'BK-'));
-      // In a real app, you would handle the deletion logic here
+      setDeletedBookingId(bookingToDelete.id);
+      // In a real app, you would call an API to delete the booking
+      setReservations(prev => prev.filter(res => res.id !== bookingToDelete.id));
       setBookingToDelete(null);
       setShowDeleteSuccessDialog(true);
     }
@@ -211,79 +202,89 @@ export default function ReservationsPage() {
       <AlertDialog open={!!bookingToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead className="w-[200px]">Guest</TableHead>
-                  <TableHead>Room</TableHead>
-                  <TableHead>Check-in</TableHead>
-                  <TableHead>Check-out</TableHead>
-                  <TableHead>Guests</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reservations.map((res) => (
-                  <TableRow key={res.id}>
-                    <TableCell className="font-semibold text-primary">{res.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={res.avatar} alt={res.guest} data-ai-hint={res.avatarHint} />
-                          <AvatarFallback>{res.guest.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">{res.guest}</p>
-                          <p className="text-xs text-muted-foreground">{res.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-medium text-sm">{res.roomType}</p>
-                      <p className="text-xs text-muted-foreground">{res.roomNumber}</p>
-                    </TableCell>
-                    <TableCell>{res.checkIn}</TableCell>
-                    <TableCell>{res.checkOut}</TableCell>
-                    <TableCell>{res.guests}</TableCell>
-                    <TableCell>{res.total}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment as keyof typeof paymentVariant])}>
-                        {res.payment}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn('border-transparent', statusVariant[res.status as keyof typeof statusVariant])}>
-                        {res.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                       <div className="flex justify-end items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                              <Link href={`/reservations/${res.id.replace('#', '')}`}>
-                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                <span className="sr-only">View</span>
-                              </Link>
-                          </Button>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(res)}>
-                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                      </div>
-                    </TableCell>
+             {loading && <p className="p-4 text-center">Loading reservations...</p>}
+             {error && (
+              <Alert variant="destructive" className="m-4">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error Fetching Data</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {!loading && !error && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Booking ID</TableHead>
+                    <TableHead className="w-[200px]">Guest</TableHead>
+                    <TableHead>Room</TableHead>
+                    <TableHead>Check-in</TableHead>
+                    <TableHead>Check-out</TableHead>
+                    <TableHead>Guests</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {reservations.map((res) => (
+                    <TableRow key={res.id}>
+                      <TableCell className="font-semibold text-primary">{res.id}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={`https://placehold.co/40x40.png`} alt={res.guest.fullName} data-ai-hint="person face" />
+                            <AvatarFallback>{res.guest.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{res.guest.fullName}</p>
+                            <p className="text-xs text-muted-foreground">{res.guest.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium text-sm">{res.room.room_type_details.name}</p>
+                        <p className="text-xs text-muted-foreground">{res.room.id}</p>
+                      </TableCell>
+                      <TableCell>{format(new Date(res.checkInDate), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(res.checkOutDate), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{`${res.adults} Adults`}{res.children > 0 ? `, ${res.children} Children` : ''}</TableCell>
+                      <TableCell>{`LKR. ${Number(res.totalAmount).toLocaleString()}`}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.paymentStatus as keyof typeof paymentVariant])}>
+                          {res.paymentStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn('border-transparent', statusVariant[res.bookingStatus as keyof typeof statusVariant])}>
+                          {res.bookingStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         <div className="flex justify-end items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                <Link href={`/reservations/${res.id.replace('#', '')}`}>
+                                  <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                  <span className="sr-only">View</span>
+                                </Link>
+                            </Button>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(res)}>
+                                  <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                  <span className="sr-only">Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
            <CardFooter className="flex items-center justify-between border-t px-6 py-3">
               <div className="text-sm text-muted-foreground">
-                  Showing 1 to {reservations.length} of 247 bookings
+                  Showing 1 to {reservations.length} of {reservations.length} bookings
               </div>
               <div className="flex items-center space-x-2">
                   <Button variant="outline" size="sm">
@@ -306,7 +307,7 @@ export default function ReservationsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Booking ?</AlertDialogTitle>
               <AlertDialogDescription className="text-center text-red-500 text-lg">
-                {bookingToDelete?.id.replace('#', 'BK-')}
+                {bookingToDelete?.id}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">

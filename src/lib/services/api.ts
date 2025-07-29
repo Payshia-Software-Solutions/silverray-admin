@@ -19,6 +19,30 @@ export interface RoomFromApi {
   };
 }
 
+/**
+ * Defines the structure for a Reservation object from the API.
+ */
+export interface ReservationFromApi {
+  id: string;
+  checkInDate: string;
+  checkOutDate: string;
+  adults: number;
+  children: number;
+  totalAmount: string;
+  paymentStatus: 'Paid' | 'Pending' | 'Due';
+  bookingStatus: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  guest: {
+    fullName: string;
+    email: string;
+  };
+  room: {
+    id: string; // Room number
+    room_type_details: {
+      name: string; // Room type name
+    };
+  };
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -52,6 +76,25 @@ export async function getRooms(): Promise<RoomFromApi[]> {
   } catch (error) {
     console.error('Failed to fetch rooms:', error);
     // In a real app, you might want to handle this more gracefully
+    throw error;
+  }
+}
+
+/**
+ * Fetches all reservations from the back-end.
+ * @returns A promise that resolves to an array of ReservationFromApi objects.
+ */
+export async function getReservations(): Promise<ReservationFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/bookings`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return handleResponse<ReservationFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch reservations:', error);
     throw error;
   }
 }
