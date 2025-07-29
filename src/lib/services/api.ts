@@ -86,7 +86,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function getReservations(): Promise<ReservationFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/bookings`, {
+    const response = await fetch(`${API_BASE_URL}/roombookings`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
