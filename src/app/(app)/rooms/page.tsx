@@ -141,7 +141,7 @@ export default function RoomsPage() {
                           {room.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{room.price}</TableCell>
+                      <TableCell>{room.pricePerNight}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>

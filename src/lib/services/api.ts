@@ -13,7 +13,7 @@ export interface RoomFromApi {
   id: string; // e.g., "101"
   type: string; // e.g., "Deluxe Double Room"
   status: 'Available' | 'Booked' | 'Under Maintenance';
-  price: string; // e.g., "150.00"
+  pricePerNight: string; // e.g., "150.00"
   occupancy: string; // e.g., "2 Adults / 1 Child"
 }
 
