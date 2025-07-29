@@ -1,4 +1,6 @@
 <?php
+// Start output buffering
+ob_start();
 
 // Set CORS headers for every response
 header("Access-Control-Allow-Origin: *");
@@ -22,6 +24,9 @@ ini_set('display_errors', 1);
 // --- Database Connection ---
 require_once __DIR__ . '/config/database.php';
 (new Database())->getConnection(); // This sets $GLOBALS['pdo']
+
+// Clean the buffer to remove any debug output (like "Connection successful!")
+ob_end_clean();
 
 
 // --- Routing ---
