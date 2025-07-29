@@ -1,88 +1,74 @@
 /**
- * @fileoverview This service handles all API communication with the PHP back-end using the Fetch API.
+ * @fileoverview This file contains the functions for making API calls to the PHP back-end.
+ * It uses the native fetch API for all requests.
  */
 
-// The base URL should point to your PHP application's entry script.
+// The base URL of your PHP server's router script
 const API_ENDPOINT = 'http://localhost/Silver_server/index.php';
 
-// --- Helper Functions ---
+/**
+ * Defines the structure of a Room object as returned by the API.
+ */
+export interface RoomFromApi {
+  id: string; // e.g., "101"
+  type: string; // e.g., "Deluxe Double Room"
+  status: 'Available' | 'Booked' | 'Under Maintenance';
+  price: string; // e.g., "150.00"
+  occupancy: string; // e.g., "2 Adults / 1 Child"
+}
+
 
 /**
- * Handles the response from the Fetch API.
- * It checks if the response was successful and parses the JSON.
- * @param response The response object from a fetch call.
+ * A helper function to handle the response from the fetch API.
+ * It checks for errors and parses the JSON response.
+ * @param response The Response object from a fetch call.
  * @returns A promise that resolves with the JSON data.
  */
 async function handleResponse<T>(response: Response): Promise<T> {
-  const text = await response.text();
   if (!response.ok) {
-    // Try to parse the error text as JSON, but fall back to the raw text if it fails
-    let errorDetails = text;
-    try {
-        const jsonError = JSON.parse(text);
-        errorDetails = jsonError.error || JSON.stringify(jsonError);
-    } catch (e) {
-        // Not a JSON error, use the raw text
-    }
-    throw new Error(`API request failed with status ${response.status}: ${errorDetails}`);
+    const errorText = await response.text();
+    throw new Error(`API request failed with status ${response.status}: ${errorText}`);
   }
-
-  try {
-    return JSON.parse(text) as T;
-  } catch (error) {
-    throw new Error('Failed to parse JSON response from server.');
-  }
+  return response.json();
 }
-
-
-// --- API Function Types ---
-
-// This type should match the structure of your `Rooms` table from the PHP back-end.
-export interface RoomFromApi {
-    id: string;
-    type: string;
-    status: 'Available' | 'Booked' | 'Under Maintenance';
-    price: string;
-    occupancy?: string; // Made optional to match existing usage
-}
-
-// --- API Functions ---
 
 /**
  * Fetches all rooms from the back-end.
- * Corresponds to a GET request to the '/rooms' endpoint in your PHP router.
- * @returns A promise that resolves with an array of rooms.
+ * @returns A promise that resolves to an array of RoomFromApi objects.
  */
 export async function getRooms(): Promise<RoomFromApi[]> {
   try {
-    // The request will be made to 'http://localhost/Silver_server/index.php?route=/rooms'
-    const response = await fetch(`${API_ENDPOINT}?route=/rooms`);
+    const response = await fetch(`${API_ENDPOINT}?route=/rooms`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
     return handleResponse<RoomFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch rooms:', error);
-    // Re-throw the error so the calling component's error state can be updated.
+    // In a real app, you might want to handle this more gracefully
     throw error;
   }
 }
 
 /**
  * Creates a new room.
- * Corresponds to a POST request to the '/rooms/new' endpoint.
  * @param roomData The data for the new room.
- * @returns A promise that resolves with the server's confirmation message and new ID.
+ * @returns A promise that resolves with the newly created room data.
  */
-export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
-  try {
-    const response = await fetch(`${API_ENDPOINT}?route=/rooms/new`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(roomData),
-    });
-    return handleResponse<{ message: string; id: string }>(response);
-  } catch (error) {
-    console.error('Failed to create room:', error);
-    throw error;
-  }
+export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_ENDPOINT}?route=/rooms/new`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create room:', error);
+        throw error;
+    }
 }
