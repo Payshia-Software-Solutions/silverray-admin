@@ -14,11 +14,24 @@ const API_ENDPOINT = 'http://localhost/Silver_server/index.php';
  * @returns A promise that resolves with the JSON data.
  */
 async function handleResponse<T>(response: Response): Promise<T> {
+  const text = await response.text();
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+    // Try to parse the error text as JSON, but fall back to the raw text if it fails
+    let errorDetails = text;
+    try {
+        const jsonError = JSON.parse(text);
+        errorDetails = jsonError.error || JSON.stringify(jsonError);
+    } catch (e) {
+        // Not a JSON error, use the raw text
+    }
+    throw new Error(`API request failed with status ${response.status}: ${errorDetails}`);
   }
-  return response.json() as Promise<T>;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch (error) {
+    throw new Error('Failed to parse JSON response from server.');
+  }
 }
 
 
@@ -41,9 +54,8 @@ export interface RoomFromApi {
  */
 export async function getRooms(): Promise<RoomFromApi[]> {
   try {
-    // The request will be made to 'http://localhost/Silver_server/index.php/rooms'
-    // This ensures it hits the router correctly without needing .htaccess rewrites.
-    const response = await fetch(`${API_ENDPOINT}/rooms`);
+    // The request will be made to 'http://localhost/Silver_server/index.php?route=/rooms'
+    const response = await fetch(`${API_ENDPOINT}?route=/rooms`);
     return handleResponse<RoomFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch rooms:', error);
@@ -60,7 +72,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
   try {
-    const response = await fetch(`${API_ENDPOINT}/rooms/new`, {
+    const response = await fetch(`${API_ENDPOINT}?route=/rooms/new`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
