@@ -10,11 +10,12 @@ const API_BASE_URL = 'http://localhost/Silver_server';
  * Defines the structure of a Room object as returned by the API.
  */
 export interface RoomFromApi {
-  id: string; // e.g., "101"
-  type: string; // e.g., "Deluxe Double Room"
+  id: string; // e.g., "R001"
   status: 'Available' | 'Booked' | 'Under Maintenance';
-  pricePerNight: string; // e.g., "150.00"
-  occupancy: string; // e.g., "2 Adults / 1 Child"
+  room_type_details: {
+    name: string; // e.g., "Executive Suite"
+    pricePerNight: string; // e.g., "18000.00"
+  };
 }
 
 
