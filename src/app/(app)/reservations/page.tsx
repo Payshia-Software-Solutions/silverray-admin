@@ -247,7 +247,7 @@ export default function ReservationsPage() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {res.room?.room_type_details ? (
+                        {res.room && res.room.room_type_details ? (
                           <>
                             <p className="font-medium text-sm">{res.room.room_type_details.name}</p>
                             <p className="text-xs text-muted-foreground">{res.room.id}</p>
