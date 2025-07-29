@@ -29,9 +29,11 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
-import { getRooms, type RoomFromApi } from '@/lib/services/api';
+import { getRooms, deleteRoom, type RoomFromApi } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 
 const statusVariant = {
@@ -42,6 +44,7 @@ const statusVariant = {
 
 export default function RoomsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [rooms, setRooms] = useState<RoomFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,19 +83,30 @@ export default function RoomsPage() {
     setRoomToDelete(null);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (roomToDelete) {
-      console.log(`Deleting room ${roomToDelete}`);
-      setDeletedRoomId(roomToDelete);
-      // Add actual delete logic here
-      setShowDeleteSuccessDialog(true);
-      setRoomToDelete(null);
+      try {
+        await deleteRoom(roomToDelete);
+        setDeletedRoomId(roomToDelete);
+        // Update the UI by removing the deleted room
+        setRooms(currentRooms => currentRooms.filter(room => room.id !== roomToDelete));
+        setShowDeleteSuccessDialog(true);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error Deleting Room",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setRoomToDelete(null);
+      }
     }
   };
 
 
   return (
     <div className="space-y-6">
+      <Toaster />
       <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

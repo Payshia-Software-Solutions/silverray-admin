@@ -30,7 +30,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const errorText = await response.text();
     throw new Error(`API request failed with status ${response.status}: ${errorText}`);
   }
-  return response.json();
+   // Check if the response has content before trying to parse it as JSON
+  const text = await response.text();
+  return text ? JSON.parse(text) : ({} as T);
 }
 
 /**
@@ -60,7 +62,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<RoomFromApi> {
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms/new`, {
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,4 +74,24 @@ export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<Roo
         console.error('Failed to create room:', error);
         throw error;
     }
+}
+
+/**
+ * Deletes a room by its ID.
+ * @param roomId The ID of the room to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoom(roomId: string): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room ${roomId}:`, error);
+    throw error;
+  }
 }
