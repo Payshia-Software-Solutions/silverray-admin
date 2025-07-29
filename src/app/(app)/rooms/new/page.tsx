@@ -28,7 +28,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
-import { createRoom, type RoomFromApi } from '@/lib/services/api';
+import { createRoom } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -61,24 +61,29 @@ export default function AddNewRoomPage() {
     setIsSubmitting(true);
     
     const formData = new FormData(event.currentTarget);
-    const roomData: Omit<RoomFromApi, 'id'> = {
-        // This is a placeholder. You might need to map your form fields to the RoomFromApi type more carefully.
-        type: formData.get('descriptive-title') as string || "Default Type",
-        price: formData.get('price') as string || "0",
-        status: 'Available', // Default status for a new room
-        occupancy: `${formData.get('adults')} Adults / ${formData.get('children')} Children`
+    const roomData = {
+        id: formData.get('id'),
+        roomTypeId: formData.get('room-type'),
+        descriptiveTitle: formData.get('descriptive-title'),
+        shortDescription: formData.get('short-description'),
+        adults: formData.get('adults'),
+        children: formData.get('children'),
+        roomSize: `${formData.get('room-width')}x${formData.get('room-height')}`,
+        pricePerNight: formData.get('price'),
+        status: formData.get('status'),
+        amenities: formData.getAll('amenities'),
     };
 
     try {
       const result = await createRoom(roomData);
       console.log('Room created:', result);
       setShowSuccessDialog(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create the room. Please check the server connection and try again.",
+        description: error.message || "Failed to create the room. Please check the server connection and try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -145,9 +150,9 @@ export default function AddNewRoomPage() {
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="deluxe-double">Deluxe Double Room</SelectItem>
-                    <SelectItem value="king-suite">King Suite</SelectItem>
-                    <SelectItem value="premium-suite">Premium Suite</SelectItem>
+                    <SelectItem value="RT001">Deluxe Double Room</SelectItem>
+                    <SelectItem value="RT002">King Suite</SelectItem>
+                    <SelectItem value="RT003">Premium Suite</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -176,7 +181,7 @@ export default function AddNewRoomPage() {
                 <Label htmlFor="adults">Adults</Label>
                 <div className="flex items-center space-x-2">
                   <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="adults" name="adults" type="number" defaultValue={0} className="w-16 text-center" />
+                  <Input id="adults" name="adults" type="number" defaultValue={2} className="w-16 text-center" />
                   <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
@@ -219,14 +224,14 @@ export default function AddNewRoomPage() {
                  </div>
                  <div className="space-y-2">
                     <Label htmlFor="status">Current Status</Label>
-                     <Select name="status">
+                     <Select name="status" defaultValue="Available">
                         <SelectTrigger id="status">
                             <SelectValue placeholder="Available" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="available">Available</SelectItem>
-                            <SelectItem value="booked">Booked</SelectItem>
-                            <SelectItem value="maintenance">Under Maintenance</SelectItem>
+                            <SelectItem value="Available">Available</SelectItem>
+                            <SelectItem value="Booked">Booked</SelectItem>
+                            <SelectItem value="Under Maintenance">Under Maintenance</SelectItem>
                         </SelectContent>
                     </Select>
                  </div>
@@ -296,7 +301,7 @@ export default function AddNewRoomPage() {
           <Link href="/rooms">Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create New Room'}
+            {isSubmitting ? 'Creating...' : '+ Create New Room'}
         </Button>
       </div>
 

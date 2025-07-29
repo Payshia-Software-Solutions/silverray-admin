@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -60,7 +61,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  * @param roomData The data for the new room.
  * @returns A promise that resolves with the newly created room data.
  */
-export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<RoomFromApi> {
+export async function createRoom(roomData: any): Promise<any> {
     try {
         const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
@@ -69,7 +70,7 @@ export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<Roo
             },
             body: JSON.stringify(roomData),
         });
-        return handleResponse<RoomFromApi>(response);
+        return handleResponse<any>(response);
     } catch (error) {
         console.error('Failed to create room:', error);
         throw error;
