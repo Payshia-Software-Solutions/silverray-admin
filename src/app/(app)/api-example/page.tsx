@@ -27,10 +27,11 @@ export default function ApiExamplePage() {
       try {
         setLoading(true);
         setError(null);
+        // The getRooms function now calls your new API structure
         const data = await getRooms();
         setRooms(data);
       } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred. Make sure your PHP server is running and CORS is configured.');
+        setError(err.message || 'An unexpected error occurred. Make sure your PHP server is running and CORS is configured correctly.');
       } finally {
         setLoading(false);
       }
@@ -45,7 +46,7 @@ export default function ApiExamplePage() {
         <Terminal className="h-4 w-4" />
         <AlertTitle>API Connection Example</AlertTitle>
         <AlertDescription>
-          This page demonstrates how to fetch data from a PHP back-end. The data below is loaded by calling the `getRooms` function from our API service, which makes a `fetch` request to your PHP server.
+          This page demonstrates how to fetch data from your PHP back-end. The data below is loaded by calling the `getRooms` function from `src/lib/services/api.ts`, which makes a `fetch` request to your PHP router at the `/rooms` endpoint.
         </AlertDescription>
       </Alert>
 
