@@ -4,7 +4,7 @@
  */
 
 // The base URL of your PHP server's router script
-const API_ENDPOINT = 'http://localhost/Silver_server/index.php';
+const API_BASE_URL = 'http://localhost/Silver_server';
 
 /**
  * Defines the structure of a Room object as returned by the API.
@@ -38,7 +38,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
  */
 export async function getRooms(): Promise<RoomFromApi[]> {
   try {
-    const response = await fetch(`${API_ENDPOINT}?route=/rooms`, {
+    const response = await fetch(`${API_BASE_URL}/rooms`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<RoomFromApi> {
     try {
-        const response = await fetch(`${API_ENDPOINT}?route=/rooms/new`, {
+        const response = await fetch(`${API_BASE_URL}/rooms/new`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
