@@ -339,7 +339,7 @@ export default function ReservationsPage() {
                   <span className="sr-only">Close</span>
               </button>
             </DialogClose>
-        </DialogContent>
+          </DialogContent>
       </Dialog>
     </div>
   );
