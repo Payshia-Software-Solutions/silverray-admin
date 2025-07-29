@@ -1,10 +1,11 @@
--- This file contains the complete SQL schema for the application's database.
+-- This file contains the complete SQL schema for the Silver Ray Admin application.
 -- It follows 3rd Normal Form (3NF) to ensure data integrity and reduce redundancy.
 
 -- =================================================================
--- Table: Roles
--- Description: Defines the different roles a user can have (e.g., Super Admin).
+-- Step 1: User & Access Control
 -- =================================================================
+
+-- Defines the different roles a user can have
 CREATE TABLE Roles (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -14,17 +15,14 @@ CREATE TABLE Roles (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert default roles
+-- Inserts default roles to start with
 INSERT INTO Roles (id, name, description, permissions) VALUES
 ('super-admin', 'Super Admin', 'Full access to all system features', '["*"]'),
 ('booking-manager', 'Booking Manager', 'Manages rooms and reservations', '["manage_bookings", "manage_rooms"]'),
 ('restaurant-manager', 'Restaurant Manager', 'Manages dining and menus', '["manage_restaurant"]');
 
 
--- =================================================================
--- Table: Users
--- Description: Stores individual admin user accounts.
--- =================================================================
+-- Stores individual admin user accounts
 CREATE TABLE Users (
     id VARCHAR(255) PRIMARY KEY,
     roleId VARCHAR(255) NOT NULL,
@@ -41,9 +39,10 @@ CREATE TABLE Users (
 
 
 -- =================================================================
--- Table: Guests
--- Description: A central table for all non-admin individuals (customers).
+-- Step 2: Central Guest Management
 -- =================================================================
+
+-- Central table to store information about all guests.
 CREATE TABLE Guests (
     id VARCHAR(255) PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
@@ -56,9 +55,10 @@ CREATE TABLE Guests (
 
 
 -- =================================================================
--- Table: RoomTypes
--- Description: Defines the properties of a category of room (e.g., "Deluxe King").
+-- Step 3: Room Management & Bookings
 -- =================================================================
+
+-- Defines the properties and characteristics of a category of room.
 CREATE TABLE RoomTypes (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
@@ -75,11 +75,7 @@ CREATE TABLE RoomTypes (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
--- =================================================================
--- Table: Rooms
--- Description: Represents individual, physical rooms in the hotel.
--- =================================================================
+-- Represents an individual, physical room in the hotel.
 CREATE TABLE Rooms (
     id VARCHAR(255) PRIMARY KEY,
     roomTypeId VARCHAR(255) NOT NULL,
@@ -91,10 +87,7 @@ CREATE TABLE Rooms (
 );
 
 
--- =================================================================
--- Table: RoomBookings
--- Description: Transactional table for booking rooms.
--- =================================================================
+-- Central table for managing all room bookings.
 CREATE TABLE RoomBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
@@ -122,9 +115,9 @@ CREATE TABLE RoomBookings (
 
 
 -- =================================================================
--- Table: Experiences
--- Description: Stores details of guest experiences/activities offered.
+-- Step 4: Experience Management
 -- =================================================================
+
 CREATE TABLE Experiences (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -148,11 +141,6 @@ CREATE TABLE Experiences (
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
--- =================================================================
--- Table: ExperienceBookings
--- Description: Transactional table for booking experiences.
--- =================================================================
 CREATE TABLE ExperienceBookings (
     id VARCHAR(255) PRIMARY KEY,
     experienceId VARCHAR(255) NOT NULL,
@@ -174,26 +162,23 @@ CREATE TABLE ExperienceBookings (
 
 
 -- =================================================================
--- Table: Restaurants
--- Description: Defines the dining venues within the hotel.
+-- Step 5: Restaurant Management
 -- =================================================================
+
+-- Defines the properties of a dining venue within the hotel.
 CREATE TABLE Restaurants (
     id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     description TEXT,
     capacity INT,
+    operatingHours JSON, -- e.g., {"Monday": "09:00-22:00", "Tuesday": "09:00-22:00"}
     status ENUM('Active', 'Inactive', 'Seasonal') NOT NULL DEFAULT 'Active',
-    operatingHours JSON,
-    images JSON,
+    images JSON, -- e.g., [{"src": "url", "alt": "text", "primary": true}]
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
--- =================================================================
--- Table: MenuItems
--- Description: Stores individual items on a restaurant's menu.
--- =================================================================
+-- Defines a single item on a restaurant's menu.
 CREATE TABLE MenuItems (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
@@ -203,7 +188,7 @@ CREATE TABLE MenuItems (
     currency VARCHAR(3) NOT NULL DEFAULT 'LKR',
     category ENUM('Starter', 'Main Course', 'Dessert', 'Beverage') NOT NULL,
     status ENUM('Available', 'Unavailable', 'Seasonal') NOT NULL DEFAULT 'Available',
-    dietaryInfo JSON,
+    dietaryInfo JSON, -- e.g., ["Gluten-Free", "Vegetarian"]
     spiceLevel ENUM('Not Spicy', 'Mild', 'Medium', 'Hot') DEFAULT 'Mild',
     imageUrl VARCHAR(2048),
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -211,25 +196,17 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE
 );
 
-
--- =================================================================
--- Table: RestaurantReservations
--- Description: Transactional table for booking tables at restaurants.
--- =================================================================
+-- Represents a reservation at a specific dining venue.
 CREATE TABLE RestaurantReservations (
     id VARCHAR(255) PRIMARY KEY,
     restaurantId VARCHAR(255) NOT NULL,
     guestId VARCHAR(255) NOT NULL,
     reservationDate DATE NOT NULL,
     reservationTime TIME NOT NULL,
-    durationMinutes INT,
-    adults INT NOT NULL,
-    children INT DEFAULT 0,
-    tablePreference VARCHAR(255),
-    notes TEXT,
+    numberOfGuests INT NOT NULL,
+    tableNumber VARCHAR(255),
     status ENUM('Confirmed', 'Pending', 'Cancelled', 'Seated') NOT NULL DEFAULT 'Pending',
-    paymentStatus ENUM('Paid', 'Pending', 'Due at venue') NOT NULL DEFAULT 'Pending',
-    bookingSource ENUM('Online', 'Phone Call', 'Walk-in') NOT NULL DEFAULT 'Online',
+    notes TEXT,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE,
@@ -238,9 +215,9 @@ CREATE TABLE RestaurantReservations (
 
 
 -- =================================================================
--- Table: WeddingPackages
--- Description: Defines pre-set wedding packages offered by the hotel.
+-- Step 6: Wedding Management
 -- =================================================================
+
 CREATE TABLE WeddingPackages (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -258,10 +235,6 @@ CREATE TABLE WeddingPackages (
 );
 
 
--- =================================================================
--- Table: WeddingBookings
--- Description: Transactional table for booking wedding packages.
--- =================================================================
 CREATE TABLE WeddingBookings (
     id VARCHAR(255) PRIMARY KEY,
     guestId VARCHAR(255) NOT NULL,
