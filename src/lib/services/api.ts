@@ -1,18 +1,26 @@
 /**
- * @fileoverview This service handles all API communication with the PHP back-end using axios.
+ * @fileoverview This service handles all API communication with the PHP back-end using the Fetch API.
  */
-import axios from 'axios';
 
-// The base URL should point to your PHP application's directory.
-const API_BASE_URL = 'http://localhost/Silver_server';
+// The base URL should point to your PHP application's entry script.
+const API_ENDPOINT = 'http://localhost/Silver_server/index.php';
 
-// We create a base apiClient but will specify the full URL in each function call
-// to avoid resolution issues that can cause Network Errors.
-const apiClient = axios.create({
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// --- Helper Functions ---
+
+/**
+ * Handles the response from the Fetch API.
+ * It checks if the response was successful and parses the JSON.
+ * @param response The response object from a fetch call.
+ * @returns A promise that resolves with the JSON data.
+ */
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+  }
+  return response.json() as Promise<T>;
+}
+
 
 // --- API Function Types ---
 
@@ -33,10 +41,10 @@ export interface RoomFromApi {
  */
 export async function getRooms(): Promise<RoomFromApi[]> {
   try {
-    // The request will be made to 'http://localhost/Silver_server/index.php?route=/rooms'
+    // The request will be made to 'http://localhost/Silver_server/index.php/rooms'
     // This ensures it hits the router correctly without needing .htaccess rewrites.
-    const response = await apiClient.get<RoomFromApi[]>(`${API_BASE_URL}/index.php?route=/rooms`);
-    return response.data;
+    const response = await fetch(`${API_ENDPOINT}/rooms`);
+    return handleResponse<RoomFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch rooms:', error);
     // Re-throw the error so the calling component's error state can be updated.
@@ -52,8 +60,14 @@ export async function getRooms(): Promise<RoomFromApi[]> {
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
   try {
-    const response = await apiClient.post<{ message: string; id: string }>(`${API_BASE_URL}/index.php?route=/rooms/new`, roomData);
-    return response.data;
+    const response = await fetch(`${API_ENDPOINT}/rooms/new`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roomData),
+    });
+    return handleResponse<{ message: string; id: string }>(response);
   } catch (error) {
     console.error('Failed to create room:', error);
     throw error;
