@@ -4,9 +4,10 @@
 import axios from 'axios';
 
 // The base URL should point to your PHP application's directory.
-// We will provide the full URL in each function to avoid resolution issues.
 const API_BASE_URL = 'http://localhost/Silver_server';
 
+// We create a base apiClient but will specify the full URL in each function call
+// to avoid resolution issues that can cause Network Errors.
 const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
