@@ -1,47 +1,22 @@
 /**
- * @fileoverview This service handles all API communication with the PHP back-end.
+ * @fileoverview This service handles all API communication with the PHP back-end using axios.
  */
+import axios from 'axios';
 
-// IMPORTANT: Replace this with the actual base URL of your PHP server.
-// If your PHP server runs in a subdirectory on localhost (e.g., /Silver_server), include it here.
-const API_BASE_URL = 'http://localhost/Silver_server'; // Example for a local PHP server in a subdirectory
+// Create a central axios instance for API requests.
+// This is a best practice for managing API configurations.
+const apiClient = axios.create({
+  // Replace this with the actual base URL of your PHP server.
+  // This should point to the directory where your main router (index.php) is located.
+  baseURL: 'http://localhost/Silver_server', 
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-/**
- * A generic fetch function to handle requests to the PHP API.
- * It simplifies error handling and JSON parsing.
- * @param endpoint The specific API endpoint (e.g., '/rooms', '/bookings/123').
- * @param options The standard options for a fetch request (method, headers, body).
- * @returns A promise that resolves with the JSON response from the API.
- */
-async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
+// --- API Function Types ---
 
-    if (!response.ok) {
-      // If the server response is not OK, throw an error with the status text.
-      const errorBody = await response.text();
-      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody}`);
-    }
-
-    // If the response is successful, parse the JSON body.
-    return await response.json() as T;
-  } catch (error) {
-    console.error('Failed to fetch from API:', error);
-    // Re-throw the error so the calling component can handle it.
-    throw error;
-  }
-}
-
-// --- Example API Functions ---
-
-// Define a type for the Room data we expect from the PHP API
-// This should match the structure of your rooms table
+// This type should match the structure of your `Rooms` table from the PHP back-end.
 export interface RoomFromApi {
     id: string;
     type: string;
@@ -50,22 +25,49 @@ export interface RoomFromApi {
     occupancy: string;
 }
 
+// --- API Functions ---
+
 /**
  * Fetches all rooms from the back-end.
- * Corresponds to a GET request to an endpoint like '/rooms'.
+ * Corresponds to a GET request to the '/rooms' endpoint in your PHP router.
+ * @returns A promise that resolves with an array of rooms.
  */
-export function getRooms(): Promise<RoomFromApi[]> {
-    return apiFetch<RoomFromApi[]>('/rooms', { method: 'GET' });
+export async function getRooms(): Promise<RoomFromApi[]> {
+  try {
+    const response = await apiClient.get<RoomFromApi[]>('/rooms');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch rooms:', error);
+    // Re-throw the error so the calling component's error state can be updated.
+    throw error;
+  }
 }
 
 /**
  * Creates a new room.
- * Corresponds to a POST request to an endpoint like '/rooms'.
+ * Corresponds to a POST request to the '/rooms' endpoint.
  * @param roomData The data for the new room.
+ * @returns A promise that resolves with the server's confirmation message and new ID.
  */
-export function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
-    return apiFetch<{ message: string; id: string }>('/rooms', {
-        method: 'POST',
-        body: JSON.stringify(roomData),
-    });
+export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
+  try {
+    const response = await apiClient.post<{ message: string; id: string }>('/rooms', roomData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create room:', error);
+    throw error;
+  }
 }
+
+// You can add more functions here for other endpoints, for example:
+/*
+export async function getGuest(guestId: string): Promise<Guest> {
+  try {
+    const response = await apiClient.get(`/guests/${guestId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch guest ${guestId}:`, error);
+    throw error;
+  }
+}
+*/
