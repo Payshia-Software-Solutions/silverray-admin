@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, Eye, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -29,15 +29,10 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { getRooms, type RoomFromApi } from '@/lib/services/api';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
-
-const rooms = [
-  { id: '101', type: 'Deluxe Double Room with Balcony', price: 'LKR. 29500', status: 'Available', occupancy: '2 Adults / 1 Child' },
-  { id: '102', type: 'King Suite with Balcony', price: 'LKR. 29500', status: 'Booked', occupancy: '2 Adults / 2 Children' },
-  { id: '201', type: 'Premium Suite', price: 'LKR. 29500', status: 'Under Maintenance', occupancy: '4 Adults / 2 Children' },
-  { id: '202', type: 'Premium Suite', price: 'LKR. 29500', status: 'Under Maintenance', occupancy: '4 Adults / 2 Children' },
-  { id: '203', type: 'Premium Suite', price: 'LKR. 29500', status: 'Under Maintenance', occupancy: '4 Adults / 2 Children' },
-];
 
 const statusVariant = {
   Available: 'bg-green-100 text-green-700',
@@ -47,9 +42,35 @@ const statusVariant = {
 
 export default function RoomsPage() {
   const router = useRouter();
+  const [rooms, setRooms] = useState<RoomFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletedRoomId, setDeletedRoomId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchRooms() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getRooms();
+        if (Array.isArray(data)) {
+            setRooms(data);
+        } else {
+            setError('Received unexpected data format from server.');
+            setRooms([]);
+        }
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred. Make sure your PHP server is running and CORS is configured correctly.');
+        setRooms([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRooms();
+  }, []);
 
   const handleDeleteClick = (roomId: string) => {
     setRoomToDelete(roomId);
@@ -89,55 +110,63 @@ export default function RoomsPage() {
       <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
         <Card>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Room Number</TableHead>
-                  <TableHead>Room Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Price/Night</TableHead>
-                  <TableHead>Occupancy</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rooms.map((room) => (
-                  <TableRow key={room.id}>
-                    <TableCell className="font-medium">{room.id}</TableCell>
-                    <TableCell>{room.type}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
-                        {room.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{room.price}</TableCell>
-                    <TableCell>
-                      {room.occupancy}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                            <Link href={`/rooms/${room.id}`}>
-                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                              <span className="sr-only">View</span>
-                            </Link>
-                          </Button>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-100" onClick={() => handleDeleteClick(room.id)}>
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                      </div>
-                    </TableCell>
+            {loading && <p className="p-4 text-center">Loading rooms...</p>}
+            {error && (
+              <Alert variant="destructive" className="m-4">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error Fetching Data</AlertTitle>
+                <AlertDescription>
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+            {!loading && !error && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Room Number</TableHead>
+                    <TableHead>Room Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Price/Night</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {rooms.map((room) => (
+                    <TableRow key={room.id}>
+                      <TableCell className="font-medium">{room.id}</TableCell>
+                      <TableCell>{room.type}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
+                          {room.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{room.price}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end items-center gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                              <Link href={`/rooms/${room.id}`}>
+                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                <span className="sr-only">View</span>
+                              </Link>
+                            </Button>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-100" onClick={() => handleDeleteClick(room.id)}>
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="sr-only">Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
           <CardFooter className="flex items-center justify-between border-t px-6 py-3">
               <div className="text-sm text-muted-foreground">
-                  Showing 1 to 5 of 47 rooms
+                  Showing 1 to {rooms.length} of {rooms.length} rooms
               </div>
               <div className="flex items-center space-x-2">
                   <Button variant="outline" size="sm">

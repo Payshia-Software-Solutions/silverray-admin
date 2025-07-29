@@ -6,8 +6,9 @@ import axios from 'axios';
 // Create a central axios instance for API requests.
 // This is a best practice for managing API configurations.
 const apiClient = axios.create({
-  // Replace this with the actual base URL of your PHP server.
-  // This should point to the directory where your main router (index.php) is located.
+  // This is a placeholder. Replace it with your actual PHP server URL.
+  // Make sure this URL is accessible from your front-end environment.
+  // Example: 'http://localhost/my-hotel-app/api'
   baseURL: 'http://localhost/Silver_server', 
   headers: {
     'Content-Type': 'application/json',
@@ -34,7 +35,9 @@ export interface RoomFromApi {
  */
 export async function getRooms(): Promise<RoomFromApi[]> {
   try {
-    const response = await apiClient.get<RoomFromApi[]>('/rooms');
+    // The request will be made to 'http://localhost/Silver_server/index.php?route=/rooms'
+    // This ensures it hits the router correctly without needing .htaccess rewrites.
+    const response = await apiClient.get<RoomFromApi[]>('/index.php?route=/rooms');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch rooms:', error);
@@ -45,13 +48,13 @@ export async function getRooms(): Promise<RoomFromApi[]> {
 
 /**
  * Creates a new room.
- * Corresponds to a POST request to the '/rooms' endpoint.
+ * Corresponds to a POST request to the '/rooms/new' endpoint.
  * @param roomData The data for the new room.
  * @returns A promise that resolves with the server's confirmation message and new ID.
  */
 export async function createRoom(roomData: Omit<RoomFromApi, 'id'>): Promise<{ message: string; id: string }> {
   try {
-    const response = await apiClient.post<{ message: string; id: string }>('/rooms/new', roomData);
+    const response = await apiClient.post<{ message: string; id: string }>('/index.php?route=/rooms/new', roomData);
     return response.data;
   } catch (error) {
     console.error('Failed to create room:', error);
