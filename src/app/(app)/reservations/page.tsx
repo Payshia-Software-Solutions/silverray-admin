@@ -47,7 +47,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getReservations, type ReservationFromApi, deleteRoom } from '@/lib/services/api';
+import { getReservations, type ReservationFromApi, deleteBooking } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -136,7 +136,7 @@ export default function ReservationsPage() {
   const handleDeleteConfirm = async () => {
     if (bookingToDelete) {
       try {
-        await deleteRoom(bookingToDelete.id);
+        await deleteBooking(bookingToDelete.id);
         setDeletedBookingId(bookingToDelete.id);
         setReservations(prev => prev.filter(res => res.id !== bookingToDelete.id));
         setShowDeleteSuccessDialog(true);
@@ -367,5 +367,3 @@ export default function ReservationsPage() {
       </Dialog>
     </div>
   );
-
-    

@@ -139,3 +139,25 @@ export async function deleteRoom(roomId: string): Promise<{ message: string }> {
     throw error;
   }
 }
+
+/**
+ * Deletes a reservation by its ID.
+ * @param bookingId The ID of the booking to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteBooking(bookingId: string): Promise<{ message: string }> {
+  try {
+    // Note: The backend route might need to be adjusted to handle IDs with '#'
+    const encodedBookingId = encodeURIComponent(bookingId);
+    const response = await fetch(`${API_BASE_URL}/roombookings/${encodedBookingId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete booking ${bookingId}:`, error);
+    throw error;
+  }
+}
