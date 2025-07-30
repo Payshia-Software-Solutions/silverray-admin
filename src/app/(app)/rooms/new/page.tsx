@@ -62,14 +62,14 @@ export default function AddNewRoomPage() {
     
     const formData = new FormData(event.currentTarget);
     const roomData = {
-        id: formData.get('room-number'),
-        roomTypeId: formData.get('room-type'),
-        descriptiveTitle: formData.get('descriptive-title'),
-        shortDescription: formData.get('short-description'),
+        id: formData.get('id'),
+        roomTypeId: formData.get('roomTypeId'),
+        descriptiveTitle: formData.get('descriptiveTitle'),
+        shortDescription: formData.get('shortDescription'),
         adults: formData.get('adults'),
         children: formData.get('children'),
         roomSize: `${formData.get('room-width')}x${formData.get('room-height')}`,
-        pricePerNight: formData.get('price'),
+        pricePerNight: formData.get('pricePerNight'),
         status: formData.get('status'),
         amenities: formData.getAll('amenities'),
     };
@@ -141,11 +141,11 @@ export default function AddNewRoomPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="room-number">Room Number</Label>
-                <Input id="room-number" name="room-number" placeholder="e.g., 105" />
+                <Input id="room-number" name="id" placeholder="e.g., 105" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
-                 <Select name="room-type">
+                 <Select name="roomTypeId">
                   <SelectTrigger id="room-type">
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
@@ -159,11 +159,11 @@ export default function AddNewRoomPage() {
             </div>
              <div className="space-y-2">
                 <Label htmlFor="descriptive-title">Descriptive Title</Label>
-                <Input id="descriptive-title" name="descriptive-title" placeholder="e.g., Mountain View King Suite" />
+                <Input id="descriptive-title" name="descriptiveTitle" placeholder="e.g., Mountain View King Suite" />
               </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
-              <Textarea id="short-description" name="short-description" placeholder="Brief overview of the room..." />
+              <Textarea id="short-description" name="shortDescription" placeholder="Brief overview of the room..." />
             </div>
           </CardContent>
         </Card>
@@ -219,7 +219,7 @@ export default function AddNewRoomPage() {
                     <Label htmlFor="price">Price per night</Label>
                     <div className="flex items-center">
                         <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">LKR</span>
-                        <Input id="price" name="price" type="number" placeholder="25000" className="rounded-l-none" />
+                        <Input id="price" name="pricePerNight" type="number" placeholder="25000" className="rounded-l-none" />
                     </div>
                  </div>
                  <div className="space-y-2">
