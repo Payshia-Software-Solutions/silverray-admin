@@ -31,11 +31,11 @@ export interface ReservationFromApi {
   totalAmount: string;
   paymentStatus: 'Paid' | 'Pending' | 'Due';
   bookingStatus: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
-  guest: {
+  guest?: {
     fullName: string;
     email: string;
   };
-  room: {
+  room?: {
     id: string; // Room number
     room_type_details: {
       name: string; // Room type name
@@ -149,7 +149,7 @@ export async function deleteBooking(bookingId: string): Promise<{ message: strin
   try {
     // Note: The backend route might need to be adjusted to handle IDs with '#'
     const encodedBookingId = encodeURIComponent(bookingId);
-    const response = await fetch(`${API_BASE_URL}/roombookings/${encodedBookingId}`, {
+    const response = await fetch(`${API_BASE_URL}/roombooking/${encodedBookingId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
