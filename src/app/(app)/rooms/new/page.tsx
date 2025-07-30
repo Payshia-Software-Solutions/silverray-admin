@@ -62,7 +62,7 @@ export default function AddNewRoomPage() {
     
     const formData = new FormData(event.currentTarget);
     const roomData = {
-        id: formData.get('id'),
+        id: formData.get('room-number'),
         roomTypeId: formData.get('room-type'),
         descriptiveTitle: formData.get('descriptive-title'),
         shortDescription: formData.get('short-description'),
@@ -141,7 +141,7 @@ export default function AddNewRoomPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="room-number">Room Number</Label>
-                <Input id="room-number" name="id" placeholder="e.g., 105" />
+                <Input id="room-number" name="room-number" placeholder="e.g., 105" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
