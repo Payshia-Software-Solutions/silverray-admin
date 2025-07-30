@@ -68,11 +68,11 @@ export default function AddNewRoomPage() {
         shortDescription: formData.get('shortDescription'),
         adults: formData.get('adults'),
         children: formData.get('children'),
-        roomSize: `${formData.get('room-width')}x${formData.get('room-height')}`,
+        roomSize: formData.get('roomSize'),
         pricePerNight: formData.get('pricePerNight'),
         status: formData.get('status'),
         amenities: formData.getAll('amenities'),
-        companyId: 'C001', // Hardcoded companyId to fix validation
+        companyId: 'C001',
     };
 
     try {
@@ -195,12 +195,9 @@ export default function AddNewRoomPage() {
                 </div>
               </div>
                 <div className="space-y-2">
-                    <Label>Room Size</Label>
+                    <Label>Room Size (sqft)</Label>
                     <div className="flex items-center gap-2">
-                        <Input name="room-width" type="number" placeholder="450" className="w-24" />
-                        <span className="text-sm text-muted-foreground">width</span>
-                        <Input name="room-height" type="number" placeholder="450" className="w-24" />
-                        <span className="text-sm text-muted-foreground">height</span>
+                        <Input name="roomSize" type="number" placeholder="450" className="w-24" />
                     </div>
                 </div>
             </div>
