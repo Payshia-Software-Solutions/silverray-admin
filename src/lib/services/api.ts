@@ -106,7 +106,7 @@ export async function getReservations(): Promise<ReservationFromApi[]> {
  */
 export async function createRoom(roomData: any): Promise<any> {
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms`, {
+        const response = await fetch(`${API_BASE_URL}/rooms/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export async function createRoom(roomData: any): Promise<any> {
  */
 export async function deleteRoom(roomId: string): Promise<{ message: string }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export async function deleteBooking(bookingId: string): Promise<{ message: strin
   try {
     // Note: The backend route might need to be adjusted to handle IDs with '#'
     const encodedBookingId = encodeURIComponent(bookingId);
-    const response = await fetch(`${API_BASE_URL}/roombooking/${encodedBookingId}`, {
+    const response = await fetch(`${API_BASE_URL}/roombooking/${encodedBookingId}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
