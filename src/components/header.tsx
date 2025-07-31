@@ -8,6 +8,8 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
   '/rooms': { title: 'Rooms Management', description: 'View, add, edit, or delete hotel rooms.' },
   '/rooms/new': { title: 'Create New Room', description: 'Add a new room to your hotel.' },
+  '/rooms/types': { title: 'Room Types Management', description: 'Create, view, edit, and manage room types.' },
+  '/rooms/types/new': { title: 'Create New Room Type', description: 'Add a new category of room for your hotel.' },
   '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/reservations/new': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
@@ -31,6 +33,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
 
 const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
   '^/rooms/([^/]+)$': (params) => ({ title: 'Rooms Management', description: `Editing Room ${params[0]}` }),
+  '^/rooms/types/([^/]+)$': (params) => ({ title: 'Edit Room Type', description: `Updating details for room type ID ${params[0]}` }),
   '^/reservations/([^/]+)$': (params) => ({ title: 'Booking Management (Rooms & Suites)', description: `Details for Booking #${params[0]}` }),
   '^/weddings/booking/([^/]+)$': (params) => ({ title: `Booking #${params[0]}`, description: 'Details for wedding booking' }),
   '^/restaurant/menu/([^/]+)$': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
