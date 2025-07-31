@@ -243,7 +243,6 @@ export default function AddNewRoomPage() {
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
                         <Input name="roomWidth" type="number" placeholder="Width" className="w-24" />
-                        <span className="text-sm text-muted-foreground">x</span>
                         <Input name="roomHeight" type="number" placeholder="Height" className="w-24" />
                         <span className="text-sm text-muted-foreground">sqft</span>
                     </div>
