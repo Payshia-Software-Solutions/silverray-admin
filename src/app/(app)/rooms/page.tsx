@@ -1,244 +1,49 @@
 
 'use client';
-import { useState, useEffect } from 'react';
-import { Plus, Search, Eye, Trash2, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription as DialogDescriptionComponent,
-  DialogClose,
-} from '@/components/ui/dialog';
-import Link from 'next/link';
-import { getRooms, deleteRoom, type RoomFromApi } from '@/lib/services/api';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Toaster } from '@/components/ui/toaster';
-
-
-const statusVariant = {
-  available: 'bg-green-100 text-green-700',
-  booked: 'bg-red-100 text-red-700',
-  maintenance: 'bg-yellow-100 text-yellow-700',
-} as const;
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import RoomsList from '@/components/rooms-list';
+import RoomTypesList from '@/components/room-types-list';
 
 export default function RoomsPage() {
   const router = useRouter();
-  const { toast } = useToast();
-  const [rooms, setRooms] = useState<RoomFromApi[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [roomToDelete, setRoomToDelete] = useState<number | null>(null);
-  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
-  const [deletedRoomId, setDeletedRoomId] = useState<number | null>(null);
-
-  useEffect(() => {
-    async function fetchRooms() {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getRooms();
-        if (Array.isArray(data)) {
-            setRooms(data);
-        } else {
-            setError('Received unexpected data format from server.');
-            setRooms([]);
-        }
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred. Make sure your PHP server is running and CORS is configured correctly.');
-        setRooms([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchRooms();
-  }, []);
-
-  const handleDeleteClick = (roomId: number) => {
-    setRoomToDelete(roomId);
-  };
-
-  const handleCancelDelete = () => {
-    setRoomToDelete(null);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (roomToDelete) {
-      try {
-        await deleteRoom(roomToDelete);
-        setDeletedRoomId(roomToDelete);
-        // Update the UI by removing the deleted room
-        setRooms(currentRooms => currentRooms.filter(room => room.id !== roomToDelete));
-        setShowDeleteSuccessDialog(true);
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error Deleting Room",
-          description: error.message || "An unexpected error occurred.",
-        });
-      } finally {
-        setRoomToDelete(null);
-      }
-    }
-  };
-
 
   return (
     <div className="space-y-6">
-      <Toaster />
-      <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-lg shadow-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search by room number..."
-            className="w-full rounded-lg bg-background pl-10"
-          />
-        </div>
-        <Button onClick={() => router.push('/rooms/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Room
-          </Button>
-      </div>
-      <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
-        <Card>
-          <CardContent className="p-0">
-            {loading && <p className="p-4 text-center">Loading rooms...</p>}
-            {error && (
-              <Alert variant="destructive" className="m-4">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Error Fetching Data</AlertTitle>
-                <AlertDescription>
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
-            {!loading && !error && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Room Number</TableHead>
-                    <TableHead>Room Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Price/Night</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rooms.map((room) => (
-                    <TableRow key={room.id}>
-                      <TableCell className="font-medium">{room.room_number}</TableCell>
-                      <TableCell>{room.descriptive_title}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', statusVariant[room.current_status as keyof typeof statusVariant])}>
-                          {room.current_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{`${room.currency} ${room.price_per_night}`}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end items-center gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                              <Link href={`/rooms/${room.room_number}`}>
-                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                <span className="sr-only">View</span>
-                              </Link>
-                            </Button>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-100" onClick={() => handleDeleteClick(room.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                  <span className="sr-only">Delete</span>
-                              </Button>
-                            </AlertDialogTrigger>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-          <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-              <div className="text-sm text-muted-foreground">
-                  Showing 1 to {rooms.length} of {rooms.length} rooms
-              </div>
-              <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
-                      Previous
-                  </Button>
-                  <Button variant="default" size="sm">
-                      1
-                  </Button>
-                  <Button variant="outline" size="sm">
-                      2
-                  </Button>
-                  <Button variant="outline" size="sm">
-                      Next
-                  </Button>
-              </div>
-          </CardFooter>
-        </Card>
-        
-        <AlertDialogContent>
-            <AlertDialogHeader className="sr-only">
-                <AlertDialogTitle>Delete Room</AlertDialogTitle>
-                <AlertDialogDescription>Are you sure you want to delete this room?</AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="text-center">
-              <h2 className="text-xl font-bold mb-2">Do you want to Delete this Room ?</h2>
-              <p className="text-lg text-red-500">Room Number {rooms.find(r => r.id === roomToDelete)?.room_number}</p>
+      <Tabs defaultValue="rooms" className="space-y-4">
+        <div className="flex justify-between items-center">
+            <TabsList>
+                <TabsTrigger value="rooms">Rooms</TabsTrigger>
+                <TabsTrigger value="room-types">Room Types</TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-4">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search..."
+                        className="w-full rounded-lg bg-background pl-10"
+                    />
+                </div>
+                 <Button onClick={() => router.push('/rooms/new')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add New Room
+                </Button>
             </div>
-            <AlertDialogFooter className="sm:justify-center">
-                <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-            </AlertDialogFooter>
-            <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-              <X className="h-5 w-5" />
-            </button>
-        </AlertDialogContent>
-      </AlertDialog>
-
-       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
-          <DialogContent className="sm:max-w-md">
-             <DialogHeader className="sr-only">
-                  <DialogTitle>Success</DialogTitle>
-                  <DialogDescriptionComponent>The room was successfully deleted.</DialogDescriptionComponent>
-              </DialogHeader>
-              <div className="flex flex-col items-center justify-center text-center p-8">
-                  <div className="p-4 bg-red-100 rounded-full mb-4">
-                      <div className="p-2 bg-red-200 rounded-full">
-                         <Trash2 className="h-8 w-8 text-red-600" />
-                      </div>
-                  </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {deletedRoomId}!</h2>
-                  <DialogClose asChild>
-                      <Button className="mt-6 w-full" onClick={() => {
-                        setShowDeleteSuccessDialog(false);
-                      }}>Done</Button>
-                  </DialogClose>
-              </div>
-          </DialogContent>
-      </Dialog>
+        </div>
+        <TabsContent value="rooms">
+          <RoomsList />
+        </TabsContent>
+        <TabsContent value="room-types">
+            <RoomTypesList />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

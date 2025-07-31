@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -15,7 +14,7 @@ export interface RoomFromApi {
   id: number;
   room_number: string;
   descriptive_title: string;
-  current_status: 'available' | 'booked' | 'maintenance';
+  current_status: 'Available' | 'Booked' | 'Under Maintenance';
   price_per_night: string;
   currency: string;
 }
@@ -50,7 +49,7 @@ export interface ReservationFromApi {
 export interface RoomTypeFromApi {
   id: number;
   room_type_id: string;
-  company_Id: string;
+  company_id: string;
   type_name: string;
   created_at: string;
   updated_at: string;
@@ -131,6 +130,90 @@ export async function getRoomTypes(): Promise<RoomTypeFromApi[]> {
 }
 
 /**
+ * Fetches a single room type by its ID.
+ * @param id The ID of the room type to fetch.
+ * @returns A promise that resolves to a RoomTypeFromApi object.
+ */
+export async function getRoomTypeById(id: number): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new room type.
+ * @param roomTypeData The data for the new room type.
+ * @returns A promise that resolves with the newly created room type data.
+ */
+export async function createRoomType(roomTypeData: Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RoomTypeFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(roomTypeData),
+        });
+        return handleResponse<RoomTypeFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create room type:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room type.
+ * @param id The ID of the room type to update.
+ * @param roomTypeData The new data for the room type.
+ * @returns A promise that resolves with the updated room type data.
+ */
+export async function updateRoomType(id: number, roomTypeData: Partial<Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(roomTypeData),
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a room type by its ID.
+ * @param id The ID of the room type to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoomType(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room type ${id}:`, error);
+    throw error;
+  }
+}
+
+
+/**
  * Fetches all amenities from the back-end.
  * @returns A promise that resolves to an array of AmenityFromApi objects.
  */
@@ -176,7 +259,7 @@ export async function getReservations(): Promise<ReservationFromApi[]> {
  */
 export async function createRoom(roomData: any): Promise<any> {
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms/`, {
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -191,13 +274,32 @@ export async function createRoom(roomData: any): Promise<any> {
 }
 
 /**
+ * Fetches a single room by its room number.
+ * @param roomNumber The room number to fetch.
+ * @returns A promise that resolves to a RoomFromApi object.
+ */
+export async function getRoomByRoomNumber(roomNumber: string): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomNumber}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to fetch room ${roomNumber}:`, error);
+        throw error;
+    }
+}
+
+
+/**
  * Deletes a room by its ID.
  * @param roomId The ID of the room to delete.
  * @returns A promise that resolves with a success message.
  */
 export async function deleteRoom(roomId: number): Promise<{ message: string }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}/`, {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
