@@ -58,6 +58,22 @@ export interface RoomTypeFromApi {
   updated_by: string;
 }
 
+/**
+ * Defines the structure of an Amenity object as returned by the API.
+ */
+export interface AmenityFromApi {
+  id: number;
+  amenities_id: number;
+  amenity_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -112,6 +128,25 @@ export async function getRoomTypes(): Promise<RoomTypeFromApi[]> {
         console.error('Failed to fetch room types:', error);
         throw error;
     }
+}
+
+/**
+ * Fetches all amenities from the back-end.
+ * @returns A promise that resolves to an array of AmenityFromApi objects.
+ */
+export async function getAmenities(): Promise<AmenityFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch amenities:', error);
+    throw error;
+  }
 }
 
 

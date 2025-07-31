@@ -28,25 +28,9 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
-import { createRoom, getRoomTypes, type RoomTypeFromApi } from '@/lib/services/api';
+import { createRoom, getRoomTypes, getAmenities, type RoomTypeFromApi, type AmenityFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-
-
-const amenities = [
-    { id: 'king-bed', label: 'King-size Bed' },
-    { id: 'rain-shower', label: 'Rain Shower' },
-    { id: 'luxury-linens', label: 'Luxury Linens' },
-    { id: 'high-speed-wifi', label: 'High-speed Wi-Fi' },
-    { id: 'private-balcony', label: 'Private Balcony' },
-    { id: 'nespresso', label: 'Nespresso Machine' },
-    { id: 'climate-control', label: 'Climate Control' },
-    { id: 'smart-tv', label: '55" Smart TV' },
-    { id: 'in-room-safe', label: 'In-room Safe' },
-    { id: 'mini-bar', label: 'Mini Bar' },
-    { id: 'work-desk', label: 'Work Desk' },
-    { id: 'room-service', label: 'Room Service' },
-]
 
 const initialImageSlots = Array(4).fill(null);
 
@@ -57,13 +41,15 @@ export default function AddNewRoomPage() {
   const { toast } = useToast();
   const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
+  const [amenities, setAmenities] = useState<AmenityFromApi[]>([]);
+  const [loadingAmenities, setLoadingAmenities] = useState(true);
 
   useEffect(() => {
-    async function fetchRoomTypes() {
+    async function fetchInitialData() {
       try {
         setLoadingRoomTypes(true);
-        const data = await getRoomTypes();
-        setRoomTypes(data);
+        const roomTypesData = await getRoomTypes();
+        setRoomTypes(roomTypesData);
       } catch (error) {
         console.error("Failed to fetch room types:", error);
         toast({
@@ -74,8 +60,23 @@ export default function AddNewRoomPage() {
       } finally {
         setLoadingRoomTypes(false);
       }
+
+      try {
+        setLoadingAmenities(true);
+        const amenitiesData = await getAmenities();
+        setAmenities(amenitiesData);
+      } catch (error) {
+        console.error("Failed to fetch amenities:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load amenities. Please check the connection and try again.",
+        });
+      } finally {
+        setLoadingAmenities(false);
+      }
     }
-    fetchRoomTypes();
+    fetchInitialData();
   }, [toast]);
 
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -83,8 +84,8 @@ export default function AddNewRoomPage() {
     setIsSubmitting(true);
     
     const formData = new FormData(event.currentTarget);
+    const selectedAmenities = formData.getAll('amenities');
 
-    // Manually construct the object from FormData
     const roomDataFromForm = {
         room_number: formData.get('id'),
         room_type_id: formData.get('roomTypeId'),
@@ -95,15 +96,14 @@ export default function AddNewRoomPage() {
         roomSize: formData.get('roomSize'),
         price_per_night: formData.get('pricePerNight'),
         current_status: formData.get('status'),
-        // ... amenities if needed
+        amenities: selectedAmenities,
     };
 
-    // Transform frontend data to match the backend's expected JSON structure
     const roomDataForApi = {
         room_number: roomDataFromForm.room_number,
-        amenities_id: 1, // Placeholder
+        amenities_id: 1, // This seems to be what the user's backend expects
         room_type_id: Number(roomDataFromForm.room_type_id),
-        company_id: 'COMP031', // Placeholder
+        company_id: 'C001',
         descriptive_title: roomDataFromForm.descriptive_title,
         short_description: roomDataFromForm.short_description,
         adults_capacity: Number(roomDataFromForm.adults_capacity),
@@ -111,10 +111,10 @@ export default function AddNewRoomPage() {
         room_width: Number((roomDataFromForm.roomSize as string || '').split('x')[0] || 0),
         room_height: Number((roomDataFromForm.roomSize as string || '').split('x')[1] || 0),
         price_per_night: Number(roomDataFromForm.price_per_night),
-        currency: 'USD', // Placeholder
+        currency: 'LKR',
         current_status: roomDataFromForm.current_status,
-        image_url: '/images/rooms/default.jpg', // Placeholder
-        created_by: 'admin', // Placeholder
+        image_url: '/images/rooms/default.jpg',
+        created_by: 'admin',
     };
 
     try {
@@ -290,10 +290,10 @@ export default function AddNewRoomPage() {
                 </h3>
             </div>
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {amenities.map(item => (
+                {loadingAmenities ? <p>Loading amenities...</p> : amenities.map(item => (
                 <div key={item.id} className="flex items-center space-x-2">
-                    <Checkbox id={item.id} name="amenities" value={item.id} />
-                    <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
+                    <Checkbox id={`amenity-${item.id}`} name="amenities" value={String(item.id)} />
+                    <Label htmlFor={`amenity-${item.id}`} className="font-normal">{item.amenity_name}</Label>
                 </div>
                 ))}
             </div>
