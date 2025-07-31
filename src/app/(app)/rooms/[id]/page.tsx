@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,21 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose } from '@/components/ui/dialog';
 import { useParams } from 'next/navigation';
-
-const amenities = [
-    { id: 'king-bed', label: 'King-size Bed', checked: true },
-    { id: 'rain-shower', label: 'Rain Shower', checked: true },
-    { id: 'luxury-linens', label: 'Luxury Linens', checked: true },
-    { id: 'high-speed-wifi', label: 'High-speed Wi-Fi', checked: true },
-    { id: 'private-balcony', label: 'Private Balcony', checked: true },
-    { id: 'nespresso', label: 'Nespresso Machine', checked: true },
-    { id: 'climate-control', label: 'Climate Control', checked: true },
-    { id: 'smart-tv', label: '55" Smart TV', checked: true },
-    { id: 'in-room-safe', label: 'In-room Safe', checked: true },
-    { id: 'mini-bar', label: 'Mini Bar', checked: true },
-    { id: 'work-desk', label: 'Work Desk', checked: true },
-    { id: 'room-service', label: 'Room Service', checked: true },
-];
+import { getRoomByRoomNumber, getAmenities, AmenityFromApi, RoomFromApi } from '@/lib/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 const roomImages = [
     { src: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070&auto=format&fit=crop', hint: 'hotel room interior', primary: true },
@@ -58,11 +46,58 @@ const roomImages = [
 
 export default function EditRoomPage() {
   const params = useParams<{ id: string }>();
+  const { toast } = useToast();
+  const [room, setRoom] = useState<RoomFromApi | null>(null);
+  const [allAmenities, setAllAmenities] = useState<AmenityFromApi[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
 
+   useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [roomData, amenitiesData] = await Promise.all([
+          getRoomByRoomNumber(params.id),
+          getAmenities(),
+        ]);
+        setRoom(roomData);
+        setAllAmenities(amenitiesData);
+        
+        // Pre-select amenities based on room data
+        if (roomData.amenities_id) {
+          const amenityIds = new Set(roomData.amenities_id.split(',').filter(id => id));
+          setSelectedAmenities(amenityIds);
+        }
+
+      } catch (error: any) {
+        toast({
+          variant: 'destructive',
+          title: 'Error fetching data',
+          description: error.message || 'An unexpected error occurred.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [params.id, toast]);
+
+  const handleAmenityChange = (amenityId: string, checked: boolean) => {
+    setSelectedAmenities(prev => {
+      const newSelected = new Set(prev);
+      if (checked) {
+        newSelected.add(amenityId);
+      } else {
+        newSelected.delete(amenityId);
+      }
+      return newSelected;
+    });
+  };
 
   const handleDelete = () => {
     setShowDeleteDialog(false);
@@ -74,8 +109,17 @@ export default function EditRoomPage() {
     setShowSaveSuccessDialog(true);
   }
   
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!room) {
+    return <div>Room not found.</div>;
+  }
+
   return (
     <div className="space-y-6">
+      <Toaster />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -105,25 +149,25 @@ export default function EditRoomPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
-                 <Select defaultValue="deluxe-double">
+                 <Select defaultValue={String(room.room_type_id)}>
                   <SelectTrigger id="room-type">
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="deluxe-double">Deluxe Double Room</SelectItem>
-                    <SelectItem value="king-suite">King Suite</SelectItem>
-                    <SelectItem value="premium-suite">Premium Suite</SelectItem>
+                    <SelectItem value="1">Deluxe Double Room</SelectItem>
+                    <SelectItem value="2">King Suite</SelectItem>
+                    <SelectItem value="3">Premium Suite</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
              <div className="space-y-2">
                 <Label htmlFor="descriptive-title">Descriptive Title</Label>
-                <Input id="descriptive-title" defaultValue="Deluxe Double Room with Balcony" />
+                <Input id="descriptive-title" defaultValue={room.descriptive_title} />
               </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
-              <Textarea id="short-description" defaultValue="Spacious deluxe room with modern amenities, comfortable king-size bed, and private balcony overlooking the city." />
+              <Textarea id="short-description" defaultValue={room.short_description} />
             </div>
           </CardContent>
         </Card>
@@ -141,7 +185,7 @@ export default function EditRoomPage() {
                 <Label htmlFor="adults">Adults</Label>
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="adults" type="number" defaultValue={2} className="w-16 text-center" />
+                  <Input id="adults" type="number" defaultValue={room.adults_capacity} className="w-16 text-center" />
                   <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
@@ -149,16 +193,16 @@ export default function EditRoomPage() {
                 <Label htmlFor="children">Children</Label>
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="children" type="number" defaultValue={1} className="w-16 text-center" />
+                  <Input id="children" type="number" defaultValue={room.children_capacity} className="w-16 text-center" />
                   <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
                 <div className="space-y-2">
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input type="number" defaultValue="450" className="w-24" />
+                        <Input type="number" defaultValue={room.room_width} className="w-24" />
                         <span className="text-sm text-muted-foreground">width</span>
-                        <Input type="number" defaultValue="450" className="w-24" />
+                        <Input type="number" defaultValue={room.room_height} className="w-24" />
                         <span className="text-sm text-muted-foreground">height</span>
                     </div>
                 </div>
@@ -178,13 +222,13 @@ export default function EditRoomPage() {
                  <div className="space-y-2">
                     <Label htmlFor="price">Price per night</Label>
                     <div className="flex items-center">
-                        <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">$</span>
-                        <Input id="price" type="number" defaultValue="150" className="rounded-l-none" />
+                        <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">{room.currency}</span>
+                        <Input id="price" type="number" defaultValue={room.price_per_night} className="rounded-l-none" />
                     </div>
                  </div>
                  <div className="space-y-2">
                     <Label htmlFor="status">Current Status</Label>
-                     <Select defaultValue="available">
+                     <Select defaultValue={room.current_status}>
                         <SelectTrigger id="status">
                             <SelectValue placeholder="Available" />
                         </SelectTrigger>
@@ -208,11 +252,15 @@ export default function EditRoomPage() {
                 </h3>
             </div>
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {amenities.map(item => (
-                <div key={item.id} className="flex items-center space-x-2">
-                    <Checkbox id={item.id} defaultChecked={item.checked} />
-                    <Label htmlFor={item.id} className="font-normal">{item.label}</Label>
-                </div>
+                {allAmenities.map(amenity => (
+                  <div key={amenity.id} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`amenity-${amenity.id}`}
+                      checked={selectedAmenities.has(String(amenity.id))}
+                      onCheckedChange={(checked) => handleAmenityChange(String(amenity.id), !!checked)}
+                    />
+                    <Label htmlFor={`amenity-${amenity.id}`} className="font-normal">{amenity.amenity_name}</Label>
+                  </div>
                 ))}
             </div>
           </CardContent>

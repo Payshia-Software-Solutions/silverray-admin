@@ -17,6 +17,13 @@ export interface RoomFromApi {
   current_status: 'Available' | 'Booked' | 'Under Maintenance';
   price_per_night: string;
   currency: string;
+  room_type_id: number;
+  short_description: string;
+  adults_capacity: number;
+  children_capacity: number;
+  room_width: string;
+  room_height: string;
+  amenities_id: string; // Comma-separated string of amenity IDs
 }
 
 /**
@@ -161,7 +168,7 @@ export async function createRoomType(roomTypeData: Omit<RoomTypeFromApi, 'id' | 
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(roomTypeData),
+            body: JSON.stringify({ ...roomTypeData, company_id: 'C001' }),
         });
         return handleResponse<RoomTypeFromApi>(response);
     } catch (error) {
