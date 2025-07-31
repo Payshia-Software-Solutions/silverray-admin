@@ -252,9 +252,9 @@ export default function EditRoomPage() {
                 <div className="space-y-2">
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input name="roomWidth" type="number" defaultValue={room.room_width} className="w-24" />
+                        <Input name="roomWidth" type="text" defaultValue={room.room_width} className="w-24" />
                         <span className="text-sm text-muted-foreground">width</span>
-                        <Input name="roomHeight" type="number" defaultValue={room.room_height} className="w-24" />
+                        <Input name="roomHeight" type="text" defaultValue={room.room_height} className="w-24" />
                         <span className="text-sm text-muted-foreground">height</span>
                     </div>
                 </div>
