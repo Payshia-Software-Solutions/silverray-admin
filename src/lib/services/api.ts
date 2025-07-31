@@ -44,6 +44,20 @@ export interface ReservationFromApi {
   };
 }
 
+/**
+ * Defines the structure of a RoomType object as returned by the API.
+ */
+export interface RoomTypeFromApi {
+  id: number;
+  room_type_id: string;
+  company_Id: string;
+  type_name: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -80,6 +94,26 @@ export async function getRooms(): Promise<RoomFromApi[]> {
     throw error;
   }
 }
+
+/**
+ * Fetches all room types from the back-end.
+ * @returns A promise that resolves to an array of RoomTypeFromApi objects.
+ */
+export async function getRoomTypes(): Promise<RoomTypeFromApi[]> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return handleResponse<RoomTypeFromApi[]>(response);
+    } catch (error) {
+        console.error('Failed to fetch room types:', error);
+        throw error;
+    }
+}
+
 
 /**
  * Fetches all reservations from the back-end.

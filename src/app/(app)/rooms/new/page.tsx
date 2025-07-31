@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
-import { createRoom } from '@/lib/services/api';
+import { createRoom, getRoomTypes, type RoomTypeFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -55,6 +55,28 @@ export default function AddNewRoomPage() {
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(initialImageSlots);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
+  const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
+
+  useEffect(() => {
+    async function fetchRoomTypes() {
+      try {
+        setLoadingRoomTypes(true);
+        const data = await getRoomTypes();
+        setRoomTypes(data);
+      } catch (error) {
+        console.error("Failed to fetch room types:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load room types. Please check the connection and try again.",
+        });
+      } finally {
+        setLoadingRoomTypes(false);
+      }
+    }
+    fetchRoomTypes();
+  }, [toast]);
 
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,33 +86,33 @@ export default function AddNewRoomPage() {
 
     // Manually construct the object from FormData
     const roomDataFromForm = {
-        id: formData.get('id'),
-        roomTypeId: formData.get('roomTypeId'),
-        descriptiveTitle: formData.get('descriptiveTitle'),
-        shortDescription: formData.get('shortDescription'),
-        adults: formData.get('adults'),
-        children: formData.get('children'),
+        room_number: formData.get('id'),
+        room_type_id: formData.get('roomTypeId'),
+        descriptive_title: formData.get('descriptiveTitle'),
+        short_description: formData.get('shortDescription'),
+        adults_capacity: formData.get('adults'),
+        children_capacity: formData.get('children'),
         roomSize: formData.get('roomSize'),
-        pricePerNight: formData.get('pricePerNight'),
-        status: formData.get('status'),
+        price_per_night: formData.get('pricePerNight'),
+        current_status: formData.get('status'),
         // ... amenities if needed
     };
 
     // Transform frontend data to match the backend's expected JSON structure
     const roomDataForApi = {
-        room_number: roomDataFromForm.id,
+        room_number: roomDataFromForm.room_number,
         amenities_id: 1, // Placeholder
-        room_type_id: Number(roomDataFromForm.roomTypeId), // Ensure number
+        room_type_id: Number(roomDataFromForm.room_type_id),
         company_id: 'COMP031', // Placeholder
-        descriptive_title: roomDataFromForm.descriptiveTitle,
-        short_description: roomDataFromForm.shortDescription,
-        adults_capacity: Number(roomDataFromForm.adults),
-        children_capacity: Number(roomDataFromForm.children),
-        room_width: Number((roomDataFromForm.roomSize as string || '').split('x')[0] || 0), // Ensure number
-        room_height: Number((roomDataFromForm.roomSize as string || '').split('x')[1] || 0), // Ensure number
-        price_per_night: Number(roomDataFromForm.pricePerNight), // Ensure number
+        descriptive_title: roomDataFromForm.descriptive_title,
+        short_description: roomDataFromForm.short_description,
+        adults_capacity: Number(roomDataFromForm.adults_capacity),
+        children_capacity: Number(roomDataFromForm.children_capacity),
+        room_width: Number((roomDataFromForm.roomSize as string || '').split('x')[0] || 0),
+        room_height: Number((roomDataFromForm.roomSize as string || '').split('x')[1] || 0),
+        price_per_night: Number(roomDataFromForm.price_per_night),
         currency: 'USD', // Placeholder
-        current_status: roomDataFromForm.status,
+        current_status: roomDataFromForm.current_status,
         image_url: '/images/rooms/default.jpg', // Placeholder
         created_by: 'admin', // Placeholder
     };
@@ -166,14 +188,16 @@ export default function AddNewRoomPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
-                 <Select name="roomTypeId">
+                 <Select name="roomTypeId" disabled={loadingRoomTypes}>
                   <SelectTrigger id="room-type">
-                    <SelectValue placeholder="Select Room Type" />
+                    <SelectValue placeholder={loadingRoomTypes ? "Loading..." : "Select Room Type"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Deluxe Double Room</SelectItem>
-                    <SelectItem value="2">King Suite</SelectItem>
-                    <SelectItem value="3">Premium Suite</SelectItem>
+                    {roomTypes.map((type) => (
+                       <SelectItem key={type.id} value={String(type.id)}>
+                        {type.type_name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
