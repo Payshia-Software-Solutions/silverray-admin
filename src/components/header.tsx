@@ -33,25 +33,25 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   // Add other pages here
 };
 
-const dynamicPageInfo: { [key: string]: (params: any) => { title: string; description: string } } = {
-  '^/rooms/([^/]+)$': (params) => ({ title: 'Rooms Management', description: `Editing Room ${params[0]}` }),
-  '^/rooms/types/([^/]+)$': (params) => ({ title: 'Edit Room Type', description: `Updating details for room type ID ${params[0]}` }),
-  '^/amenities/([^/]+)$': (params) => ({ title: 'Edit Amenity', description: `Updating details for amenity ID ${params[0]}` }),
-  '^/reservations/([^/]+)$': (params) => ({ title: 'Booking Management (Rooms & Suites)', description: `Details for Booking #${params[0]}` }),
-  '^/weddings/booking/([^/]+)$': (params) => ({ title: `Booking #${params[0]}`, description: 'Details for wedding booking' }),
-  '^/restaurant/menu/([^/]+)$': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
-  '^/restaurant/reservations/([^/]+)$': (params) => ({ title: 'Restaurant & Dining', description: `Details for reservation #${params[0]}` }),
-  '^/experience/([^/]+)/bookings/new$': (params) => ({ title: 'Experience Management', description: 'Create a new booking for this experience.' }),
-  '^/experience/([^/]+)/edit$': (params) => {
-    const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+const dynamicPageInfo: { [key: string]: (params: { [key: string]: string }) => { title: string; description: string } } = {
+  '/rooms/[id]': (params) => ({ title: 'Rooms Management', description: `Editing Room ${params.id}` }),
+  '/rooms/types/[id]': (params) => ({ title: 'Edit Room Type', description: `Updating details for room type ID ${params.id}` }),
+  '/amenities/[id]': (params) => ({ title: 'Edit Amenity', description: `Updating details for amenity ID ${params.id}` }),
+  '/reservations/[id]': (params) => ({ title: 'Booking Management (Rooms & Suites)', description: `Details for Booking #${params.id}` }),
+  '/weddings/booking/[id]': (params) => ({ title: `Booking #${params.id}`, description: 'Details for wedding booking' }),
+  '/restaurant/menu/[id]': (params) => ({ title: `Restaurant & Dining Management`, description: 'Manage dining venues, menu items, and reservations' }),
+  '/restaurant/reservations/[id]': (params) => ({ title: 'Restaurant & Dining', description: `Details for reservation #${params.id}` }),
+  '/experience/[id]/bookings/new': (params) => ({ title: 'Experience Management', description: 'Create a new booking for this experience.' }),
+  '/experience/[id]/edit': (params) => {
+    const title = params.id.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
   },
-  '^/experience/([^/]+)/booking/([^/]+)$': (params) => {
-    const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+  '/experience/[id]/booking/[bookingId]': (params) => {
+    const title = params.id.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
   },
-  '^/experience/([^/]+)$': (params) => {
-    const title = params[0].replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+  '/experience/[id]': (params) => {
+    const title = params.id.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
     return { title: 'Experience Management', description: title };
   },
 };
@@ -66,21 +66,37 @@ export function Header() {
   }, []);
 
   const { title, description } = useMemo(() => {
-    // Wait until the component is mounted to ensure pathname is available
     if (!isMounted) return { title: 'Loading...', description: 'Please wait...' };
 
-    // First, check for an exact match in static pages
     if (pageInfo[pathname]) {
       return pageInfo[pathname];
     }
     
-    // Then, check for dynamic routes
+    const pathSegments = pathname.split('/').filter(Boolean);
+    
     for (const routePattern in dynamicPageInfo) {
-        const regex = new RegExp(routePattern);
-        const match = pathname.match(regex);
-        if (match) {
-            return dynamicPageInfo[routePattern](match.slice(1));
+      const patternSegments = routePattern.split('/').filter(Boolean);
+      if (patternSegments.length !== pathSegments.length) continue;
+
+      const params: { [key: string]: string } = {};
+      let match = true;
+
+      for (let i = 0; i < patternSegments.length; i++) {
+        const patternSegment = patternSegments[i];
+        const pathSegment = pathSegments[i];
+
+        if (patternSegment.startsWith('[') && patternSegment.endsWith(']')) {
+          const paramName = patternSegment.slice(1, -1);
+          params[paramName] = pathSegment;
+        } else if (patternSegment !== pathSegment) {
+          match = false;
+          break;
         }
+      }
+
+      if (match) {
+        return dynamicPageInfo[routePattern](params);
+      }
     }
 
     return { title: 'Page Not Found', description: "The page you are looking for does not exist." };
