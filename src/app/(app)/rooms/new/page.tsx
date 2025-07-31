@@ -61,22 +61,30 @@ export default function AddNewRoomPage() {
     setIsSubmitting(true);
     
     const formData = new FormData(event.currentTarget);
-    const roomData = {
-        id: formData.get('id'),
-        roomTypeId: formData.get('roomTypeId'),
-        descriptiveTitle: formData.get('descriptiveTitle'),
-        shortDescription: formData.get('shortDescription'),
-        adults: formData.get('adults'),
-        children: formData.get('children'),
-        roomSize: formData.get('roomSize'),
-        pricePerNight: formData.get('pricePerNight'),
-        status: formData.get('status'),
-        amenities: formData.getAll('amenities'),
-        companyId: 'C001',
+
+    // Transform frontend data to match the backend's expected JSON structure
+    const roomDataForApi = {
+        room_number: formData.get('id'),
+        amenities_id: 1, // Placeholder as per backend example
+        room_type_id: formData.get('roomTypeId'),
+        company_id: 'COMP031', // Placeholder as per backend example
+        descriptive_title: formData.get('descriptiveTitle'),
+        short_description: formData.get('shortDescription'),
+        adults_capacity: Number(formData.get('adults')),
+        children_capacity: Number(formData.get('children')),
+        // Assuming roomSize is 'widthxheight' or just a single value for now
+        // Let's split it if it contains 'x', otherwise use it for width.
+        room_width: (formData.get('roomSize') as string || '').split('x')[0] || 0,
+        room_height: (formData.get('roomSize') as string || '').split('x')[1] || 0,
+        price_per_night: Number(formData.get('pricePerNight')),
+        currency: 'USD', // Placeholder as per backend example
+        current_status: formData.get('status'),
+        image_url: '/images/rooms/default.jpg', // Placeholder as per backend example
+        created_by: 'admin', // Placeholder as per backend example
     };
 
     try {
-      const result = await createRoom(roomData);
+      const result = await createRoom(roomDataForApi);
       console.log('Room created:', result);
       setShowSuccessDialog(true);
     } catch (error: any) {
@@ -197,7 +205,7 @@ export default function AddNewRoomPage() {
                 <div className="space-y-2">
                     <Label>Room Size (sqft)</Label>
                     <div className="flex items-center gap-2">
-                        <Input name="roomSize" type="number" placeholder="450" className="w-24" />
+                        <Input name="roomSize" type="text" placeholder="e.g. 450 or 20x30" className="w-24" />
                     </div>
                 </div>
             </div>
