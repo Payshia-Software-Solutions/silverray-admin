@@ -24,6 +24,10 @@ export interface RoomFromApi {
   room_width: string;
   room_height: string;
   amenities_id: string; // Comma-separated string of amenity IDs
+  image_url: string;
+  company_id: string;
+  created_by: string;
+  updated_by: string | null;
 }
 
 /**
@@ -376,6 +380,26 @@ export async function getRoomById(roomId: number): Promise<RoomFromApi> {
         return handleResponse<RoomFromApi>(response);
     } catch (error) {
         console.error(`Failed to fetch room ${roomId}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room.
+ * @param roomId The ID of the room to update.
+ * @param roomData The data to update.
+ * @returns A promise that resolves with the updated room data.
+ */
+export async function updateRoom(roomId: number, roomData: Partial<RoomFromApi>): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to update room ${roomId}:`, error);
         throw error;
     }
 }

@@ -32,8 +32,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose } from '@/components/ui/dialog';
-import { useParams } from 'next/navigation';
-import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi } from '@/lib/services/api';
+import { useParams, useRouter } from 'next/navigation';
+import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -46,12 +46,15 @@ const roomImages = [
 
 export default function EditRoomPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const roomId = Number(params.id);
   const { toast } = useToast();
   const [room, setRoom] = useState<RoomFromApi | null>(null);
   const [allAmenities, setAllAmenities] = useState<AmenityFromApi[]>([]);
+  const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
   const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
@@ -62,14 +65,15 @@ export default function EditRoomPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [roomData, amenitiesData] = await Promise.all([
+        const [roomData, amenitiesData, roomTypesData] = await Promise.all([
           getRoomById(roomId),
           getAmenities(),
+          getRoomTypes(),
         ]);
         setRoom(roomData);
         setAllAmenities(amenitiesData);
+        setRoomTypes(roomTypesData);
         
-        // Pre-select amenities based on room data
         if (roomData.amenities_id) {
           const amenityIds = new Set(roomData.amenities_id.split(',').filter(id => id));
           setSelectedAmenities(amenityIds);
@@ -107,10 +111,53 @@ export default function EditRoomPage() {
     setShowDeleteSuccessDialog(true);
   }
 
-  const handleSave = () => {
-    setShowSaveConfirmDialog(false);
-    setShowSaveSuccessDialog(true);
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setShowSaveConfirmDialog(true);
   }
+
+  const handleSaveConfirm = async () => {
+    if (!room) return;
+    setIsSubmitting(true);
+    
+    const form = document.getElementById('edit-room-form') as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const roomDataForApi = {
+        room_number: room.room_number,
+        amenities_id: Array.from(selectedAmenities).join(','),
+        room_type_id: Number(formData.get('roomTypeId')),
+        company_id: room.company_id || 'COMP031', // Fallback
+        descriptive_title: formData.get('descriptiveTitle') as string,
+        short_description: formData.get('shortDescription') as string,
+        adults_capacity: Number(formData.get('adults')),
+        children_capacity: Number(formData.get('children')),
+        room_width: (formData.get('roomWidth') as string),
+        room_height: (formData.get('roomHeight') as string),
+        price_per_night: (formData.get('pricePerNight') as string),
+        currency: room.currency || 'USD',
+        current_status: formData.get('status') as RoomFromApi['current_status'],
+        image_url: room.image_url || '/images/rooms/default.jpg',
+        created_by: room.created_by || 'admin',
+        updated_by: 'admin'
+    };
+    
+    try {
+        await updateRoom(room.id, roomDataForApi);
+        setShowSaveConfirmDialog(false);
+        setShowSaveSuccessDialog(true);
+    } catch (error: any) {
+        console.error('Error updating room:', error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message || "Failed to update the room.",
+        });
+        setShowSaveConfirmDialog(false);
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
   
   if (loading) {
     return <div>Loading...</div>;
@@ -121,7 +168,7 @@ export default function EditRoomPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <form id="edit-room-form" onSubmit={handleSave} className="space-y-6">
       <Toaster />
       <Breadcrumb>
         <BreadcrumbList>
@@ -152,25 +199,27 @@ export default function EditRoomPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="room-type">Room Type</Label>
-                 <Select defaultValue={String(room.room_type_id)}>
+                 <Select name="roomTypeId" defaultValue={String(room.room_type_id)}>
                   <SelectTrigger id="room-type">
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Deluxe Double Room</SelectItem>
-                    <SelectItem value="2">King Suite</SelectItem>
-                    <SelectItem value="3">Premium Suite</SelectItem>
+                    {roomTypes.map(type => (
+                       <SelectItem key={type.id} value={String(type.id)}>
+                        {type.type_name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
              <div className="space-y-2">
                 <Label htmlFor="descriptive-title">Descriptive Title</Label>
-                <Input id="descriptive-title" defaultValue={room.descriptive_title} />
+                <Input id="descriptive-title" name="descriptiveTitle" defaultValue={room.descriptive_title} />
               </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
-              <Textarea id="short-description" defaultValue={room.short_description} />
+              <Textarea id="short-description" name="shortDescription" defaultValue={room.short_description} />
             </div>
           </CardContent>
         </Card>
@@ -187,25 +236,25 @@ export default function EditRoomPage() {
                <div className="space-y-2">
                 <Label htmlFor="adults">Adults</Label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="adults" type="number" defaultValue={room.adults_capacity} className="w-16 text-center" />
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                  <Input id="adults" name="adults" type="number" defaultValue={room.adults_capacity} className="w-16 text-center" />
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
                <div className="space-y-2">
                 <Label htmlFor="children">Children</Label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                  <Input id="children" type="number" defaultValue={room.children_capacity} className="w-16 text-center" />
-                  <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                  <Input id="children" name="children" type="number" defaultValue={room.children_capacity} className="w-16 text-center" />
+                  <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
                 <div className="space-y-2">
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input type="number" defaultValue={room.room_width} className="w-24" />
+                        <Input name="roomWidth" type="number" defaultValue={room.room_width} className="w-24" />
                         <span className="text-sm text-muted-foreground">width</span>
-                        <Input type="number" defaultValue={room.room_height} className="w-24" />
+                        <Input name="roomHeight" type="number" defaultValue={room.room_height} className="w-24" />
                         <span className="text-sm text-muted-foreground">height</span>
                     </div>
                 </div>
@@ -226,19 +275,19 @@ export default function EditRoomPage() {
                     <Label htmlFor="price">Price per night</Label>
                     <div className="flex items-center">
                         <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">{room.currency}</span>
-                        <Input id="price" type="number" defaultValue={room.price_per_night} className="rounded-l-none" />
+                        <Input id="price" name="pricePerNight" type="number" defaultValue={room.price_per_night} className="rounded-l-none" />
                     </div>
                  </div>
                  <div className="space-y-2">
                     <Label htmlFor="status">Current Status</Label>
-                     <Select defaultValue={room.current_status}>
+                     <Select name="status" defaultValue={room.current_status}>
                         <SelectTrigger id="status">
                             <SelectValue placeholder="Available" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="available">Available</SelectItem>
-                            <SelectItem value="booked">Booked</SelectItem>
-                            <SelectItem value="maintenance">Under Maintenance</SelectItem>
+                            <SelectItem value="Available">Available</SelectItem>
+                            <SelectItem value="Booked">Booked</SelectItem>
+                            <SelectItem value="Under Maintenance">Under Maintenance</SelectItem>
                         </SelectContent>
                     </Select>
                  </div>
@@ -304,7 +353,7 @@ export default function EditRoomPage() {
       <div className="flex justify-between items-center">
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
             <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button type="button" variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete Room
                 </Button>
@@ -329,12 +378,12 @@ export default function EditRoomPage() {
         </AlertDialog>
 
         <div className="flex justify-end gap-2">
-            <Button variant="outline" asChild>
+            <Button type="button" variant="outline" asChild>
                 <Link href="/rooms">Cancel</Link>
             </Button>
             <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
               <AlertDialogTrigger asChild>
-                <Button>Save Changes</Button>
+                <Button type="submit">Save Changes</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader className="sr-only">
@@ -346,7 +395,9 @@ export default function EditRoomPage() {
                 </div>
                 <AlertDialogFooter className="sm:justify-center">
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSave}>Save Changes</AlertDialogAction>
+                    <AlertDialogAction onClick={handleSaveConfirm} disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
+                    </AlertDialogAction>
                 </AlertDialogFooter>
                  <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
                     <X className="h-5 w-5" />
@@ -372,6 +423,7 @@ export default function EditRoomPage() {
                   <DialogClose asChild>
                       <Button className="mt-6 w-full" onClick={() => {
                         setShowDeleteSuccessDialog(false);
+                        router.push('/rooms');
                       }}>Done</Button>
                   </DialogClose>
               </div>
@@ -391,11 +443,14 @@ export default function EditRoomPage() {
                 </div>
                 <h2 className="text-xl font-bold mb-2">Successfully Updated Room {room.room_number}!</h2>
                 <DialogClose asChild>
-                    <Button className="mt-6 w-full" onClick={() => setShowSaveSuccessDialog(false)}>Done</Button>
+                    <Button className="mt-6 w-full" onClick={() => {
+                      setShowSaveSuccessDialog(false);
+                      router.push('/rooms');
+                      }}>Done</Button>
                 </DialogClose>
             </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </form>
   );
 }
