@@ -183,7 +183,7 @@ export async function updateRoomType(id: number, roomTypeData: Partial<Omit<Room
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(roomTypeData),
+      body: JSON.stringify({ ...roomTypeData, company_id: 'C001' }),
     });
     return handleResponse<RoomTypeFromApi>(response);
   } catch (error) {
@@ -286,7 +286,7 @@ export async function updateAmenity(id: number, amenityData: Partial<Omit<Amenit
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(amenityData),
+      body: JSON.stringify({ ...amenityData, company_id: 'C001' }),
     });
     return handleResponse<AmenityFromApi>(response);
   } catch (error) {
