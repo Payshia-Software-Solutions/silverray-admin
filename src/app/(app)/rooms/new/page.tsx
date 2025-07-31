@@ -93,7 +93,8 @@ export default function AddNewRoomPage() {
         short_description: formData.get('shortDescription'),
         adults_capacity: formData.get('adults'),
         children_capacity: formData.get('children'),
-        roomSize: formData.get('roomSize'),
+        room_width: formData.get('roomWidth'),
+        room_height: formData.get('roomHeight'),
         price_per_night: formData.get('pricePerNight'),
         current_status: formData.get('status'),
         amenities: selectedAmenities,
@@ -108,8 +109,8 @@ export default function AddNewRoomPage() {
         short_description: roomDataFromForm.short_description,
         adults_capacity: Number(roomDataFromForm.adults_capacity),
         children_capacity: Number(roomDataFromForm.children_capacity),
-        room_width: Number((roomDataFromForm.roomSize as string || '').split('x')[0] || 0),
-        room_height: Number((roomDataFromForm.roomSize as string || '').split('x')[1] || 0),
+        room_width: Number(roomDataFromForm.room_width || 0),
+        room_height: Number(roomDataFromForm.room_height || 0),
         price_per_night: Number(roomDataFromForm.price_per_night),
         currency: 'LKR',
         current_status: roomDataFromForm.current_status,
@@ -239,9 +240,12 @@ export default function AddNewRoomPage() {
                 </div>
               </div>
                 <div className="space-y-2">
-                    <Label>Room Size (sqft)</Label>
+                    <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input name="roomSize" type="text" placeholder="e.g. 450 or 20x30" className="w-24" />
+                        <Input name="roomWidth" type="number" placeholder="Width" className="w-24" />
+                        <span className="text-sm text-muted-foreground">x</span>
+                        <Input name="roomHeight" type="number" placeholder="Height" className="w-24" />
+                        <span className="text-sm text-muted-foreground">sqft</span>
                     </div>
                 </div>
             </div>
