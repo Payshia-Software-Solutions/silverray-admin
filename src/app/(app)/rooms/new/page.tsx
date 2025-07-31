@@ -62,25 +62,37 @@ export default function AddNewRoomPage() {
     
     const formData = new FormData(event.currentTarget);
 
+    // Manually construct the object from FormData
+    const roomDataFromForm = {
+        id: formData.get('id'),
+        roomTypeId: formData.get('roomTypeId'),
+        descriptiveTitle: formData.get('descriptiveTitle'),
+        shortDescription: formData.get('shortDescription'),
+        adults: formData.get('adults'),
+        children: formData.get('children'),
+        roomSize: formData.get('roomSize'),
+        pricePerNight: formData.get('pricePerNight'),
+        status: formData.get('status'),
+        // ... amenities if needed
+    };
+
     // Transform frontend data to match the backend's expected JSON structure
     const roomDataForApi = {
-        room_number: formData.get('id'),
-        amenities_id: 1, // Placeholder as per backend example
-        room_type_id: formData.get('roomTypeId'),
-        company_id: 'COMP031', // Placeholder as per backend example
-        descriptive_title: formData.get('descriptiveTitle'),
-        short_description: formData.get('shortDescription'),
-        adults_capacity: Number(formData.get('adults')),
-        children_capacity: Number(formData.get('children')),
-        // Assuming roomSize is 'widthxheight' or just a single value for now
-        // Let's split it if it contains 'x', otherwise use it for width.
-        room_width: (formData.get('roomSize') as string || '').split('x')[0] || 0,
-        room_height: (formData.get('roomSize') as string || '').split('x')[1] || 0,
-        price_per_night: Number(formData.get('pricePerNight')),
-        currency: 'USD', // Placeholder as per backend example
-        current_status: formData.get('status'),
-        image_url: '/images/rooms/default.jpg', // Placeholder as per backend example
-        created_by: 'admin', // Placeholder as per backend example
+        room_number: roomDataFromForm.id,
+        amenities_id: 1, // Placeholder
+        room_type_id: Number(roomDataFromForm.roomTypeId), // Ensure number
+        company_id: 'COMP031', // Placeholder
+        descriptive_title: roomDataFromForm.descriptiveTitle,
+        short_description: roomDataFromForm.shortDescription,
+        adults_capacity: Number(roomDataFromForm.adults),
+        children_capacity: Number(roomDataFromForm.children),
+        room_width: Number((roomDataFromForm.roomSize as string || '').split('x')[0] || 0), // Ensure number
+        room_height: Number((roomDataFromForm.roomSize as string || '').split('x')[1] || 0), // Ensure number
+        price_per_night: Number(roomDataFromForm.pricePerNight), // Ensure number
+        currency: 'USD', // Placeholder
+        current_status: roomDataFromForm.status,
+        image_url: '/images/rooms/default.jpg', // Placeholder
+        created_by: 'admin', // Placeholder
     };
 
     try {
@@ -159,9 +171,9 @@ export default function AddNewRoomPage() {
                     <SelectValue placeholder="Select Room Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="RT001">Deluxe Double Room</SelectItem>
-                    <SelectItem value="RT002">King Suite</SelectItem>
-                    <SelectItem value="RT003">Premium Suite</SelectItem>
+                    <SelectItem value="1">Deluxe Double Room</SelectItem>
+                    <SelectItem value="2">King Suite</SelectItem>
+                    <SelectItem value="3">Premium Suite</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
