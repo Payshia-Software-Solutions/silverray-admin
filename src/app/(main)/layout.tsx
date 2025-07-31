@@ -19,6 +19,7 @@ import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/components/header';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -58,6 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger className="md:hidden" />
             <Header />
             <div className="ml-auto flex items-center gap-4">
+              <ThemeToggle />
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
