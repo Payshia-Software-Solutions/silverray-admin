@@ -232,6 +232,88 @@ export async function getAmenities(): Promise<AmenityFromApi[]> {
   }
 }
 
+/**
+ * Fetches a single amenity by its ID.
+ * @param id The ID of the amenity to fetch.
+ * @returns A promise that resolves to an AmenityFromApi object.
+ */
+export async function getAmenityById(id: number): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new amenity.
+ * @param amenityData The data for the new amenity.
+ * @returns A promise that resolves with the newly created amenity data.
+ */
+export async function createAmenity(amenityData: Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<AmenityFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/amenities`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(amenityData),
+        });
+        return handleResponse<AmenityFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create amenity:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing amenity.
+ * @param id The ID of the amenity to update.
+ * @param amenityData The new data for the amenity.
+ * @returns A promise that resolves with the updated amenity data.
+ */
+export async function updateAmenity(id: number, amenityData: Partial<Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(amenityData),
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes an amenity by its ID.
+ * @param id The ID of the amenity to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteAmenity(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete amenity ${id}:`, error);
+    throw error;
+  }
+}
 
 /**
  * Fetches all reservations from the back-end.
