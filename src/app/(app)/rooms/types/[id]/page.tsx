@@ -29,10 +29,10 @@ export default function EditRoomTypePage() {
     const params = useParams();
     const id = Number(params.id);
     const { toast } = useToast();
-    const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<RoomTypeFormValues>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, reset, setValue } = useForm<RoomTypeFormValues>({
         resolver: zodResolver(roomTypeSchema),
         defaultValues: {
-            updated_by: 'admin'
+            updated_by: 'admin' // Set a default value
         }
     });
 
@@ -41,7 +41,10 @@ export default function EditRoomTypePage() {
             async function fetchRoomType() {
                 try {
                     const roomType = await getRoomTypeById(id);
+                    // Reset the form with fetched data
                     reset(roomType);
+                    // Explicitly set company_id to ensure it's available and readonly
+                    setValue('company_id', roomType.company_id);
                 } catch (error: any) {
                     toast({
                         variant: 'destructive',
@@ -52,11 +55,13 @@ export default function EditRoomTypePage() {
             }
             fetchRoomType();
         }
-    }, [id, reset, toast]);
+    }, [id, reset, toast, setValue]);
 
     const onSubmit: SubmitHandler<RoomTypeFormValues> = async (data) => {
         try {
-            await updateRoomType(id, data);
+            // Ensure updated_by is set, even if the input is removed
+            const dataToSubmit = { ...data, updated_by: 'admin' };
+            await updateRoomType(id, dataToSubmit);
             toast({
                 title: 'Success!',
                 description: 'Room type updated successfully.',
@@ -96,11 +101,7 @@ export default function EditRoomTypePage() {
                                 <Input id="company_id" {...register('company_id')} readOnly />
                                 {errors.company_id && <p className="text-red-500 text-sm">{errors.company_id.message}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="updated_by">Updated By</Label>
-                                <Input id="updated_by" {...register('updated_by')} />
-                                {errors.updated_by && <p className="text-red-500 text-sm">{errors.updated_by.message}</p>}
-                            </div>
+                            
                             <div className="flex justify-end gap-2">
                                 <Button variant="outline" asChild>
                                     <Link href="/rooms?tab=room-types">Cancel</Link>
