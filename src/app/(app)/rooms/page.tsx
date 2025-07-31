@@ -149,13 +149,13 @@ export default function RoomsPage() {
                   {rooms.map((room) => (
                     <TableRow key={room.id}>
                       <TableCell className="font-medium">{room.id}</TableCell>
-                      <TableCell>{room.room_type_details.name}</TableCell>
+                      <TableCell>{room.room_type_details ? room.room_type_details.name : 'N/A'}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
                           {room.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{room.room_type_details.pricePerNight}</TableCell>
+                      <TableCell>{room.room_type_details ? room.room_type_details.pricePerNight : 'N/A'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
