@@ -101,7 +101,7 @@ export default function AddNewRoomPage() {
 
     const roomDataForApi = {
         room_number: roomDataFromForm.room_number,
-        amenities_id: 1, // This seems to be what the user's backend expects
+        amenities_id: roomDataFromForm.amenities.join(','),
         room_type_id: Number(roomDataFromForm.room_type_id),
         company_id: 'C001',
         descriptive_title: roomDataFromForm.descriptive_title,
