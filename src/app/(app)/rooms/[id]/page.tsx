@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose } from '@/components/ui/dialog';
 import { useParams } from 'next/navigation';
-import { getRoomByRoomNumber, getAmenities, AmenityFromApi, RoomFromApi } from '@/lib/services/api';
+import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -46,6 +46,7 @@ const roomImages = [
 
 export default function EditRoomPage() {
   const params = useParams<{ id: string }>();
+  const roomId = Number(params.id);
   const { toast } = useToast();
   const [room, setRoom] = useState<RoomFromApi | null>(null);
   const [allAmenities, setAllAmenities] = useState<AmenityFromApi[]>([]);
@@ -62,7 +63,7 @@ export default function EditRoomPage() {
       try {
         setLoading(true);
         const [roomData, amenitiesData] = await Promise.all([
-          getRoomByRoomNumber(params.id),
+          getRoomById(roomId),
           getAmenities(),
         ]);
         setRoom(roomData);
@@ -84,8 +85,10 @@ export default function EditRoomPage() {
         setLoading(false);
       }
     }
-    fetchData();
-  }, [params.id, toast]);
+    if (roomId) {
+        fetchData();
+    }
+  }, [roomId, toast]);
 
   const handleAmenityChange = (amenityId: string, checked: boolean) => {
     setSelectedAmenities(prev => {
@@ -127,7 +130,7 @@ export default function EditRoomPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Edit Room {params.id}</BreadcrumbPage>
+            <BreadcrumbPage>Edit Room {room.room_number}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -144,7 +147,7 @@ export default function EditRoomPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="room-number">Room Number</Label>
-                <Input id="room-number" value={params.id} disabled />
+                <Input id="room-number" value={room.room_number} disabled />
                 <p className="text-xs text-muted-foreground">Room number cannot be changed</p>
               </div>
               <div className="space-y-2">
@@ -313,7 +316,7 @@ export default function EditRoomPage() {
                 </AlertDialogHeader>
                 <div className="text-center">
                     <h2 className="text-xl font-bold mb-2">Do you want to Delete this Room ?</h2>
-                    <p className="text-lg text-red-500">Room Number {params.id}</p>
+                    <p className="text-lg text-red-500">Room Number {room.room_number}</p>
                 </div>
                 <AlertDialogFooter className="sm:justify-center">
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -365,7 +368,7 @@ export default function EditRoomPage() {
                          <Trash2 className="h-8 w-8 text-red-600" />
                       </div>
                   </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {params.id}!</h2>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Room {room.room_number}!</h2>
                   <DialogClose asChild>
                       <Button className="mt-6 w-full" onClick={() => {
                         setShowDeleteSuccessDialog(false);
@@ -386,7 +389,7 @@ export default function EditRoomPage() {
                         <CheckCircle2 className="h-8 w-8 text-blue-600" />
                     </div>
                 </div>
-                <h2 className="text-xl font-bold mb-2">Successfully Updated Room {params.id}!</h2>
+                <h2 className="text-xl font-bold mb-2">Successfully Updated Room {room.room_number}!</h2>
                 <DialogClose asChild>
                     <Button className="mt-6 w-full" onClick={() => setShowSaveSuccessDialog(false)}>Done</Button>
                 </DialogClose>

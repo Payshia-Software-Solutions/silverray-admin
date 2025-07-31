@@ -363,19 +363,19 @@ export async function createRoom(roomData: any): Promise<any> {
 }
 
 /**
- * Fetches a single room by its room number.
- * @param roomNumber The room number to fetch.
+ * Fetches a single room by its ID.
+ * @param roomId The ID of the room to fetch.
  * @returns A promise that resolves to a RoomFromApi object.
  */
-export async function getRoomByRoomNumber(roomNumber: string): Promise<RoomFromApi> {
+export async function getRoomById(roomId: number): Promise<RoomFromApi> {
     try {
-        const response = await fetch(`${API_BASE_URL}/rooms/${roomNumber}`, {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
         return handleResponse<RoomFromApi>(response);
     } catch (error) {
-        console.error(`Failed to fetch room ${roomNumber}:`, error);
+        console.error(`Failed to fetch room ${roomId}:`, error);
         throw error;
     }
 }
