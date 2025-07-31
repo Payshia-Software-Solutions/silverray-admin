@@ -12,12 +12,12 @@ const API_BASE_URL = 'http://localhost/Silver_server';
  * Defines the structure of a Room object as returned by the API.
  */
 export interface RoomFromApi {
-  id: string; // e.g., "R001"
-  status: 'Available' | 'Booked' | 'Under Maintenance';
-  room_type_details: {
-    name: string; // e.g., "Executive Suite"
-    pricePerNight: string; // e.g., "18000.00"
-  };
+  id: number;
+  room_number: string;
+  descriptive_title: string;
+  current_status: 'available' | 'booked' | 'maintenance';
+  price_per_night: string;
+  currency: string;
 }
 
 /**
@@ -126,7 +126,7 @@ export async function createRoom(roomData: any): Promise<any> {
  * @param roomId The ID of the room to delete.
  * @returns A promise that resolves with a success message.
  */
-export async function deleteRoom(roomId: string): Promise<{ message: string }> {
+export async function deleteRoom(roomId: number): Promise<{ message: string }> {
   try {
     const response = await fetch(`${API_BASE_URL}/rooms/${roomId}/`, {
       method: 'DELETE',

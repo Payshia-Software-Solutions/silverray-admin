@@ -37,9 +37,9 @@ import { Toaster } from '@/components/ui/toaster';
 
 
 const statusVariant = {
-  Available: 'bg-green-100 text-green-700',
-  Booked: 'bg-red-100 text-red-700',
-  'Under Maintenance': 'bg-yellow-100 text-yellow-700',
+  available: 'bg-green-100 text-green-700',
+  booked: 'bg-red-100 text-red-700',
+  maintenance: 'bg-yellow-100 text-yellow-700',
 } as const;
 
 export default function RoomsPage() {
@@ -48,9 +48,9 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<RoomFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
+  const [roomToDelete, setRoomToDelete] = useState<number | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
-  const [deletedRoomId, setDeletedRoomId] = useState<string | null>(null);
+  const [deletedRoomId, setDeletedRoomId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchRooms() {
@@ -75,7 +75,7 @@ export default function RoomsPage() {
     fetchRooms();
   }, []);
 
-  const handleDeleteClick = (roomId: string) => {
+  const handleDeleteClick = (roomId: number) => {
     setRoomToDelete(roomId);
   };
 
@@ -148,18 +148,18 @@ export default function RoomsPage() {
                 <TableBody>
                   {rooms.map((room) => (
                     <TableRow key={room.id}>
-                      <TableCell className="font-medium">{room.id}</TableCell>
-                      <TableCell>{room.room_type_details ? room.room_type_details.name : 'N/A'}</TableCell>
+                      <TableCell className="font-medium">{room.room_number}</TableCell>
+                      <TableCell>{room.descriptive_title}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', statusVariant[room.status as keyof typeof statusVariant])}>
-                          {room.status}
+                        <Badge variant="outline" className={cn('border-transparent', statusVariant[room.current_status as keyof typeof statusVariant])}>
+                          {room.current_status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{room.room_type_details ? room.room_type_details.pricePerNight : 'N/A'}</TableCell>
+                      <TableCell>{`${room.currency} ${room.price_per_night}`}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                              <Link href={`/rooms/${room.id}`}>
+                              <Link href={`/rooms/${room.room_number}`}>
                                 <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                 <span className="sr-only">View</span>
                               </Link>
@@ -206,7 +206,7 @@ export default function RoomsPage() {
             </AlertDialogHeader>
             <div className="text-center">
               <h2 className="text-xl font-bold mb-2">Do you want to Delete this Room ?</h2>
-              <p className="text-lg text-red-500">Room Number {roomToDelete}</p>
+              <p className="text-lg text-red-500">Room Number {rooms.find(r => r.id === roomToDelete)?.room_number}</p>
             </div>
             <AlertDialogFooter className="sm:justify-center">
                 <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
