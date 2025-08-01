@@ -37,6 +37,7 @@ interface ImageSlot {
   preview: string | null;
   isPrimary: boolean;
   imageName: string;
+  altText: string;
 }
 
 const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
@@ -44,6 +45,7 @@ const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
     preview: null,
     isPrimary: i === 0,
     imageName: '',
+    altText: '',
 }));
 
 
@@ -170,6 +172,7 @@ export default function AddNewRoomPage() {
     newImageSlots[index].file = null;
     newImageSlots[index].preview = null;
     newImageSlots[index].imageName = '';
+    newImageSlots[index].altText = '';
     setImageSlots(newImageSlots);
     const fileInput = document.getElementById(`image-upload-${index}`) as HTMLInputElement;
     if (fileInput) {
@@ -378,6 +381,14 @@ export default function AddNewRoomPage() {
                                     <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => {
                                         const newImageSlots = [...imageSlots];
                                         newImageSlots[index].imageName = e.target.value;
+                                        setImageSlots(newImageSlots);
+                                    }} />
+                                 </div>
+                                 <div className="space-y-1">
+                                    <Label htmlFor={`alt-text-${index}`} className="text-xs">Alt Text</Label>
+                                    <Input id={`alt-text-${index}`} placeholder="e.g. view from balcony" className="h-8 text-xs" value={slot.altText} onChange={(e) => {
+                                        const newImageSlots = [...imageSlots];
+                                        newImageSlots[index].altText = e.target.value;
                                         setImageSlots(newImageSlots);
                                     }} />
                                  </div>
