@@ -79,6 +79,10 @@ export default function NewCustomerPage() {
                                 <Label htmlFor="address">Address</Label>
                                 <Textarea id="address" placeholder="Enter customer's mailing address" />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="special-requests">Special Requests / Notes</Label>
+                                <Textarea id="special-requests" placeholder="Enter any special requests or notes for this customer" />
+                            </div>
                         </CardContent>
                     </Card>
 
