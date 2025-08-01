@@ -36,8 +36,6 @@ interface ImageSlot {
   file: File | null;
   preview: string | null;
   isPrimary: boolean;
-  altText: string;
-  order: number;
   imageName: string;
 }
 
@@ -45,8 +43,6 @@ const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
     file: null,
     preview: null,
     isPrimary: i === 0,
-    altText: '',
-    order: i + 1,
     imageName: '',
 }));
 
@@ -189,7 +185,7 @@ export default function AddNewRoomPage() {
     setImageSlots(newImageSlots);
   }
 
-  const handleDetailChange = (index: number, field: keyof ImageSlot, value: string | number | boolean) => {
+  const handleDetailChange = (index: number, field: keyof ImageSlot, value: string | boolean) => {
       const newImageSlots = [...imageSlots];
       (newImageSlots[index] as any)[field] = value;
       setImageSlots(newImageSlots);
@@ -380,14 +376,6 @@ export default function AddNewRoomPage() {
                                 <div className="space-y-1">
                                     <Label htmlFor={`image-name-${index}`} className="text-xs">Image Name</Label>
                                     <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => handleDetailChange(index, 'imageName', e.target.value)} />
-                                 </div>
-                                 <div className="space-y-1">
-                                    <Label htmlFor={`alt-text-${index}`} className="text-xs">Alt Text</Label>
-                                    <Input id={`alt-text-${index}`} placeholder="e.g. view from balcony" className="h-8 text-xs" value={slot.altText} onChange={(e) => handleDetailChange(index, 'altText', e.target.value)} />
-                                 </div>
-                                 <div className="space-y-1">
-                                    <Label htmlFor={`order-${index}`} className="text-xs">Display Order</Label>
-                                    <Input id={`order-${index}`} type="number" className="h-8 text-xs" value={slot.order} onChange={(e) => handleDetailChange(index, 'order', parseInt(e.target.value) || 0)}/>
                                  </div>
                                 <div className="flex items-center space-x-2">
                                     <Checkbox id={`is-primary-${index}`} checked={slot.isPrimary} onCheckedChange={() => handleSetPrimary(index)} />
