@@ -162,6 +162,7 @@ export default function AddNewRoomPage() {
         const newImageSlots = [...imageSlots];
         newImageSlots[index].file = file;
         newImageSlots[index].preview = reader.result as string;
+        newImageSlots[index].imageName = file.name;
         setImageSlots(newImageSlots);
       };
       reader.readAsDataURL(file);
@@ -172,6 +173,7 @@ export default function AddNewRoomPage() {
     const newImageSlots = [...imageSlots];
     newImageSlots[index].file = null;
     newImageSlots[index].preview = null;
+    newImageSlots[index].imageName = '';
     setImageSlots(newImageSlots);
     const fileInput = document.getElementById(`image-upload-${index}`) as HTMLInputElement;
     if (fileInput) {
@@ -432,5 +434,3 @@ export default function AddNewRoomPage() {
     </>
   );
 }
-
-    
