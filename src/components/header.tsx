@@ -47,19 +47,18 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'rooms' && pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'types') {
         return { title: 'Edit Room', description: `Editing Room ${pathSegments[1]}` };
     }
-    if (pathSegments[0] === 'experience' && pathSegments.length === 2 && pathSegments[1] !== 'new') {
+    if (pathSegments[0] === 'experience' && pathSegments.length > 1) {
         const title = pathSegments[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        return { title: 'Experience Details', description: `Bookings and details for ${title}` };
-    }
-    if (pathSegments[0] === 'experience' && pathSegments.length > 2) {
-        const title = pathSegments[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        if (pathSegments.length === 2) {
+            return { title: 'Experience Details', description: `Bookings and details for ${title}` };
+        }
         if(pathSegments[2] === 'edit'){
             return { title: 'Edit Experience', description: `Editing ${title}` };
         }
-        if(pathSegments[2] === 'bookings' && pathSegments[3] === 'new'){
+        if(pathSegments[2] === 'bookings' && pathSegments.length > 3 && pathSegments[3] === 'new'){
             return { title: 'New Experience Booking', description: `Creating a booking for ${title}` };
         }
-        if(pathSegments[2] === 'booking' && pathSegments[3]){
+        if(pathSegments[2] === 'booking' && pathSegments.length > 3){
              return { title: 'View Experience Booking', description: `Details for booking in ${title}` };
         }
     }
