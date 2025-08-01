@@ -171,54 +171,69 @@ export default function ManageRoomImagesPage() {
         </CardContent>
       </Card>
       
-      <Card>
-          <CardHeader>
-            <CardTitle>Image Gallery</CardTitle>
-            <CardDescription>Manage all room images from one place.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {images.map(image => (
-                    <Card key={image.id} className="overflow-hidden group">
-                        <div className="relative">
-                            <Image
-                                src={image.image_url}
-                                alt={image.alt_text}
-                                width={400}
-                                height={300}
-                                className="object-cover w-full h-40 transition-transform duration-300 group-hover:scale-105"
-                            />
-                            {image.is_primary ? (
-                                <Badge className="absolute top-2 left-2 bg-primary">Primary</Badge>
-                            ) : (
-                                <Badge variant="secondary" className="absolute top-2 left-2">Secondary</Badge>
-                            )}
-                            <Badge variant={image.is_active ? "default" : "destructive"} className={`absolute top-2 right-2 ${image.is_active ? 'bg-green-500' : 'bg-red-500'}`}>
-                                {image.is_active ? 'Active' : 'Inactive'}
-                            </Badge>
-                        </div>
-                        <CardContent className="p-3 space-y-2">
-                           <p className="text-xs text-muted-foreground">Room #{image.room_id}</p>
-                           <p className="font-semibold text-sm truncate" title={image.image_name}>{image.image_name}</p>
-                           <p className="text-xs text-muted-foreground truncate" title={image.alt_text}>{image.alt_text}</p>
-                           <div className="flex justify-between items-center pt-2">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(image)}>
-                                    <Edit className="h-4 w-4" />
-                                    <span className="sr-only">Edit</span>
-                                </Button>
-                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteClick(image)}>
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="sr-only">Delete</span>
-                                    </Button>
-                                </AlertDialogTrigger>
-                           </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-          </CardContent>
-      </Card>
+      <AlertDialog open={!!imageToDelete} onOpenChange={(open) => !open && setImageToDelete(null)}>
+        <Card>
+            <CardHeader>
+              <CardTitle>Image Gallery</CardTitle>
+              <CardDescription>Manage all room images from one place.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {images.map(image => (
+                      <Card key={image.id} className="overflow-hidden group">
+                          <div className="relative">
+                              <Image
+                                  src={image.image_url}
+                                  alt={image.alt_text}
+                                  width={400}
+                                  height={300}
+                                  className="object-cover w-full h-40 transition-transform duration-300 group-hover:scale-105"
+                              />
+                              {image.is_primary ? (
+                                  <Badge className="absolute top-2 left-2 bg-primary">Primary</Badge>
+                              ) : (
+                                  <Badge variant="secondary" className="absolute top-2 left-2">Secondary</Badge>
+                              )}
+                              <Badge variant={image.is_active ? "default" : "destructive"} className={`absolute top-2 right-2 ${image.is_active ? 'bg-green-500' : 'bg-red-500'}`}>
+                                  {image.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                          </div>
+                          <CardContent className="p-3 space-y-2">
+                             <p className="text-xs text-muted-foreground">Room #{image.room_id}</p>
+                             <p className="font-semibold text-sm truncate" title={image.image_name}>{image.image_name}</p>
+                             <p className="text-xs text-muted-foreground truncate" title={image.alt_text}>{image.alt_text}</p>
+                             <div className="flex justify-between items-center pt-2">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(image)}>
+                                      <Edit className="h-4 w-4" />
+                                      <span className="sr-only">Edit</span>
+                                  </Button>
+                                   <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => handleDeleteClick(image)}>
+                                          <Trash2 className="h-4 w-4" />
+                                          <span className="sr-only">Delete</span>
+                                      </Button>
+                                  </AlertDialogTrigger>
+                             </div>
+                          </CardContent>
+                      </Card>
+                  ))}
+              </div>
+            </CardContent>
+        </Card>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the image
+                    <span className="font-bold"> {imageToDelete?.image_name}</span>.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
 
     <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
@@ -263,22 +278,6 @@ export default function ManageRoomImagesPage() {
             </div>
         </DialogContent>
     </Dialog>
-
-     <AlertDialog open={!!imageToDelete} onOpenChange={(open) => !open && setImageToDelete(null)}>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the image
-                    <span className="font-bold"> {imageToDelete?.image_name}</span>.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-    </AlertDialog>
     </>
   );
 }
