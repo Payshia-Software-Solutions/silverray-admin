@@ -16,12 +16,10 @@ export default function NewCustomerPage() {
     
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
-            <Card className="border-none shadow-none">
-                <CardHeader>
-                    <CardTitle>Create New Customer</CardTitle>
-                    <CardDescription>Fill out the form below to add a new customer to your database.</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="space-y-2 text-center">
+                <h1 className="text-3xl font-bold">Create New Customer</h1>
+                <p className="text-muted-foreground">Fill out the form below to add a new customer to your database.</p>
+            </div>
 
             <form className="space-y-8">
                  <Card>
