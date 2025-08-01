@@ -11,6 +11,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -32,6 +33,11 @@ const navItems = [
 export function Nav() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const getParentPath = (path: string) => {
     const parts = path.split('/').filter(p => p);
@@ -62,7 +68,7 @@ export function Nav() {
                 <span
                   className={cn(
                     'transition-opacity duration-200 text-sm font-medium',
-                    state === 'collapsed' ? 'opacity-0' : 'opacity-100'
+                    state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100'
                   )}
                 >
                   {item.label}
