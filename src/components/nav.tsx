@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuItem,
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/rooms', label: 'Room Management', icon: BedDouble },
+  { href: '/rooms/images', label: 'Room Images', icon: Image },
   { href: '/amenities', label: 'Amenities Management', icon: Shield },
   { href: '/reservations', label: 'Room Booking Management', icon: CalendarCheck },
   { href: '/restaurant', label: 'Restaurant & Dining', icon: UtensilsCrossed },
@@ -34,6 +35,10 @@ export function Nav() {
   const getParentPath = (path: string) => {
     const parts = path.split('/').filter(p => p);
     if (parts.length > 1) {
+      // Handle special case for rooms/images
+      if (parts[0] === 'rooms' && parts[1] === 'images') {
+        return `/${parts[0]}/${parts[1]}`;
+      }
       return `/${parts[0]}`;
     }
     return path;

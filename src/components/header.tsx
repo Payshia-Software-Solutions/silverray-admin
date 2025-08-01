@@ -8,6 +8,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
   '/rooms': { title: 'Rooms Management', description: 'View, add, edit, or delete hotel rooms.' },
   '/rooms/new': { title: 'Create New Room', description: 'Add a new room to your hotel.' },
+  '/rooms/images': { title: 'Room Image Management', description: 'Upload, edit, and manage all room images.' },
   '/rooms/types': { title: 'Room Types Management', description: 'Create, view, edit, and manage room types.' },
   '/rooms/types/new': { title: 'Create New Room Type', description: 'Add a new category of room for your hotel.' },
   '/amenities': { title: 'Amenities Management', description: 'Manage all hotel amenities available for rooms.' },
