@@ -38,6 +38,7 @@ interface ImageSlot {
   isPrimary: boolean;
   altText: string;
   order: number;
+  imageName: string;
 }
 
 const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
@@ -46,6 +47,7 @@ const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
     isPrimary: i === 0,
     altText: '',
     order: i + 1,
+    imageName: '',
 }));
 
 
@@ -185,7 +187,7 @@ export default function AddNewRoomPage() {
     setImageSlots(newImageSlots);
   }
 
-  const handleDetailChange = (index: number, field: 'altText' | 'order', value: string | number) => {
+  const handleDetailChange = (index: number, field: keyof ImageSlot, value: string | number | boolean) => {
       const newImageSlots = [...imageSlots];
       (newImageSlots[index] as any)[field] = value;
       setImageSlots(newImageSlots);
@@ -373,6 +375,10 @@ export default function AddNewRoomPage() {
                         </div>
                         {slot.preview && (
                              <div className="space-y-3">
+                                <div className="space-y-1">
+                                    <Label htmlFor={`image-name-${index}`} className="text-xs">Image Name</Label>
+                                    <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => handleDetailChange(index, 'imageName', e.target.value)} />
+                                 </div>
                                  <div className="space-y-1">
                                     <Label htmlFor={`alt-text-${index}`} className="text-xs">Alt Text</Label>
                                     <Input id={`alt-text-${index}`} placeholder="e.g. view from balcony" className="h-8 text-xs" value={slot.altText} onChange={(e) => handleDetailChange(index, 'altText', e.target.value)} />
@@ -426,3 +432,5 @@ export default function AddNewRoomPage() {
     </>
   );
 }
+
+    
