@@ -177,14 +177,14 @@ export default function AddNewRoomPage() {
     }
   };
 
-  const handleSetPrimary = (index: number) => {
-    const newImageSlots = imageSlots.map((slot, i) => ({
-        ...slot,
-        isPrimary: i === index,
+  const handleSetPrimary = (selectedIndex: number) => {
+    const newImageSlots = imageSlots.map((slot, index) => ({
+      ...slot,
+      isPrimary: index === selectedIndex,
     }));
     setImageSlots(newImageSlots);
-  }
-
+  };
+  
   const handleDetailChange = (index: number, field: keyof ImageSlot, value: string | boolean) => {
       const newImageSlots = [...imageSlots];
       (newImageSlots[index] as any)[field] = value;
@@ -375,7 +375,11 @@ export default function AddNewRoomPage() {
                              <div className="space-y-3">
                                 <div className="space-y-1">
                                     <Label htmlFor={`image-name-${index}`} className="text-xs">Image Name</Label>
-                                    <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => handleDetailChange(index, 'imageName', e.target.value)} />
+                                    <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => {
+                                        const newImageSlots = [...imageSlots];
+                                        newImageSlots[index].imageName = e.target.value;
+                                        setImageSlots(newImageSlots);
+                                    }} />
                                  </div>
                                 <div className="flex items-center space-x-2">
                                     <Checkbox id={`is-primary-${index}`} checked={slot.isPrimary} onCheckedChange={() => handleSetPrimary(index)} />
