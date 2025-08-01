@@ -40,10 +40,9 @@ export function Nav() {
   }, []);
 
   const getParentPath = (path: string) => {
-    const parts = path.split('/').filter(p => p);
+    const parts = path.split('?')[0].split('/').filter(p => p);
     if (parts.length > 1) {
-      // Handle special case for rooms/images
-      if (parts[0] === 'rooms' && parts[1] === 'images') {
+       if (parts[0] === 'rooms' && (parts[1] === 'images' || parts[1] === 'types')) {
         return `/${parts[0]}/${parts[1]}`;
       }
       return `/${parts[0]}`;
