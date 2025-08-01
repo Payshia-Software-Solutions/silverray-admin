@@ -30,7 +30,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/user-management/new': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
   '/api-example': { title: 'API Connection Example', description: 'Demonstrating how to connect to a PHP back-end.'},
-
+  '/customers': { title: 'Customer Management', description: 'View and manage your customer database.' },
   // Add other pages here
 };
 
