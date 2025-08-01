@@ -16,7 +16,6 @@ import { useEffect, useState } from 'react';
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/rooms', label: 'Room Management', icon: BedDouble },
-  { href: '/rooms/images', label: 'Room Images', icon: Image },
   { href: '/amenities', label: 'Amenities Management', icon: Shield },
   { href: '/reservations', label: 'Room Booking Management', icon: CalendarCheck },
   { href: '/restaurant', label: 'Restaurant & Dining', icon: UtensilsCrossed },
