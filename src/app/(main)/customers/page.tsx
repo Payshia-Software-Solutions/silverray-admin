@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const customers = [
   {
@@ -72,9 +73,11 @@ export default function CustomerManagementPage() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search customers..." className="pl-8" />
               </div>
-              <Button onClick={() => console.log('Add New Customer Clicked')}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Customer
+              <Button asChild>
+                <Link href="/customers/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add New Customer
+                </Link>
               </Button>
             </div>
           </div>
