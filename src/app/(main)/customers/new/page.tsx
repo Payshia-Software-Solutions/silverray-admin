@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
@@ -21,6 +22,10 @@ export default function NewCustomerPage() {
                 <CardContent>
                     <form className="space-y-4">
                         <div className="space-y-2">
+                            <Label htmlFor="customer-id">Customer ID</Label>
+                            <Input id="customer-id" placeholder="Enter customer ID" />
+                        </div>
+                        <div className="space-y-2">
                             <Label htmlFor="full-name">Full Name</Label>
                             <Input id="full-name" placeholder="Enter customer's full name" />
                         </div>
@@ -31,6 +36,19 @@ export default function NewCustomerPage() {
                          <div className="space-y-2">
                             <Label htmlFor="phone">Phone Number</Label>
                             <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="customer-type">Customer Type</Label>
+                            <Select>
+                                <SelectTrigger id="customer-type">
+                                    <SelectValue placeholder="Select customer type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="individual">Individual</SelectItem>
+                                    <SelectItem value="corporate">Corporate</SelectItem>
+                                    <SelectItem value="vip">VIP</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="address">Address</Label>
