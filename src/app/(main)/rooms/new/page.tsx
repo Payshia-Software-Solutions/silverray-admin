@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User, X } from 'lucide-react';
+import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User, X, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -32,11 +32,26 @@ import { createRoom, getRoomTypes, getAmenities, type RoomTypeFromApi, type Amen
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
-const initialImageSlots = Array(4).fill(null);
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+  altText: string;
+  order: number;
+}
+
+const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
+    file: null,
+    preview: null,
+    isPrimary: i === 0,
+    altText: '',
+    order: i + 1,
+}));
+
 
 export default function AddNewRoomPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(initialImageSlots);
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(initialImageSlots);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
@@ -121,6 +136,9 @@ export default function AddNewRoomPage() {
     try {
       const result = await createRoom(roomDataForApi);
       console.log('Room created:', result);
+      // Here you would typically also handle the image uploads
+      // For each slot in imageSlots, if there's a file, upload it
+      // and associate it with the newly created room ID from `result`.
       setShowSuccessDialog(true);
     } catch (error: any) {
       console.error('Error creating room:', error);
@@ -139,23 +157,40 @@ export default function AddNewRoomPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const newImagePreviews = [...imagePreviews];
-        newImagePreviews[index] = reader.result as string;
-        setImagePreviews(newImagePreviews);
+        const newImageSlots = [...imageSlots];
+        newImageSlots[index].file = file;
+        newImageSlots[index].preview = reader.result as string;
+        setImageSlots(newImageSlots);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = (index: number) => {
-    const newImagePreviews = [...imagePreviews];
-    newImagePreviews[index] = null;
-    setImagePreviews(newImagePreviews);
+    const newImageSlots = [...imageSlots];
+    newImageSlots[index].file = null;
+    newImageSlots[index].preview = null;
+    setImageSlots(newImageSlots);
     const fileInput = document.getElementById(`image-upload-${index}`) as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
     }
   };
+
+  const handleSetPrimary = (index: number) => {
+    const newImageSlots = imageSlots.map((slot, i) => ({
+        ...slot,
+        isPrimary: i === index,
+    }));
+    setImageSlots(newImageSlots);
+  }
+
+  const handleDetailChange = (index: number, field: 'altText' | 'order', value: string | number) => {
+      const newImageSlots = [...imageSlots];
+      (newImageSlots[index] as any)[field] = value;
+      setImageSlots(newImageSlots);
+  };
+
 
   return (
     <>
@@ -310,29 +345,47 @@ export default function AddNewRoomPage() {
                     <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
                     Room Images
                 </h3>
+                 <p className="text-sm text-muted-foreground">Upload up to 5 images. The first image will be the primary one by default.</p>
             </div>
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {imagePreviews.map((preview, index) => (
-                    <div key={index} className="flex items-center justify-center w-full">
-                        {preview ? (
-                            <div className="relative w-full h-32">
-                                <Image src={preview} alt={`Room image preview ${index + 1}`} layout="fill" className="rounded-lg object-cover" />
-                                <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
-                                    <X className="h-4 w-4" />
-                                    <span className="sr-only">Remove image</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {imageSlots.map((slot, index) => (
+                    <div key={index} className="space-y-3">
+                        <div className="aspect-video w-full">
+                        {slot.preview ? (
+                             <div className="relative w-full h-full">
+                                <Image src={slot.preview} alt={`Room image preview ${index + 1}`} layout="fill" className="rounded-lg object-cover" />
+                                <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
+                                    <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
                         ) : (
                             <label
                                 htmlFor={`image-upload-${index}`}
-                                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                                className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
                             >
-                                <div className="flex flex-col items-center justify-center">
+                                <div className="flex flex-col items-center justify-center text-center">
                                     <Plus className="w-8 h-8 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground">Add Image</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Add Image</p>
                                 </div>
                                 <Input id={`image-upload-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} accept="image/png, image/jpeg" />
                             </label>
+                        )}
+                        </div>
+                        {slot.preview && (
+                             <div className="space-y-3">
+                                 <div className="space-y-1">
+                                    <Label htmlFor={`alt-text-${index}`} className="text-xs">Alt Text</Label>
+                                    <Input id={`alt-text-${index}`} placeholder="e.g. view from balcony" className="h-8 text-xs" value={slot.altText} onChange={(e) => handleDetailChange(index, 'altText', e.target.value)} />
+                                 </div>
+                                 <div className="space-y-1">
+                                    <Label htmlFor={`order-${index}`} className="text-xs">Display Order</Label>
+                                    <Input id={`order-${index}`} type="number" className="h-8 text-xs" value={slot.order} onChange={(e) => handleDetailChange(index, 'order', parseInt(e.target.value) || 0)}/>
+                                 </div>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id={`is-primary-${index}`} checked={slot.isPrimary} onCheckedChange={() => handleSetPrimary(index)} />
+                                    <Label htmlFor={`is-primary-${index}`} className="text-xs font-normal">Primary Image</Label>
+                                </div>
+                             </div>
                         )}
                     </div>
                 ))}
