@@ -68,9 +68,9 @@ export default function NewBookingPage() {
             </div>
 
             <div className="space-y-8">
-                {/* Guest Information */}
+                {/* Customer Information */}
                 <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2"><User className="h-5 w-5 text-primary"/> Guest Information</h3>
+                    <h3 className="text-lg font-semibold flex items-center gap-2"><User className="h-5 w-5 text-primary"/> Customer Information</h3>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="full-name">Full Name *</Label>
