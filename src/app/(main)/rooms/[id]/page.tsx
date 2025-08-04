@@ -45,9 +45,9 @@ const roomImages = [
 ]
 
 export default function EditRoomPage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams();
   const router = useRouter();
-  const roomId = Number(params.id);
+  const roomId = Number(params?.id);
   const { toast } = useToast();
   const [room, setRoom] = useState<RoomFromApi | null>(null);
   const [allAmenities, setAllAmenities] = useState<AmenityFromApi[]>([]);

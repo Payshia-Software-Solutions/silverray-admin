@@ -29,7 +29,7 @@ type AmenityFormValues = z.infer<typeof amenitySchema>;
 export default function EditAmenityPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params.id);
+    const id = Number(params?.id);
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<AmenityFormValues>({
         resolver: zodResolver(amenitySchema),
