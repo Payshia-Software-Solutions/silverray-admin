@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -31,21 +32,36 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/api-example': { title: 'API Connection Example', description: 'Demonstrating how to connect to a PHP back-end.'},
   '/customers': { title: 'Customer Management', description: 'View and manage your customer database.' },
   '/customers/new': { title: 'Add New Customer', description: 'Add a new customer to your database.' },
-  '/rooms/types/[id]': { title: 'Edit Room Type', description: `Updating details for a room type.` },
-  '/amenities/[id]': { title: 'Edit Amenity', description: `Updating details for an amenity.` },
-  '/reservations/[id]': { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` },
-  '/weddings/booking/[id]': { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' },
-  '/restaurant/menu/[id]': { title: `Edit Menu Item`, description: 'Manage a dining menu item.' },
-  '/restaurant/reservations/[id]': { title: 'Restaurant Reservation Details', description: `Details for a dining reservation.` },
-  '/experience/new-booking': { title: 'Experience Management', description: 'Create a new booking for this experience.' },
 };
 
-// Simplified dynamic logic to avoid enumerating params
 const getDynamicPageInfo = (pathname: string) => {
     const pathSegments = pathname.split('/').filter(Boolean);
 
     if (pathSegments[0] === 'rooms' && pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'types') {
         return { title: 'Edit Room', description: `Editing Room ${pathSegments[1]}` };
+    }
+     if (pathSegments[0] === 'rooms' && pathSegments[1] === 'types' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
+        return { title: 'Edit Room Type', description: `Updating details for a room type.` };
+    }
+     if (pathSegments[0] === 'amenities' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Amenity', description: `Updating details for an amenity.` };
+    }
+    if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Customer', description: `Updating details for a customer.` };
+    }
+     if (pathSegments[0] === 'reservations' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` };
+    }
+     if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
+        return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
+    }
+    if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {
+        if(pathSegments[1] === 'menu' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
+            return { title: `Edit Menu Item`, description: 'Manage a dining menu item.' };
+        }
+        if(pathSegments[1] === 'reservations' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
+             return { title: 'Restaurant Reservation Details', description: `Details for a dining reservation.` };
+        }
     }
     if (pathSegments[0] === 'experience' && pathSegments.length > 1) {
         const title = pathSegments[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -61,12 +77,6 @@ const getDynamicPageInfo = (pathname: string) => {
         if(pathSegments[2] === 'booking' && pathSegments.length > 3){
              return { title: 'View Experience Booking', description: `Details for booking in ${title}` };
         }
-    }
-    
-    // Fallback for any other dynamic routes or if no match
-    const staticPath = `/${pathSegments.slice(0, -1).join('/')}/[id]`;
-    if (pageInfo[staticPath]) {
-        return pageInfo[staticPath];
     }
     
     return null;

@@ -2,6 +2,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,10 +13,10 @@ import Link from 'next/link';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createCustomer } from '@/lib/services/api';
+import { getCustomerById, updateCustomer } from '@/lib/services/api';
 
 const customerSchema = z.object({
   customer_id: z.string().min(1, 'Customer ID is required'),
@@ -30,39 +31,49 @@ const customerSchema = z.object({
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
 
-export default function NewCustomerPage() {
+export default function EditCustomerPage() {
     const router = useRouter();
+    const params = useParams();
+    const id = Number(params.id);
     const { toast } = useToast();
-    const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<CustomerFormValues>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<CustomerFormValues>({
         resolver: zodResolver(customerSchema),
-        defaultValues: {
-            customer_type: 'individual',
-            account_status: 'active',
-        },
     });
 
+    useEffect(() => {
+        if (id) {
+            async function fetchCustomer() {
+                try {
+                    const customer = await getCustomerById(id);
+                    reset(customer);
+                } catch (error: any) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Error fetching customer',
+                        description: error.message || 'An unexpected error occurred.',
+                    });
+                }
+            }
+            fetchCustomer();
+        }
+    }, [id, reset, toast]);
+
     const onSubmit: SubmitHandler<CustomerFormValues> = async (data) => {
-      const dataToSend = {
-          ...data,
-          company_id: 'COMP004', // This should be dynamic in a real app
-          created_by: 'admin_user',
-          updated_by: 'admin_user',
-      };
-      
-      try {
-          await createCustomer(dataToSend as any);
-          toast({
-              title: 'Success!',
-              description: 'New customer created successfully.',
-          });
-          router.push('/customers');
-      } catch (error: any) {
-          toast({
-              variant: 'destructive',
-              title: 'Error creating customer',
-              description: error.message || 'An unexpected error occurred.',
-          });
-      }
+        try {
+            const dataToSend = { ...data, updated_by: 'admin_user' };
+            await updateCustomer(id, dataToSend);
+            toast({
+                title: 'Success!',
+                description: 'Customer updated successfully.',
+            });
+            router.push('/customers');
+        } catch (error: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error updating customer',
+                description: error.message || 'An unexpected error occurred.',
+            });
+        }
     };
     
     return (
@@ -72,14 +83,14 @@ export default function NewCustomerPage() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                      <Card>
                         <CardHeader>
-                            <CardTitle>Customer Identity</CardTitle>
-                            <CardDescription>Provide basic identification and contact details for the new customer.</CardDescription>
+                            <CardTitle>Edit Customer</CardTitle>
+                            <CardDescription>Update customer identification and contact details.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="customer-id">Customer ID *</Label>
-                                    <Input id="customer-id" placeholder="e.g., CUST-005" {...register('customer_id')} />
+                                    <Input id="customer-id" {...register('customer_id')} />
                                     {errors.customer_id && <p className="text-red-500 text-sm">{errors.customer_id.message}</p>}
                                 </div>
                                 <div className="space-y-2">
@@ -88,7 +99,7 @@ export default function NewCustomerPage() {
                                       name="customer_type"
                                       control={control}
                                       render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <SelectTrigger id="customer-type">
                                                 <SelectValue placeholder="Select customer type" />
                                             </SelectTrigger>
@@ -101,33 +112,33 @@ export default function NewCustomerPage() {
                                         </Select>
                                       )}
                                     />
-                                     {errors.customer_type && <p className="text-red-500 text-sm">{errors.customer_type.message}</p>}
+                                    {errors.customer_type && <p className="text-red-500 text-sm">{errors.customer_type.message}</p>}
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="full-name">Full Name *</Label>
-                                <Input id="full-name" placeholder="Enter customer's full name" {...register('full_name')} />
+                                <Input id="full-name" {...register('full_name')} />
                                 {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name.message}</p>}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email Address *</Label>
-                                    <Input id="email" type="email" placeholder="customer@example.com" {...register('email')} />
+                                    <Input id="email" type="email" {...register('email')} />
                                     {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                                 </div>
                                  <div className="space-y-2">
                                     <Label htmlFor="phone">Phone Number *</Label>
-                                    <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" {...register('phone_number')} />
+                                    <Input id="phone" type="tel" {...register('phone_number')} />
                                     {errors.phone_number && <p className="text-red-500 text-sm">{errors.phone_number.message}</p>}
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Address</Label>
-                                <Textarea id="address" placeholder="Enter customer's mailing address" {...register('address')} />
+                                <Textarea id="address" {...register('address')} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="special-requests">Special Requests / Notes</Label>
-                                <Textarea id="special-requests" placeholder="Enter any special requests or notes for this customer" {...register('special_requests')} />
+                                <Textarea id="special-requests" {...register('special_requests')} />
                             </div>
                         </CardContent>
                     </Card>
@@ -144,7 +155,7 @@ export default function NewCustomerPage() {
                                   name="account_status"
                                   control={control}
                                   render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger id="account-status">
                                             <SelectValue placeholder="Select account status" />
                                         </SelectTrigger>
@@ -157,7 +168,7 @@ export default function NewCustomerPage() {
                                     </Select>
                                   )}
                                 />
-                                 {errors.account_status && <p className="text-red-500 text-sm">{errors.account_status.message}</p>}
+                                {errors.account_status && <p className="text-red-500 text-sm">{errors.account_status.message}</p>}
                             </div>
                         </CardContent>
                     </Card>
@@ -167,7 +178,7 @@ export default function NewCustomerPage() {
                             <Link href="/customers">Cancel</Link>
                         </Button>
                         <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Creating...' : 'Create Customer'}
+                            {isSubmitting ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </form>

@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -82,6 +83,23 @@ export interface AmenityFromApi {
   updated_at: string;
   created_by: string;
   updated_by: string;
+}
+
+export interface CustomerFromApi {
+    id: number;
+    customer_id: string;
+    customer_type: 'individual' | 'corporate' | 'vip' | 'group';
+    company_id: string;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+    special_requests: string;
+    account_status: 'active' | 'inactive' | 'suspended' | 'pending';
+    created_at: string;
+    updated_at: string;
+    created_by: string;
+    updated_by: string;
 }
 
 
@@ -445,4 +463,40 @@ export async function deleteBooking(bookingId: string): Promise<{ message: strin
     console.error(`Failed to delete booking ${bookingId}:`, error);
     throw error;
   }
+}
+
+// Customer API functions
+export async function getCustomers(): Promise<CustomerFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/customers`);
+    return handleResponse<CustomerFromApi[]>(response);
+}
+
+export async function getCustomerById(id: number): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`);
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function createCustomer(customerData: Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function updateCustomer(id: number, customerData: Partial<Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function deleteCustomer(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }
