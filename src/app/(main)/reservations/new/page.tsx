@@ -30,7 +30,7 @@ import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, C
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { getCustomers, type CustomerFromApi } from '@/lib/services/api';
+import { getCustomers, getRoomTypes, type CustomerFromApi, type RoomTypeFromApi } from '@/lib/services/api';
 
 export default function NewBookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(undefined);
@@ -38,21 +38,29 @@ export default function NewBookingPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [customers, setCustomers] = useState<CustomerFromApi[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
+  const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
 
   useEffect(() => {
-    async function fetchCustomers() {
+    async function fetchInitialData() {
       try {
         setLoadingCustomers(true);
-        const data = await getCustomers();
-        setCustomers(data);
+        setLoadingRoomTypes(true);
+        const [customersData, roomTypesData] = await Promise.all([
+          getCustomers(),
+          getRoomTypes(),
+        ]);
+        setCustomers(customersData);
+        setRoomTypes(roomTypesData);
       } catch (err: any) {
-        console.error("Failed to fetch customers:", err);
+        console.error("Failed to fetch initial data:", err);
         // Optionally, show a toast or error message to the user
       } finally {
         setLoadingCustomers(false);
+        setLoadingRoomTypes(false);
       }
     }
-    fetchCustomers();
+    fetchInitialData();
   }, []);
 
   const handleCreateBooking = () => {
@@ -116,10 +124,15 @@ export default function NewBookingPage() {
                          <div className="space-y-2">
                             <Label htmlFor="room-type">Room Type *</Label>
                             <Select>
-                                <SelectTrigger id="room-type"><SelectValue placeholder="Select Room Type" /></SelectTrigger>
+                                <SelectTrigger id="room-type">
+                                  <SelectValue placeholder={loadingRoomTypes ? "Loading types..." : "Select Room Type"} />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="deluxe">Deluxe Double Room</SelectItem>
-                                    <SelectItem value="suite">King Suite</SelectItem>
+                                    {roomTypes.map((type) => (
+                                      <SelectItem key={type.room_type_id} value={type.room_type_id}>
+                                        {type.type_name}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
