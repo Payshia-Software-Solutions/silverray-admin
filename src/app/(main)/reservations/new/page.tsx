@@ -46,6 +46,7 @@ const reservationSchema = z.object({
   check_out_date: z.date({ required_error: "Check-out date is required." }),
   adults: z.coerce.number().min(1, 'At least one adult is required'),
   children: z.coerce.number().min(0, 'Children cannot be negative'),
+  numbers_of_night: z.coerce.number().min(0),
   total_amount: z.coerce.number().min(0, 'Total amount is required'),
   amount_paid: z.coerce.number().min(0, 'Amount paid is required'),
   payment_status: z.enum(['Paid', 'Pending', 'Due']),
@@ -79,6 +80,7 @@ export default function NewBookingPage() {
         booking_source: 'Online',
         payment_method: 'Credit Card',
         amount_paid: 0,
+        numbers_of_night: 0,
     }
   });
 
@@ -86,9 +88,30 @@ export default function NewBookingPage() {
   const checkOutDate = watch('check_out_date');
   const totalAmount = watch('total_amount');
   const amountPaid = watch('amount_paid');
+  const bookingId = watch('booking_id');
   
   const balanceDue = (totalAmount || 0) - (amountPaid || 0);
-  const nights = checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
+  
+  useEffect(() => {
+    if (checkInDate && checkOutDate) {
+        const nights = differenceInDays(checkOutDate, checkInDate);
+        setValue('numbers_of_night', nights > 0 ? nights : 0);
+    }
+  }, [checkInDate, checkOutDate, setValue]);
+
+  const nights = watch('numbers_of_night');
+
+  useEffect(() => {
+    if (bookingId) {
+      if (bookingId.toUpperCase().startsWith('BK')) {
+        setValue('booking_source', 'Online');
+      } else if (bookingId.toUpperCase().startsWith('PH')) {
+        setValue('booking_source', 'Phone Call');
+      } else if (bookingId.toUpperCase().startsWith('WI')) {
+        setValue('booking_source', 'Walk-in');
+      }
+    }
+  }, [bookingId, setValue]);
 
 
   useEffect(() => {
@@ -121,7 +144,6 @@ export default function NewBookingPage() {
         ...data,
         check_in_date: format(data.check_in_date, 'yyyy-MM-dd'),
         check_out_date: format(data.check_out_date, 'yyyy-MM-dd'),
-        numbers_of_night: nights > 0 ? nights : 0,
         balance_due: balanceDue.toFixed(2),
         company_id: 'COMP001', // Example company_id
     };
@@ -290,7 +312,8 @@ export default function NewBookingPage() {
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="nights">Number of Nights</Label>
-                            <Input id="nights" type="number" value={nights} readOnly />
+                            <Input id="nights" type="number" {...register('numbers_of_night')} readOnly />
+                             {errors.numbers_of_night && <p className="text-sm text-red-500">{errors.numbers_of_night.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="adults">Adults *</Label>
