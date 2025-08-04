@@ -55,6 +55,40 @@ export interface ReservationFromApi {
   };
 }
 
+
+/**
+ * Defines the structure for a Booking object from the API.
+ */
+export interface BookingFromApi {
+  id: number;
+  booking_id: string;
+  room_type_id: string;
+  customer_id: string;
+  room_number: string;
+  company_id: string;
+  check_in_date: string;
+  check_out_date: string;
+  adults: number;
+  children: number;
+  numbers_of_night: number;
+  total_amount: string;
+  amount_paid: string;
+  balance_due: string;
+  payment_status: 'Paid' | 'Pending' | 'Due';
+  payment_method: 'Credit Card' | 'Cash' | 'Bank Transfer' | 'Online';
+  discount_code: string | null;
+  booking_status: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  booking_source: 'Online' | 'Phone' | 'Walk-in';
+  customer?: {
+    full_name: string;
+    email: string;
+  };
+   roomType?: {
+    type_name: string;
+  };
+}
+
+
 /**
  * Defines the structure of a RoomType object as returned by the API.
  */
@@ -496,6 +530,42 @@ export async function updateCustomer(id: number, customerData: Partial<Omit<Cust
 
 export async function deleteCustomer(id: number): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Booking API Functions
+export async function getBookings(): Promise<BookingFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/bookings`);
+  return handleResponse<BookingFromApi[]>(response);
+}
+
+export async function getBookingById(id: number): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/bookings/${id}`);
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function createBooking(bookingData: any): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function updateBooking(id: number, bookingData: Partial<BookingFromApi>): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function deleteBookingById(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);

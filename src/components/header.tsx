@@ -15,6 +15,8 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/amenities/new': { title: 'Create New Amenity', description: 'Add a new amenity to your hotel.' },
   '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/reservations/new': { title: 'Create New Booking', description: 'Add a new room or suite booking.' },
+  '/bookings': { title: 'Bookings Management', description: 'Manage all bookings.' },
+  '/bookings/new': { title: 'Create New Booking', description: 'Add a new booking record.' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
   '/restaurant/new': { title: 'Add New Restaurant Venue', description: 'Create a new dining venue in your hotel.' },
   '/restaurant/menu/new': { title: 'Add New Menu Item', description: 'Add a new dish or beverage to a restaurant menu.' },
@@ -51,6 +53,9 @@ const getDynamicPageInfo = (pathname: string) => {
     }
      if (pathSegments[0] === 'reservations' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` };
+    }
+    if (pathSegments[0] === 'bookings' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Booking', description: `Details for booking #${pathSegments[1]}.` };
     }
      if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
         return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
