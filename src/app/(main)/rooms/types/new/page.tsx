@@ -31,7 +31,7 @@ export default function NewRoomTypePage() {
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RoomTypeFormValues>({
         resolver: zodResolver(roomTypeSchema),
         defaultValues: {
-            company_id: 'C001', // Pre-fill default company ID
+            company_id: 'COMP004', // Pre-fill default company ID
             created_by: 'admin', // Pre-fill default user
         }
     });

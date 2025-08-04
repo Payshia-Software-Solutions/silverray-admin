@@ -127,7 +127,7 @@ export default function EditRoomPage() {
         room_number: room.room_number,
         amenities_id: Array.from(selectedAmenities).join(','),
         room_type_id: Number(formData.get('roomTypeId')),
-        company_id: room.company_id || 'COMP031', // Fallback
+        company_id: room.company_id || 'COMP004', // Fallback
         descriptive_title: formData.get('descriptiveTitle') as string,
         short_description: formData.get('shortDescription') as string,
         adults_capacity: Number(formData.get('adults')),
