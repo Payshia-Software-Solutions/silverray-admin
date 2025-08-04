@@ -30,7 +30,7 @@ import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, C
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { getCustomers, getRoomTypes, type CustomerFromApi, type RoomTypeFromApi } from '@/lib/services/api';
+import { getCustomers, getRoomTypes, getRooms, type CustomerFromApi, type RoomTypeFromApi, type RoomFromApi } from '@/lib/services/api';
 
 export default function NewBookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(undefined);
@@ -40,24 +40,30 @@ export default function NewBookingPage() {
   const [loadingCustomers, setLoadingCustomers] = useState(true);
   const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
+  const [rooms, setRooms] = useState<RoomFromApi[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
 
   useEffect(() => {
     async function fetchInitialData() {
       try {
         setLoadingCustomers(true);
         setLoadingRoomTypes(true);
-        const [customersData, roomTypesData] = await Promise.all([
+        setLoadingRooms(true);
+        const [customersData, roomTypesData, roomsData] = await Promise.all([
           getCustomers(),
           getRoomTypes(),
+          getRooms(),
         ]);
         setCustomers(customersData);
         setRoomTypes(roomTypesData);
+        setRooms(roomsData);
       } catch (err: any) {
         console.error("Failed to fetch initial data:", err);
         // Optionally, show a toast or error message to the user
       } finally {
         setLoadingCustomers(false);
         setLoadingRoomTypes(false);
+        setLoadingRooms(false);
       }
     }
     fetchInitialData();
@@ -139,10 +145,13 @@ export default function NewBookingPage() {
                          <div className="space-y-2">
                             <Label htmlFor="room-number">Specific Room Number</Label>
                             <Select>
-                                <SelectTrigger id="room-number"><SelectValue placeholder="Select Room Number" /></SelectTrigger>
+                                <SelectTrigger id="room-number"><SelectValue placeholder={loadingRooms ? "Loading rooms..." : "Select Room Number"} /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="101">Room 101</SelectItem>
-                                    <SelectItem value="102">Room 102</SelectItem>
+                                    {rooms.map((room) => (
+                                      <SelectItem key={room.id} value={room.room_number}>
+                                        Room {room.room_number}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
