@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,11 +30,30 @@ import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, C
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { getCustomers, type CustomerFromApi } from '@/lib/services/api';
 
 export default function NewBookingPage() {
   const [checkinDate, setCheckinDate] = useState<Date | undefined>(undefined);
   const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(undefined);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [customers, setCustomers] = useState<CustomerFromApi[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        setLoadingCustomers(true);
+        const data = await getCustomers();
+        setCustomers(data);
+      } catch (err: any) {
+        console.error("Failed to fetch customers:", err);
+        // Optionally, show a toast or error message to the user
+      } finally {
+        setLoadingCustomers(false);
+      }
+    }
+    fetchCustomers();
+  }, []);
 
   const handleCreateBooking = () => {
     // In a real app, you would handle form submission here.
@@ -74,7 +93,18 @@ export default function NewBookingPage() {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="full-name">Full Name *</Label>
-                            <Input id="full-name" placeholder="Enter guest full name" />
+                            <Select>
+                              <SelectTrigger id="full-name">
+                                <SelectValue placeholder={loadingCustomers ? "Loading customers..." : "Select a customer"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {customers.map((customer) => (
+                                  <SelectItem key={customer.customer_id} value={customer.customer_id}>
+                                    {customer.full_name} ({customer.customer_id})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </div>
