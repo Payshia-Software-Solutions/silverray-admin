@@ -537,17 +537,17 @@ export async function deleteCustomer(id: number): Promise<{ message: string }> {
 
 // Booking API Functions
 export async function getBookings(): Promise<BookingFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/bookings`);
+  const response = await fetch(`${API_BASE_URL}/room-bookings`);
   return handleResponse<BookingFromApi[]>(response);
 }
 
 export async function getBookingById(id: number): Promise<BookingFromApi> {
-    const response = await fetch(`${API_BASE_URL}/bookings/${id}`);
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`);
     return handleResponse<BookingFromApi>(response);
 }
 
 export async function createBooking(bookingData: any): Promise<BookingFromApi> {
-    const response = await fetch(`${API_BASE_URL}/bookings`, {
+    const response = await fetch(`${API_BASE_URL}/room-bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),
@@ -556,7 +556,7 @@ export async function createBooking(bookingData: any): Promise<BookingFromApi> {
 }
 
 export async function updateBooking(id: number, bookingData: Partial<BookingFromApi>): Promise<BookingFromApi> {
-    const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),
@@ -565,7 +565,7 @@ export async function updateBooking(id: number, bookingData: Partial<BookingFrom
 }
 
 export async function deleteBookingById(id: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
