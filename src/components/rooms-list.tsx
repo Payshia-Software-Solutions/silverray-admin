@@ -139,12 +139,12 @@ export default function RoomsList() {
                                             <TableCell>{`${room.currency} ${room.price_per_night}`}</TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end items-center gap-2">
-                                                    <Link href={`/rooms/${room.id}`} passHref>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
+                                                    <Button asChild variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
+                                                        <Link href={`/rooms/${room.id}`}>
                                                             <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                                             <span className="sr-only">View</span>
-                                                        </Button>
-                                                    </Link>
+                                                        </Link>
+                                                    </Button>
                                                     <AlertDialogTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-100" onClick={() => handleDeleteClick(room)}>
                                                             <Trash2 className="h-4 w-4" />
