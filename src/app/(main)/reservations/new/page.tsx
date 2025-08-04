@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Calendar as CalendarIcon, User, BedDouble, Wallet, Info, Minus, Plus, CheckCircle, X, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import Link from 'next/link';
 import { getCustomers, getRoomTypes, getRooms, type CustomerFromApi, type RoomTypeFromApi, type RoomFromApi } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -43,6 +43,7 @@ const reservationSchema = z.object({
   check_out_date: z.date({ required_error: "Check-out date is required." }),
   adults: z.coerce.number().min(1, 'At least one adult is required'),
   children: z.coerce.number().min(0, 'Children cannot be negative'),
+  numbers_of_night: z.coerce.number().min(1, 'Stay must be at least one night'),
   total_amount: z.coerce.number().min(0, 'Total amount is required'),
   payment_status: z.enum(['Paid', 'Pending', 'Due']),
   amount_paid: z.coerce.number().optional(),
@@ -63,9 +64,23 @@ export default function NewBookingPage() {
   const [rooms, setRooms] = useState<RoomFromApi[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<ReservationFormValues>({
-    resolver: zodResolver(reservationSchema)
+  const { register, handleSubmit, control, formState: { errors }, watch, setValue } = useForm<ReservationFormValues>({
+    resolver: zodResolver(reservationSchema),
+    defaultValues: {
+        adults: 2,
+        children: 0,
+    }
   });
+
+  const checkInDate = watch('check_in_date');
+  const checkOutDate = watch('check_out_date');
+
+  useEffect(() => {
+    if (checkInDate && checkOutDate) {
+        const nights = differenceInDays(checkOutDate, checkInDate);
+        setValue('numbers_of_night', nights > 0 ? nights : 0);
+    }
+  }, [checkInDate, checkOutDate, setValue]);
 
 
   useEffect(() => {
@@ -244,13 +259,14 @@ export default function NewBookingPage() {
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="nights">Number of Nights</Label>
-                            <Input id="nights" type="number" defaultValue="3" readOnly />
+                            <Input id="nights" type="number" {...register('numbers_of_night')} readOnly />
+                             {errors.numbers_of_night && <p className="text-sm text-red-500">{errors.numbers_of_night.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="adults">Adults *</Label>
                             <div className="flex items-center space-x-2">
                                 <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                                <Input id="adults" type="number" {...register('adults')} defaultValue={2} className="w-16 text-center" />
+                                <Input id="adults" type="number" {...register('adults')} className="w-16 text-center" />
                                 <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                             </div>
                             {errors.adults && <p className="text-sm text-red-500">{errors.adults.message}</p>}
@@ -259,7 +275,7 @@ export default function NewBookingPage() {
                             <Label htmlFor="children">Children</Label>
                             <div className="flex items-center space-x-2">
                                 <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                                <Input id="children" type="number" {...register('children')} defaultValue={0} className="w-16 text-center" />
+                                <Input id="children" type="number" {...register('children')} className="w-16 text-center" />
                                 <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                             </div>
                              {errors.children && <p className="text-sm text-red-500">{errors.children.message}</p>}
