@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -92,9 +91,19 @@ export default function NewCustomerPage() {
                             <CardDescription>Manage the customer's account status.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                             <div className="flex items-center space-x-2">
-                                <Switch id="status" defaultChecked />
-                                <Label htmlFor="status">Set customer account to Active</Label>
+                             <div className="space-y-2">
+                                <Label htmlFor="account-status">Status</Label>
+                                <Select>
+                                    <SelectTrigger id="account-status">
+                                        <SelectValue placeholder="Select account status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="inactive">Inactive</SelectItem>
+                                        <SelectItem value="suspended">Suspended</SelectItem>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </CardContent>
                     </Card>
