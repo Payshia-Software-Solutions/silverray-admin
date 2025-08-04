@@ -31,10 +31,30 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { getCustomers, getRoomTypes, getRooms, type CustomerFromApi, type RoomTypeFromApi, type RoomFromApi } from '@/lib/services/api';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const reservationSchema = z.object({
+  customer_id: z.string().min(1, 'Customer is required'),
+  room_type_id: z.string().min(1, 'Room type is required'),
+  room_number: z.string().min(1, 'Room number is required'),
+  check_in_date: z.date({ required_error: "Check-in date is required." }),
+  check_out_date: z.date({ required_error: "Check-out date is required." }),
+  adults: z.coerce.number().min(1, 'At least one adult is required'),
+  children: z.coerce.number().min(0, 'Children cannot be negative'),
+  total_amount: z.coerce.number().min(0, 'Total amount is required'),
+  payment_status: z.enum(['Paid', 'Pending', 'Due']),
+  amount_paid: z.coerce.number().optional(),
+  payment_method: z.enum(['Credit Card', 'Cash', 'Bank Transfer', 'Online']).optional(),
+  booking_status: z.enum(['Confirmed', 'Pending', 'Cancelled']),
+  booking_source: z.enum(['Online', 'Phone Call', 'Walk-in']),
+});
+
+type ReservationFormValues = z.infer<typeof reservationSchema>;
+
 
 export default function NewBookingPage() {
-  const [checkinDate, setCheckinDate] = useState<Date | undefined>(undefined);
-  const [checkoutDate, setCheckoutDate] = useState<Date | undefined>(undefined);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [customers, setCustomers] = useState<CustomerFromApi[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
@@ -42,6 +62,11 @@ export default function NewBookingPage() {
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
   const [rooms, setRooms] = useState<RoomFromApi[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
+
+  const { register, handleSubmit, control, formState: { errors } } = useForm<ReservationFormValues>({
+    resolver: zodResolver(reservationSchema)
+  });
+
 
   useEffect(() => {
     async function fetchInitialData() {
@@ -69,7 +94,8 @@ export default function NewBookingPage() {
     fetchInitialData();
   }, []);
 
-  const handleCreateBooking = () => {
+  const handleCreateBooking: SubmitHandler<ReservationFormValues> = (data) => {
+    console.log(data);
     // In a real app, you would handle form submission here.
     setShowSuccessDialog(true);
   };
@@ -90,6 +116,7 @@ export default function NewBookingPage() {
       
       <Card>
         <CardContent className="p-6">
+            <form onSubmit={handleSubmit(handleCreateBooking)}>
             <div className="flex justify-between items-start mb-6">
                 <div>
                     <h1 className="text-2xl font-bold">Create New Booking</h1>
@@ -106,19 +133,26 @@ export default function NewBookingPage() {
                     <h3 className="text-lg font-semibold flex items-center gap-2"><User className="h-5 w-5 text-primary"/> Customer Information</h3>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="full-name">Full Name *</Label>
-                            <Select>
-                              <SelectTrigger id="full-name">
-                                <SelectValue placeholder={loadingCustomers ? "Loading customers..." : "Select a customer"} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {customers.map((customer) => (
-                                  <SelectItem key={customer.customer_id} value={customer.customer_id}>
-                                    {customer.full_name} ({customer.customer_id})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Label htmlFor="customer_id">Full Name *</Label>
+                             <Controller
+                                name="customer_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCustomers}>
+                                        <SelectTrigger id="customer_id">
+                                            <SelectValue placeholder={loadingCustomers ? "Loading customers..." : "Select a customer"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {customers.map((customer) => (
+                                            <SelectItem key={customer.customer_id} value={customer.customer_id}>
+                                                {customer.full_name} ({customer.customer_id})
+                                            </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                             />
+                             {errors.customer_id && <p className="text-sm text-red-500">{errors.customer_id.message}</p>}
                         </div>
                     </div>
                 </div>
@@ -128,57 +162,85 @@ export default function NewBookingPage() {
                     <h3 className="text-lg font-semibold flex items-center gap-2"><BedDouble className="h-5 w-5 text-primary"/> Room & Stay Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                          <div className="space-y-2">
-                            <Label htmlFor="room-type">Room Type *</Label>
-                            <Select>
-                                <SelectTrigger id="room-type">
-                                  <SelectValue placeholder={loadingRoomTypes ? "Loading types..." : "Select Room Type"} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roomTypes.map((type) => (
-                                      <SelectItem key={type.room_type_id} value={type.room_type_id}>
-                                        {type.type_name}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="room_type_id">Room Type *</Label>
+                            <Controller
+                                name="room_type_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingRoomTypes}>
+                                        <SelectTrigger id="room-type">
+                                        <SelectValue placeholder={loadingRoomTypes ? "Loading types..." : "Select Room Type"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {roomTypes.map((type) => (
+                                            <SelectItem key={type.room_type_id} value={type.room_type_id}>
+                                                {type.type_name}
+                                            </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.room_type_id && <p className="text-sm text-red-500">{errors.room_type_id.message}</p>}
                         </div>
                          <div className="space-y-2">
-                            <Label htmlFor="room-number">Specific Room Number</Label>
-                            <Select>
-                                <SelectTrigger id="room-number"><SelectValue placeholder={loadingRooms ? "Loading rooms..." : "Select Room Number"} /></SelectTrigger>
-                                <SelectContent>
-                                    {rooms.map((room) => (
-                                      <SelectItem key={room.id} value={room.room_number}>
-                                        Room {room.room_number}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="room_number">Specific Room Number</Label>
+                             <Controller
+                                name="room_number"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingRooms}>
+                                        <SelectTrigger id="room-number"><SelectValue placeholder={loadingRooms ? "Loading rooms..." : "Select Room Number"} /></SelectTrigger>
+                                        <SelectContent>
+                                            {rooms.map((room) => (
+                                            <SelectItem key={room.id} value={room.room_number}>
+                                                Room {room.room_number}
+                                            </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.room_number && <p className="text-sm text-red-500">{errors.room_number.message}</p>}
                         </div>
                         <div />
                          <div className="space-y-2">
                             <Label htmlFor="checkin-date">Check-in Date *</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !checkinDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {checkinDate ? format(checkinDate, 'PPP') : <span>mm/dd/yyyy</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={checkinDate} onSelect={setCheckinDate} initialFocus /></PopoverContent>
-                            </Popover>
+                             <Controller
+                                name="check_in_date"
+                                control={control}
+                                render={({ field }) => (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? format(field.value, 'PPP') : <span>mm/dd/yyyy</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                             {errors.check_in_date && <p className="text-sm text-red-500">{errors.check_in_date.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="checkout-date">Check-out Date *</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !checkoutDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {checkoutDate ? format(checkoutDate, 'PPP') : <span>mm/dd/yyyy</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={checkoutDate} onSelect={setCheckoutDate} initialFocus /></PopoverContent>
-                            </Popover>
+                            <Controller
+                                name="check_out_date"
+                                control={control}
+                                render={({ field }) => (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? format(field.value, 'PPP') : <span>mm/dd/yyyy</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.check_out_date && <p className="text-sm text-red-500">{errors.check_out_date.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="nights">Number of Nights</Label>
@@ -187,18 +249,20 @@ export default function NewBookingPage() {
                          <div className="space-y-2">
                             <Label htmlFor="adults">Adults *</Label>
                             <div className="flex items-center space-x-2">
-                                <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                                <Input id="adults" type="number" defaultValue={2} className="w-16 text-center" />
-                                <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                                <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                                <Input id="adults" type="number" {...register('adults')} defaultValue={2} className="w-16 text-center" />
+                                <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                             </div>
+                            {errors.adults && <p className="text-sm text-red-500">{errors.adults.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="children">Children</Label>
                             <div className="flex items-center space-x-2">
-                                <Button variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
-                                <Input id="children" type="number" defaultValue={0} className="w-16 text-center" />
-                                <Button variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
+                                <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Minus className="h-4 w-4" /></Button>
+                                <Input id="children" type="number" {...register('children')} defaultValue={0} className="w-16 text-center" />
+                                <Button type="button" variant="outline" size="icon" className="h-9 w-9"><Plus className="h-4 w-4" /></Button>
                             </div>
+                             {errors.children && <p className="text-sm text-red-500">{errors.children.message}</p>}
                         </div>
                     </div>
                      <div className="bg-green-50 text-green-700 p-3 rounded-md flex items-center gap-2">
@@ -212,8 +276,9 @@ export default function NewBookingPage() {
                     <h3 className="text-lg font-semibold flex items-center gap-2"><Wallet className="h-5 w-5 text-primary"/> Pricing & Payment</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-2">
-                            <Label>Total Price</Label>
-                            <Input readOnly value="$450.00" />
+                            <Label htmlFor="total_amount">Total Price</Label>
+                            <Input id="total_amount" type="number" placeholder="0.00" {...register('total_amount')} />
+                            {errors.total_amount && <p className="text-sm text-red-500">{errors.total_amount.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="discount-code">Discount Code</Label>
@@ -221,15 +286,30 @@ export default function NewBookingPage() {
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="payment-status">Payment Status</Label>
-                             <Select><SelectTrigger id="payment-status"><SelectValue placeholder="Select Payment Status" /></SelectTrigger><SelectContent><SelectItem value="paid">Paid</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="due">Due</SelectItem></SelectContent></Select>
+                             <Controller
+                                name="payment_status"
+                                control={control}
+                                render={({ field }) => (
+                                     <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger id="payment-status"><SelectValue placeholder="Select Payment Status" /></SelectTrigger><SelectContent><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Due">Due</SelectItem></SelectContent></Select>
+                                )}
+                             />
+                             {errors.payment_status && <p className="text-sm text-red-500">{errors.payment_status.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="amount-paid">Amount Paid</Label>
-                            <Input id="amount-paid" type="number" placeholder="0.00" />
+                            <Input id="amount-paid" type="number" placeholder="0.00" {...register('amount_paid')} />
+                             {errors.amount_paid && <p className="text-sm text-red-500">{errors.amount_paid.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="payment-method">Payment Method</Label>
-                            <Select><SelectTrigger id="payment-method"><SelectValue placeholder="Select Payment Method" /></SelectTrigger><SelectContent><SelectItem value="cc">Credit Card</SelectItem><SelectItem value="cash">Cash</SelectItem><SelectItem value="transfer">Bank Transfer</SelectItem></SelectContent></Select>
+                            <Controller
+                                name="payment_method"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger id="payment-method"><SelectValue placeholder="Select Payment Method" /></SelectTrigger><SelectContent><SelectItem value="Credit Card">Credit Card</SelectItem><SelectItem value="Cash">Cash</SelectItem><SelectItem value="Bank Transfer">Bank Transfer</SelectItem><SelectItem value="Online">Online</SelectItem></SelectContent></Select>
+                                )}
+                             />
+                             {errors.payment_method && <p className="text-sm text-red-500">{errors.payment_method.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label>Balance Due</Label>
@@ -246,20 +326,35 @@ export default function NewBookingPage() {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <div className="space-y-2">
                             <Label htmlFor="booking-status">Initial Booking Status</Label>
-                            <Select><SelectTrigger id="booking-status"><SelectValue placeholder="Select Booking Status" /></SelectTrigger><SelectContent><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem></SelectContent></Select>
+                             <Controller
+                                name="booking_status"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger id="booking-status"><SelectValue placeholder="Select Booking Status" /></SelectTrigger><SelectContent><SelectItem value="Confirmed">Confirmed</SelectItem><SelectItem value="Pending">Pending</SelectItem><SelectItem value="Cancelled">Cancelled</SelectItem></SelectContent></Select>
+                                )}
+                            />
+                            {errors.booking_status && <p className="text-sm text-red-500">{errors.booking_status.message}</p>}
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="booking-source">Booking Source</Label>
-                             <Select><SelectTrigger id="booking-source"><SelectValue placeholder="Select Booking Source" /></SelectTrigger><SelectContent><SelectItem value="online">Online</SelectItem><SelectItem value="phone">Phone Call</SelectItem><SelectItem value="walk-in">Walk-in</SelectItem></SelectContent></Select>
+                             <Controller
+                                name="booking_source"
+                                control={control}
+                                render={({ field }) => (
+                                     <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger id="booking-source"><SelectValue placeholder="Select Booking Source" /></SelectTrigger><SelectContent><SelectItem value="Online">Online</SelectItem><SelectItem value="Phone Call">Phone Call</SelectItem><SelectItem value="Walk-in">Walk-in</SelectItem></SelectContent></Select>
+                                )}
+                            />
+                             {errors.booking_source && <p className="text-sm text-red-500">{errors.booking_source.message}</p>}
                         </div>
                     </div>
                 </div>
                 
                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" asChild><Link href="/reservations">Cancel</Link></Button>
-                    <Button onClick={handleCreateBooking}>+ Create Booking</Button>
+                    <Button type="button" variant="outline" asChild><Link href="/reservations">Cancel</Link></Button>
+                    <Button type="submit">+ Create Booking</Button>
                 </div>
             </div>
+            </form>
         </CardContent>
       </Card>
 
