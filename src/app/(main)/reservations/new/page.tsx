@@ -110,10 +110,7 @@ export default function NewBookingPage() {
   }, []);
 
   const handleCreateBooking: SubmitHandler<ReservationFormValues> = (data) => {
-    console.log({
-        ...data,
-        numbers_of_night: parseInt(String(data.numbers_of_night), 10)
-    });
+    console.log(data);
     // In a real app, you would handle form submission here.
     setShowSuccessDialog(true);
   };
