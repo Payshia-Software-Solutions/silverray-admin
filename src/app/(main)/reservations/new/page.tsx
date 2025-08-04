@@ -76,22 +76,6 @@ export default function NewBookingPage() {
                             <Label htmlFor="full-name">Full Name *</Label>
                             <Input id="full-name" placeholder="Enter guest full name" />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email Address *</Label>
-                            <Input id="email" type="email" placeholder="guest@example.com" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number *</Label>
-                            <Input id="phone" placeholder="+1 (555) 123-4567" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="address">Address</Label>
-                             <Textarea id="address" placeholder="Enter guest address" className="min-h-[40px]" />
-                        </div>
-                        <div className="md:col-span-2 space-y-2">
-                             <Label htmlFor="special-requests">Special Requests / Notes</Label>
-                            <Textarea id="special-requests" placeholder="Any special requests or notes about the guest" />
-                        </div>
                     </div>
                 </div>
 
