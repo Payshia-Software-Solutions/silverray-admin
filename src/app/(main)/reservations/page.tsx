@@ -47,7 +47,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getReservations, type ReservationFromApi, deleteBooking } from '@/lib/services/api';
+import { getBookings, type BookingFromApi, deleteBookingById } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -102,10 +102,10 @@ export default function ReservationsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [reservations, setReservations] = useState<ReservationFromApi[]>([]);
+  const [reservations, setReservations] = useState<BookingFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bookingToDelete, setBookingToDelete] = useState<ReservationFromApi | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<BookingFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletedBookingId, setDeletedBookingId] = useState('');
 
@@ -114,7 +114,7 @@ export default function ReservationsPage() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getReservations();
+        const data = await getBookings();
         setReservations(data);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred while fetching reservations.');
@@ -125,7 +125,7 @@ export default function ReservationsPage() {
     fetchReservations();
   }, []);
 
-  const handleDeleteClick = (reservation: ReservationFromApi) => {
+  const handleDeleteClick = (reservation: BookingFromApi) => {
     setBookingToDelete(reservation);
   };
 
@@ -136,8 +136,8 @@ export default function ReservationsPage() {
   const handleDeleteConfirm = async () => {
     if (bookingToDelete) {
       try {
-        await deleteBooking(bookingToDelete.id);
-        setDeletedBookingId(bookingToDelete.id);
+        await deleteBookingById(bookingToDelete.id);
+        setDeletedBookingId(bookingToDelete.booking_id);
         setReservations(prev => prev.filter(res => res.id !== bookingToDelete.id));
         setShowDeleteSuccessDialog(true);
       } catch (error: any) {
@@ -242,51 +242,45 @@ export default function ReservationsPage() {
                 <TableBody>
                   {reservations.map((res) => (
                     <TableRow key={res.id}>
-                      <TableCell className="font-semibold text-primary">{res.id}</TableCell>
+                      <TableCell className="font-semibold text-primary">{res.booking_id}</TableCell>
                       <TableCell>
-                        {res.guest ? (
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={`https://placehold.co/40x40.png`} alt={res.guest.fullName} data-ai-hint="person face" />
-                              <AvatarFallback>{res.guest.fullName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-sm">{res.guest.fullName}</p>
-                              <p className="text-xs text-muted-foreground">{res.guest.email}</p>
-                            </div>
+                        {res.customer ? (
+                          <div>
+                            <p className="font-medium text-sm">{res.customer.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{res.customer.email}</p>
                           </div>
                         ) : (
                           <span className="text-muted-foreground">N/A</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {res.room && res.room.room_type_details ? (
+                        {res.roomType ? (
                           <>
-                            <p className="font-medium text-sm">{res.room.room_type_details.name}</p>
-                            <p className="text-xs text-muted-foreground">{res.room.id}</p>
+                            <p className="font-medium text-sm">{res.roomType.type_name}</p>
+                            <p className="text-xs text-muted-foreground">Room: {res.room_number}</p>
                           </>
                         ) : (
                           <span className="text-muted-foreground">N/A</span>
                         )}
                       </TableCell>
-                      <TableCell>{format(new Date(res.checkInDate), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{format(new Date(res.checkOutDate), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(res.check_in_date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(res.check_out_date), 'MMM dd, yyyy')}</TableCell>
                       <TableCell>{`${res.adults} Adults`}{res.children > 0 ? `, ${res.children} Children` : ''}</TableCell>
-                      <TableCell>{`LKR. ${Number(res.totalAmount).toLocaleString()}`}</TableCell>
+                      <TableCell>{`LKR ${Number(res.total_amount).toLocaleString()}`}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.paymentStatus as keyof typeof paymentVariant])}>
-                          {res.paymentStatus}
+                        <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment_status as keyof typeof paymentVariant])}>
+                          {res.payment_status}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', statusVariant[res.bookingStatus as keyof typeof statusVariant])}>
-                          {res.bookingStatus}
+                        <Badge variant="outline" className={cn('border-transparent', statusVariant[res.booking_status as keyof typeof statusVariant])}>
+                          {res.booking_status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                          <div className="flex justify-end items-center gap-1">
                             <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                <Link href={`/reservations/${res.id.replace('#', '')}`}>
+                                <Link href={`/reservations/${res.id}`}>
                                   <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                   <span className="sr-only">View</span>
                                 </Link>
@@ -330,7 +324,7 @@ export default function ReservationsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Booking ?</AlertDialogTitle>
               <AlertDialogDescription className="text-center text-red-500 text-lg">
-                {bookingToDelete?.id}
+                {bookingToDelete?.booking_id}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">
