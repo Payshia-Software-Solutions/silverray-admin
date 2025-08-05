@@ -262,14 +262,10 @@ export default function ReservationsPage() {
                             )}
                         </TableCell>
                         <TableCell>
-                            {res.roomType ? (
-                            <>
-                                <p className="font-medium text-sm">{res.roomType.type_name}</p>
+                            <div>
+                                <p className="font-medium text-sm">{res.roomType?.type_name || 'N/A'}</p>
                                 <p className="text-xs text-muted-foreground">Room: {res.room_number}</p>
-                            </>
-                            ) : (
-                            <span className="text-muted-foreground">N/A</span>
-                            )}
+                            </div>
                         </TableCell>
                         <TableCell>{format(new Date(res.check_in_date), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>{format(new Date(res.check_out_date), 'MMM dd, yyyy')}</TableCell>
