@@ -149,15 +149,15 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new Error(`API request failed with status ${response.status}: ${errorText}`);
   }
   const text = await response.text();
+  const trimmedText = text.trim();
   try {
-    return JSON.parse(text);
-  } catch (error) {
-    if (text.trim() === '') {
-      // If the response is empty, return an empty object or null based on expected type.
+    // If the trimmed text is empty, return an empty object or array based on what's expected.
+    if (trimmedText === '') {
       return {} as T;
     }
-    // If it's not empty but still fails, there's a problem with the JSON format.
-    console.error("Failed to parse JSON:", text);
+    return JSON.parse(trimmedText);
+  } catch (error) {
+    console.error("Failed to parse JSON:", trimmedText);
     throw new Error("Invalid JSON response from server.");
   }
 }
