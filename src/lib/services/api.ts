@@ -79,7 +79,7 @@ export interface BookingFromApi {
   discount_code: string | null;
   booking_status: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
   booking_source: 'Online' | 'Phone' | 'Walk-in';
-  customer?: {
+  customer: {
     full_name: string;
     email: string;
   };
