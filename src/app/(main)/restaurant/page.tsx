@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X, CheckCircle2 } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X, CheckCircle2, Shield } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import RestaurantFeaturesPage from './features/page';
 
 
 const menuItems = [
@@ -214,12 +215,22 @@ export default function RestaurantDiningPage() {
                 <CalendarCheck className="mr-2 h-4 w-4" />
                 Reservations
               </TabsTrigger>
+              <TabsTrigger value="features">
+                <Shield className="mr-2 h-4 w-4" />
+                Features Management
+              </TabsTrigger>
             </TabsList>
             {activeTab === 'dining-venues' && (
               <Button onClick={() => router.push('/restaurant/new')}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Venue
               </Button>
+            )}
+             {activeTab === 'features' && (
+                <Button onClick={() => router.push('/restaurant/features/new')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add New Feature
+                </Button>
             )}
           </div>
           <TabsContent value="dining-venues" className="space-y-4">
@@ -491,6 +502,9 @@ export default function RestaurantDiningPage() {
               </CardFooter>
             </Card>
           </TabsContent>
+          <TabsContent value="features">
+            <RestaurantFeaturesPage />
+          </TabsContent>
         </Tabs>
         <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
@@ -605,3 +619,5 @@ export default function RestaurantDiningPage() {
     </div>
   );
 }
+
+    
