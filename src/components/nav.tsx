@@ -81,7 +81,7 @@ export function Nav() {
                             className="justify-start group"
                         >
                             <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
-                            <span className={cn('transition-opacity duration-200 text-sm font-medium', state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100')}>
+                            <span className={cn('transition-opacity duration-200 text-sm font-medium', state === 'collapsed' ? 'opacity-0' : 'opacity-100')}>
                                 {item.label}
                             </span>
                         </SidebarMenuButton>
@@ -111,7 +111,7 @@ export function Nav() {
                     <span
                     className={cn(
                         'transition-opacity duration-200 text-sm font-medium',
-                        state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100'
+                        state === 'collapsed' ? 'opacity-0' : 'opacity-100'
                     )}
                     >
                     {item.label}

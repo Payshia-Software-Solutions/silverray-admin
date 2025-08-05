@@ -40,24 +40,32 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { getRestaurantFeatures, type RestaurantFeatureFromApi } from '@/lib/services/api';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-const features = [
-    { id: 'fine-dining', label: 'Fine Dining' },
-    { id: 'casual-dining', label: 'Casual Dining' },
-    { id: 'bar-area', label: 'Bar Area' },
-    { id: 'outdoor-seating', label: 'Outdoor Seating' },
-    { id: 'live-music', label: 'Live Music' },
-    { id: 'private-dining', label: 'Private Dining' },
-    { id: 'kid-friendly', label: 'Kid-Friendly' },
-    { id: 'buffet-style', label: 'Buffet Style' },
-];
 
 export default function NewRestaurantVenuePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+  const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
+  const [loadingFeatures, setLoadingFeatures] = useState(true);
+
+   useEffect(() => {
+    async function fetchFeatures() {
+      try {
+        setLoadingFeatures(true);
+        const data = await getRestaurantFeatures();
+        setFeatures(data);
+      } catch (err) {
+        console.error("Failed to fetch features:", err);
+      } finally {
+        setLoadingFeatures(false);
+      }
+    }
+    fetchFeatures();
+  }, []);
   
   const handleDelete = () => {
     setShowDeleteDialog(false);
@@ -158,38 +166,13 @@ export default function NewRestaurantVenuePage() {
             <CardTitle>Features &amp; Ambiance</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* 
-              This section displays a static list of features.
-              To add, remove, or change these features, you can modify the 'features' array 
-              defined at the top of this file (NewRestaurantVenuePage component).
-            */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {features.map(feature => (
+                {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
                   <div key={feature.id} className="flex items-center space-x-2">
                     <Checkbox id={`feature-${feature.id}`} />
-                    <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.label}</Label>
+                    <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
                   </div>
                 ))}
-            </div>
-            <div className="border-t pt-4 space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="feature-name">Feature Name</Label>
-                    <Input id="feature-name" placeholder="Enter new feature name" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="feature-description">Description</Label>
-                    <Textarea id="feature-description" placeholder="Describe the feature" />
-                </div>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <Switch id="feature-active" defaultChecked />
-                        <Label htmlFor="feature-active">Active</Label>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline">Cancel</Button>
-                        <Button className="bg-yellow-500 hover:bg-yellow-600 text-yellow-900">Create Feature</Button>
-                    </div>
-                </div>
             </div>
           </CardContent>
         </Card>
