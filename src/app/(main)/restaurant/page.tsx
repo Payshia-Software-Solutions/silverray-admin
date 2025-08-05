@@ -226,12 +226,6 @@ export default function RestaurantDiningPage() {
                 Add New Venue
               </Button>
             )}
-             {activeTab === 'features' && (
-                <Button onClick={() => router.push('/restaurant/features/new')}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add New Feature
-                </Button>
-            )}
           </div>
           <TabsContent value="dining-venues" className="space-y-4">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -619,5 +613,3 @@ export default function RestaurantDiningPage() {
     </div>
   );
 }
-
-    
