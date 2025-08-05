@@ -15,6 +15,7 @@ export interface Restaurant {
   status: 'Active' | 'Inactive' | 'Seasonal';
   // Operating hours could be a JSON object for more structure
   operatingHours: string; 
+  features: string[]; // e.g., ["Ocean View", "Fine Dining", "Live Music"]
   images: {
     src: string;
     alt: string;
