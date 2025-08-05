@@ -84,8 +84,12 @@ export default function NewRestaurantVenuePage() {
             <BreadcrumbLink href="/restaurant">Restaurant Management</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
+           <BreadcrumbItem>
+            <BreadcrumbLink href="/restaurant/features">Features Management</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Main Restaurant</BreadcrumbPage>
+            <BreadcrumbPage>Add New Venue</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
