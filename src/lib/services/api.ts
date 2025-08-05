@@ -148,9 +148,18 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const errorText = await response.text();
     throw new Error(`API request failed with status ${response.status}: ${errorText}`);
   }
-   // Check if the response has content before trying to parse it as JSON
   const text = await response.text();
-  return text ? JSON.parse(text) : ({} as T);
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    if (text.trim() === '') {
+      // If the response is empty, return an empty object or null based on expected type.
+      return {} as T;
+    }
+    // If it's not empty but still fails, there's a problem with the JSON format.
+    console.error("Failed to parse JSON:", text);
+    throw new Error("Invalid JSON response from server.");
+  }
 }
 
 /**
