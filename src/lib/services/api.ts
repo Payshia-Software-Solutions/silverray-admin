@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -614,8 +615,19 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
 
 // Restaurant Features API
 export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features`);
-  return handleResponse<RestaurantFeatureFromApi[]>(response);
+  try {
+    const response = await fetch(`${API_BASE_URL}/restaurant-features`);
+    // If the endpoint is not found, return an empty array to avoid crashing the app.
+    if (response.status === 404) {
+      console.warn('getRestaurantFeatures: API endpoint not found. Returning empty array.');
+      return [];
+    }
+    return handleResponse<RestaurantFeatureFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch restaurant features:', error);
+    // Also return an empty array on other fetch errors for robustness.
+    return [];
+  }
 }
 
 export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
@@ -647,3 +659,4 @@ export async function deleteRestaurantFeature(id: number): Promise<{ message: st
   });
   return handleResponse<{ message: string }>(response);
 }
+
