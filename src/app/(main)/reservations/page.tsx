@@ -47,7 +47,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getBookings, type BookingFromApi, deleteBookingById } from '@/lib/services/api';
+import { getBookings, type BookingFromApi, deleteBookingById, getCustomers, CustomerFromApi } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -103,6 +103,7 @@ export default function ReservationsPage() {
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [reservations, setReservations] = useState<BookingFromApi[]>([]);
+  const [customers, setCustomers] = useState<Map<string, CustomerFromApi>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bookingToDelete, setBookingToDelete] = useState<BookingFromApi | null>(null);
@@ -110,19 +111,24 @@ export default function ReservationsPage() {
   const [deletedBookingId, setDeletedBookingId] = useState('');
 
   useEffect(() => {
-    async function fetchReservations() {
+    async function fetchReservationsAndCustomers() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getBookings();
-        setReservations(data);
+        const [bookingsData, customersData] = await Promise.all([
+            getBookings(),
+            getCustomers()
+        ]);
+        setReservations(bookingsData);
+        const customerMap = new Map(customersData.map(c => [c.customer_id, c]));
+        setCustomers(customerMap);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred while fetching reservations.');
       } finally {
         setLoading(false);
       }
     }
-    fetchReservations();
+    fetchReservationsAndCustomers();
   }, []);
 
   const handleDeleteClick = (reservation: BookingFromApi) => {
@@ -240,61 +246,64 @@ export default function ReservationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reservations.map((res) => (
-                    <TableRow key={res.id}>
-                      <TableCell className="font-semibold text-primary">{res.booking_id}</TableCell>
-                      <TableCell>
-                        {res.customer ? (
-                          <div>
-                            <p className="font-medium text-sm">{res.customer.full_name}</p>
-                            <p className="text-xs text-muted-foreground">{res.customer.email}</p>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {res.roomType ? (
-                          <>
-                            <p className="font-medium text-sm">{res.roomType.type_name}</p>
-                            <p className="text-xs text-muted-foreground">Room: {res.room_number}</p>
-                          </>
-                        ) : (
-                          <span className="text-muted-foreground">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{format(new Date(res.check_in_date), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{format(new Date(res.check_out_date), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{`${res.adults} Adults`}{res.children > 0 ? `, ${res.children} Children` : ''}</TableCell>
-                      <TableCell>{`LKR ${Number(res.total_amount).toLocaleString()}`}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment_status as keyof typeof paymentVariant])}>
-                          {res.payment_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={cn('border-transparent', statusVariant[res.booking_status as keyof typeof statusVariant])}>
-                          {res.booking_status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                         <div className="flex justify-end items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                <Link href={`/reservations/${res.id}`}>
-                                  <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                  <span className="sr-only">View</span>
-                                </Link>
-                            </Button>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(res)}>
-                                  <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                  <span className="sr-only">Delete</span>
-                              </Button>
-                            </AlertDialogTrigger>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {reservations.map((res) => {
+                    const customer = customers.get(res.customer_id);
+                    return (
+                        <TableRow key={res.id}>
+                        <TableCell className="font-semibold text-primary">{res.booking_id}</TableCell>
+                        <TableCell>
+                            {customer ? (
+                            <div>
+                                <p className="font-medium text-sm">{customer.full_name}</p>
+                                <p className="text-xs text-muted-foreground">{customer.email}</p>
+                            </div>
+                            ) : (
+                            <span className="text-muted-foreground">{res.customer_id}</span>
+                            )}
+                        </TableCell>
+                        <TableCell>
+                            {res.roomType ? (
+                            <>
+                                <p className="font-medium text-sm">{res.roomType.type_name}</p>
+                                <p className="text-xs text-muted-foreground">Room: {res.room_number}</p>
+                            </>
+                            ) : (
+                            <span className="text-muted-foreground">N/A</span>
+                            )}
+                        </TableCell>
+                        <TableCell>{format(new Date(res.check_in_date), 'MMM dd, yyyy')}</TableCell>
+                        <TableCell>{format(new Date(res.check_out_date), 'MMM dd, yyyy')}</TableCell>
+                        <TableCell>{`${res.adults} Adults`}{res.children > 0 ? `, ${res.children} Children` : ''}</TableCell>
+                        <TableCell>{`LKR ${Number(res.total_amount).toLocaleString()}`}</TableCell>
+                        <TableCell>
+                            <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment_status as keyof typeof paymentVariant])}>
+                            {res.payment_status}
+                            </Badge>
+                        </TableCell>
+                        <TableCell>
+                            <Badge variant="outline" className={cn('border-transparent', statusVariant[res.booking_status as keyof typeof statusVariant])}>
+                            {res.booking_status}
+                            </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex justify-end items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                    <Link href={`/reservations/${res.id}`}>
+                                    <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                    <span className="sr-only">View</span>
+                                    </Link>
+                                </Button>
+                                <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(res)}>
+                                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                    <span className="sr-only">Delete</span>
+                                </Button>
+                                </AlertDialogTrigger>
+                            </div>
+                        </TableCell>
+                        </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
@@ -329,7 +338,7 @@ export default function ReservationsPage() {
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">
               <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+              <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
             </AlertDialogFooter>
             <button onClick={handleCancelDelete} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
                 <X className="h-5 w-5" />
