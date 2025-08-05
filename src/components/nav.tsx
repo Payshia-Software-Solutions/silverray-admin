@@ -3,12 +3,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList, PlusSquare } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
@@ -18,7 +25,14 @@ const navItems = [
   { href: '/rooms', label: 'Room Management', icon: BedDouble },
   { href: '/amenities', label: 'Amenities Management', icon: Shield },
   { href: '/reservations', label: 'Room Booking Management', icon: CalendarCheck },
-  { href: '/restaurant', label: 'Restaurant & Dining', icon: UtensilsCrossed },
+  { 
+    href: '/restaurant', 
+    label: 'Restaurant & Dining', 
+    icon: UtensilsCrossed,
+    subItems: [
+        { href: '/restaurant/features', label: 'Features Management' },
+    ]
+  },
   { href: '/experience', label: 'Experience Management', icon: Star },
   { href: '/customers', label: 'Customer Management', icon: Users },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
@@ -44,6 +58,9 @@ export function Nav() {
        if (parts[0] === 'rooms' && (parts[1] === 'images' || parts[1] === 'types')) {
         return `/${parts[0]}/${parts[1]}`;
       }
+      if (parts[0] === 'restaurant' && parts[1] === 'features') {
+        return `/${parts[0]}/${parts[1]}`;
+      }
       return `/${parts[0]}`;
     }
     return path;
@@ -55,24 +72,53 @@ export function Nav() {
     <SidebarMenu>
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton
-              asChild
-              isActive={currentParentPath === getParentPath(item.href)}
-              tooltip={item.label}
-              className="justify-start group"
-            >
-              <Link href={item.href}>
-                <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
-                <span
-                  className={cn(
-                    'transition-opacity duration-200 text-sm font-medium',
-                    state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100'
-                  )}
+            {item.subItems ? (
+                 <Collapsible>
+                    <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                            isActive={currentParentPath === getParentPath(item.href)}
+                            tooltip={item.label}
+                            className="justify-start group"
+                        >
+                            <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
+                            <span className={cn('transition-opacity duration-200 text-sm font-medium', state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100')}>
+                                {item.label}
+                            </span>
+                        </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            {item.subItems.map(subItem => (
+                                 <SidebarMenuSubButton key={subItem.href} asChild isActive={pathname === subItem.href}>
+                                     <Link href={subItem.href}>
+                                        <PlusSquare />
+                                        <span>{subItem.label}</span>
+                                     </Link>
+                                 </SidebarMenuSubButton>
+                            ))}
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                 </Collapsible>
+            ) : (
+                <SidebarMenuButton
+                asChild
+                isActive={currentParentPath === getParentPath(item.href)}
+                tooltip={item.label}
+                className="justify-start group"
                 >
-                  {item.label}
-                </span>
-              </Link>
-            </SidebarMenuButton>
+                <Link href={item.href}>
+                    <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
+                    <span
+                    className={cn(
+                        'transition-opacity duration-200 text-sm font-medium',
+                        state === 'collapsed' || !isMounted ? 'opacity-0' : 'opacity-100'
+                    )}
+                    >
+                    {item.label}
+                    </span>
+                </Link>
+                </SidebarMenuButton>
+            )}
         </SidebarMenuItem>
       ))}
     </SidebarMenu>

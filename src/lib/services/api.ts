@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -136,6 +135,19 @@ export interface CustomerFromApi {
     updated_by: string;
 }
 
+export interface RestaurantFeatureFromApi {
+  id: number;
+  feature_id: string;
+  feature_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -144,11 +156,12 @@ export interface CustomerFromApi {
  * @returns A promise that resolves with the JSON data.
  */
 async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed with status ${response.status}: ${errorText}`);
-  }
   const text = await response.text();
+  if (!response.ok) {
+    // If the response is not ok, it might contain a server-side error message.
+    // We throw this as an error to be caught by the calling function.
+    throw new Error(`API request failed with status ${response.status}: ${text}`);
+  }
   
   // Find the start of the actual JSON content
   const firstBracket = text.indexOf('[');
@@ -159,7 +172,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (firstBracket === -1 && firstBrace === -1) {
     // Neither bracket nor brace found, response is likely empty or not JSON
     if (text.trim() === '') return {} as T;
-    startIndex = 0; // Fallback to parsing the whole string if no JSON object/array is found
+    throw new Error(`Invalid JSON response: ${text}`);
   } else if (firstBracket === -1) {
     startIndex = firstBrace;
   } else if (firstBrace === -1) {
@@ -597,4 +610,40 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
+}
+
+// Restaurant Features API
+export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features`);
+  return handleResponse<RestaurantFeatureFromApi[]>(response);
+}
+
+export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`);
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
 }
