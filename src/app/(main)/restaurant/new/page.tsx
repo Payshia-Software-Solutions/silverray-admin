@@ -40,32 +40,25 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getRestaurantFeatures, type RestaurantFeatureFromApi } from '@/lib/services/api';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+const features = [
+    { id: 'fine-dining', label: 'Fine Dining' },
+    { id: 'casual-dining', label: 'Casual Dining' },
+    { id: 'bar-area', label: 'Bar Area' },
+    { id: 'outdoor-seating', label: 'Outdoor Seating' },
+    { id: 'live-music', label: 'Live Music' },
+    { id: 'private-dining', label: 'Private Dining' },
+    { id: 'kid-friendly', label: 'Kid-Friendly' },
+    { id: 'buffet-style', label: 'Buffet Style' },
+];
 
 export default function NewRestaurantVenuePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
-  const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
-  const [loadingFeatures, setLoadingFeatures] = useState(true);
-
-  useEffect(() => {
-    async function fetchFeatures() {
-      try {
-        setLoadingFeatures(true);
-        const data = await getRestaurantFeatures();
-        setFeatures(data);
-      } catch (error) {
-        console.error("Failed to fetch restaurant features:", error);
-      } finally {
-        setLoadingFeatures(false);
-      }
-    }
-    fetchFeatures();
-  }, []);
-
+  
   const handleDelete = () => {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
@@ -165,17 +158,19 @@ export default function NewRestaurantVenuePage() {
             <CardTitle>Features &amp; Ambiance</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* 
+              This section displays a static list of features.
+              To add, remove, or change these features, you can modify the 'features' array 
+              defined at the top of this file (NewRestaurantVenuePage component).
+              Each item in the array should have a unique 'id' and a 'label' to be displayed.
+            */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {loadingFeatures ? (
-                <p>Loading features...</p>
-              ) : (
-                features.map(feature => (
+                {features.map(feature => (
                   <div key={feature.id} className="flex items-center space-x-2">
                     <Checkbox id={`feature-${feature.id}`} />
-                    <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
+                    <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.label}</Label>
                   </div>
-                ))
-              )}
+                ))}
             </div>
             <div>
               <Label htmlFor="custom-features">Custom Features</Label>
