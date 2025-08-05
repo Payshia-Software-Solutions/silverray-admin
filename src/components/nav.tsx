@@ -69,53 +69,24 @@ export function Nav() {
     <SidebarMenu>
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
-            {item.subItems ? (
-                 <Collapsible>
-                    <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                            isActive={currentParentPath === getParentPath(item.href)}
-                            tooltip={item.label}
-                            className="justify-start group"
-                        >
-                            <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
-                            <span className={cn('transition-opacity duration-200 text-sm font-medium', state === 'collapsed' ? 'opacity-0' : 'opacity-100')}>
-                                {item.label}
-                            </span>
-                        </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                        <SidebarMenuSub>
-                            {item.subItems.map(subItem => (
-                                 <SidebarMenuSubButton key={subItem.href} asChild isActive={pathname === subItem.href}>
-                                     <Link href={subItem.href}>
-                                        <PlusSquare />
-                                        <span>{subItem.label}</span>
-                                     </Link>
-                                 </SidebarMenuSubButton>
-                            ))}
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                 </Collapsible>
-            ) : (
-                <SidebarMenuButton
-                asChild
-                isActive={currentParentPath === getParentPath(item.href)}
-                tooltip={item.label}
-                className="justify-start group"
+            <SidebarMenuButton
+            asChild
+            isActive={currentParentPath === getParentPath(item.href)}
+            tooltip={item.label}
+            className="justify-start group"
+            >
+            <Link href={item.href}>
+                <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
+                <span
+                className={cn(
+                    'transition-opacity duration-200 text-sm font-medium',
+                    state === 'collapsed' && isMounted ? 'opacity-0' : 'opacity-100'
+                )}
                 >
-                <Link href={item.href}>
-                    <item.icon className="h-5 w-5 text-sidebar-foreground/70 group-data-[active=true]:text-inherit" />
-                    <span
-                    className={cn(
-                        'transition-opacity duration-200 text-sm font-medium',
-                        state === 'collapsed' ? 'opacity-0' : 'opacity-100'
-                    )}
-                    >
-                    {item.label}
-                    </span>
-                </Link>
-                </SidebarMenuButton>
-            )}
+                {item.label}
+                </span>
+            </Link>
+            </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
