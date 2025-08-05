@@ -149,15 +149,34 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new Error(`API request failed with status ${response.status}: ${errorText}`);
   }
   const text = await response.text();
-  const trimmedText = text.trim();
+  
+  // Find the start of the actual JSON content
+  const firstBracket = text.indexOf('[');
+  const firstBrace = text.indexOf('{');
+  
+  let startIndex = -1;
+
+  if (firstBracket === -1 && firstBrace === -1) {
+    // Neither bracket nor brace found, response is likely empty or not JSON
+    if (text.trim() === '') return {} as T;
+    startIndex = 0; // Fallback to parsing the whole string if no JSON object/array is found
+  } else if (firstBracket === -1) {
+    startIndex = firstBrace;
+  } else if (firstBrace === -1) {
+    startIndex = firstBracket;
+  } else {
+    startIndex = Math.min(firstBracket, firstBrace);
+  }
+  
+  const jsonText = text.substring(startIndex);
+  
   try {
-    // If the trimmed text is empty, return an empty object or array based on what's expected.
-    if (trimmedText === '') {
+    if (jsonText.trim() === '') {
       return {} as T;
     }
-    return JSON.parse(trimmedText);
+    return JSON.parse(jsonText);
   } catch (error) {
-    console.error("Failed to parse JSON:", trimmedText);
+    console.error("Failed to parse JSON:", jsonText);
     throw new Error("Invalid JSON response from server.");
   }
 }
