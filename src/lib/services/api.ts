@@ -149,6 +149,32 @@ export interface RestaurantFeatureFromApi {
   updated_by: string;
 }
 
+export interface ExperienceFromApi {
+  id: number;
+  name: string;
+  company_id: string;
+  meeting_Point: string;
+  short_description: string;
+  detailed_description: string;
+  duration: string;
+  Price: string;
+  pricing_basis: string;
+  min_participants: number;
+  max_participants: number;
+  advance_booking_required: number;
+  walk_in_available: number;
+  day_of_week: string;
+  is_available: number;
+  schedule_note: string;
+  status: 'Active' | 'Inactive' | 'Seasonal';
+  images_url: string;
+  time_slot: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -652,4 +678,40 @@ export async function deleteRestaurantFeature(id: number): Promise<{ message: st
     method: 'DELETE',
   });
   return handleResponse<{ message: string }>(response);
+}
+
+// Experiences API Functions
+export async function getExperiences(): Promise<ExperienceFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/experiences`);
+  return handleResponse<ExperienceFromApi[]>(response);
+}
+
+export async function getExperienceById(id: number): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`);
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function deleteExperience(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }

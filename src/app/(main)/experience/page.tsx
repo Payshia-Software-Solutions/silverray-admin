@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,9 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
+import { getExperiences, deleteExperience, type ExperienceFromApi } from '@/lib/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 const stats = [
   { label: 'Total Experiences', value: '12', icon: Star, color: 'text-blue-500', bgColor: 'bg-blue-100' },
@@ -36,90 +39,38 @@ const stats = [
   { label: 'Total Bookings', value: '247', icon: Calendar, color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
 ];
 
-const experiences = [
-    {
-        id: 'tea-factory-tour',
-        title: 'Tea Factory Tour',
-        details: [
-            { icon: Clock, text: '90 minutes' },
-            { icon: DollarSign, text: '$65 per person' },
-            { icon: Ticket, text: 'Advance booking required' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'tea plantation',
-        status: 'Active',
-    },
-    {
-        id: 'sunrise-yoga-session',
-        title: 'Sunrise Yoga Session',
-        details: [
-            { icon: Clock, text: '60 minutes' },
-            { icon: DollarSign, text: '$25 per person' },
-            { icon: Users, text: 'Walk-in available' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'yoga sunrise',
-        status: 'Active',
-    },
-    {
-        id: 'cultural-dance-performance',
-        title: 'Cultural Dance Performance',
-        details: [
-            { icon: Clock, text: '45 minutes' },
-            { icon: DollarSign, text: 'Free for guests' },
-            { icon: Ticket, text: 'Advance booking required' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'cultural dance',
-        status: 'Seasonal',
-    },
-    {
-        id: 'sapphire-trail-adventure',
-        title: 'Sapphire Trail Adventure',
-        details: [
-            { icon: Clock, text: '3 hours' },
-            { icon: DollarSign, text: '$85 per person' },
-            { icon: Ticket, text: 'Advance booking required' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'nature trail',
-        status: 'Active',
-    },
-    {
-        id: 'cooking-masterclass',
-        title: 'Cooking Masterclass',
-        details: [
-            { icon: Clock, text: '2 hours' },
-            { icon: DollarSign, text: '$45 per person' },
-            { icon: Users, text: 'Walk-in available' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'cooking class',
-        status: 'Inactive',
-    },
-    {
-        id: 'bird-watching-tour',
-        title: 'Bird Watching Tour',
-        details: [
-            { icon: Clock, text: '2.5 hours' },
-            { icon: DollarSign, text: '$35 per person' },
-            { icon: Ticket, text: 'Advance booking required' },
-        ],
-        image: 'https://placehold.co/600x400',
-        imageHint: 'bird watching',
-        status: 'Active',
-    },
-];
-
-type Experience = typeof experiences[0];
-
 export default function ExperienceManagementPage() {
   const router = useRouter();
-  const [experienceToDelete, setExperienceToDelete] = useState<Experience | null>(null);
+  const { toast } = useToast();
+  const [experiences, setExperiences] = useState<ExperienceFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [experienceToDelete, setExperienceToDelete] = useState<ExperienceFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
 
-  const handleDeleteClick = (experience: Experience) => {
+  useEffect(() => {
+    async function fetchExperiences() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getExperiences();
+        setExperiences(data);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+        toast({
+          variant: 'destructive',
+          title: 'Failed to fetch experiences',
+          description: err.message,
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchExperiences();
+  }, [toast]);
+
+  const handleDeleteClick = (experience: ExperienceFromApi) => {
     setExperienceToDelete(experience);
   };
 
@@ -127,19 +78,29 @@ export default function ExperienceManagementPage() {
     setExperienceToDelete(null);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (experienceToDelete) {
-      console.log(`Deleting ${experienceToDelete.title}`);
-      // Add actual delete logic here
-      setDeletedExperienceTitle(experienceToDelete.title);
-      setExperienceToDelete(null);
-      setShowDeleteSuccessDialog(true);
+      try {
+        await deleteExperience(experienceToDelete.id);
+        setDeletedExperienceTitle(experienceToDelete.name);
+        setExperiences(prev => prev.filter(exp => exp.id !== experienceToDelete.id));
+        setShowDeleteSuccessDialog(true);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error Deleting Experience",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setExperienceToDelete(null);
+      }
     }
   };
 
 
   return (
     <div className="space-y-6">
+      <Toaster />
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat, index) => (
@@ -175,15 +136,17 @@ export default function ExperienceManagementPage() {
       <AlertDialog open={!!experienceToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
         {/* Experiences Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {experiences.map((experience, index) => (
-            <Card key={index} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+          {loading && Array.from({ length: 6 }).map((_, i) => <Card key={i} className="h-80 animate-pulse bg-muted"></Card>)}
+          {error && <p className="text-red-500 col-span-full">{error}</p>}
+          {!loading && !error && experiences.map((experience) => (
+            <Card key={experience.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
               <div className="relative w-full h-48">
                 <Image
-                  src={experience.image}
-                  alt={experience.title}
+                  src={experience.images_url || 'https://placehold.co/600x400'}
+                  alt={experience.name}
                   fill
                   className="object-cover"
-                  data-ai-hint={experience.imageHint}
+                  data-ai-hint="experience photo"
                 />
                  {experience.status && (
                   <span className={cn(
@@ -197,14 +160,20 @@ export default function ExperienceManagementPage() {
                  )}
               </div>
               <CardContent className="p-4 flex flex-col flex-grow">
-                <h3 className="text-lg font-semibold mb-2">{experience.title}</h3>
+                <h3 className="text-lg font-semibold mb-2">{experience.name}</h3>
                 <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
-                    {experience.details.map((detail, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <detail.icon className="h-4 w-4"/>
-                            <span>{detail.text}</span>
-                        </div>
-                    ))}
+                    <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4"/>
+                        <span>{experience.duration}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4"/>
+                        <span>${experience.Price} per {experience.pricing_basis}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Ticket className="h-4 w-4"/>
+                        <span>{experience.advance_booking_required ? 'Advance booking required' : 'Walk-in available'}</span>
+                    </div>
                 </div>
                 <div className="mt-auto flex justify-between items-center pt-2 gap-2">
                   <Button className="w-full" variant="default" onClick={() => router.push(`/experience/${experience.id}`)}>View Bookings</Button>
@@ -229,7 +198,7 @@ export default function ExperienceManagementPage() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Experience ?</AlertDialogTitle>
               <AlertDialogDescription className="text-center text-red-500 text-lg">
-                {experienceToDelete?.title}
+                {experienceToDelete?.name}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">
