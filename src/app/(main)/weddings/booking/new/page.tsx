@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,11 +32,29 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import { getHalls, type HallFromApi } from '@/lib/services/api';
 
 
 export default function NewWeddingBookingPage() {
   const [weddingDate, setWeddingDate] = useState<Date | undefined>(undefined);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [halls, setHalls] = useState<HallFromApi[]>([]);
+  const [loadingHalls, setLoadingHalls] = useState(true);
+
+  useEffect(() => {
+    async function fetchHalls() {
+      try {
+        setLoadingHalls(true);
+        const data = await getHalls();
+        setHalls(data);
+      } catch (err) {
+        console.error("Failed to fetch halls:", err);
+      } finally {
+        setLoadingHalls(false);
+      }
+    }
+    fetchHalls();
+  }, []);
 
   const handleCreateBooking = () => {
     // In a real app, you would handle form submission here.
@@ -150,45 +168,25 @@ export default function NewWeddingBookingPage() {
                     Wedding Halls Selection
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="p-4 flex flex-col justify-between">
-                        <div>
-                            <div className="flex justify-between items-center mb-1">
-                                <h4 className="font-semibold">Grand Ballroom</h4>
-                                <Badge variant="outline" className="bg-green-100 text-green-700">Available</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">Capacity: 200 guests</p>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-4">
-                            <Checkbox id="hall-grand-ballroom" />
-                            <Label htmlFor="hall-grand-ballroom" className="font-normal">Select this hall</Label>
-                        </div>
-                    </Card>
-                     <Card className="p-4 flex flex-col justify-between">
-                        <div>
-                            <div className="flex justify-between items-center mb-1">
-                                <h4 className="font-semibold">Crystal Hall</h4>
-                                <Badge variant="outline" className="bg-green-100 text-green-700">Available</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">Capacity: 120 guests</p>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-4">
-                            <Checkbox id="hall-crystal-hall" />
-                            <Label htmlFor="hall-crystal-hall" className="font-normal">Select this hall</Label>
-                        </div>
-                    </Card>
-                     <Card className="p-4 flex flex-col justify-between bg-muted/50">
-                        <div>
-                            <div className="flex justify-between items-center mb-1">
-                                <h4 className="font-semibold text-muted-foreground">Royal Suite</h4>
-                                <Badge variant="outline" className="bg-red-100 text-red-700">Booked</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">Capacity: 80 guests</p>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-4">
-                            <Checkbox id="hall-royal-suite" disabled />
-                            <Label htmlFor="hall-royal-suite" className="font-normal text-muted-foreground">Unavailable</Label>
-                        </div>
-                    </Card>
+                    {loadingHalls ? <p>Loading halls...</p> : halls.map(hall => (
+                      <Card key={hall.id} className={cn("p-4 flex flex-col justify-between", !hall.is_active && 'bg-muted/50')}>
+                          <div>
+                              <div className="flex justify-between items-center mb-1">
+                                  <h4 className={cn("font-semibold", !hall.is_active && 'text-muted-foreground')}>{hall.hall_name}</h4>
+                                  <Badge variant="outline" className={hall.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                                      {hall.is_active ? 'Available' : 'Booked'}
+                                  </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{hall.description}</p>
+                          </div>
+                          <div className="flex items-center space-x-2 mt-4">
+                              <Checkbox id={`hall-${hall.id}`} disabled={!hall.is_active} />
+                              <Label htmlFor={`hall-${hall.id}`} className={cn("font-normal", !hall.is_active && 'text-muted-foreground')}>
+                                {hall.is_active ? 'Select this hall' : 'Unavailable'}
+                              </Label>
+                          </div>
+                      </Card>
+                    ))}
                 </div>
             </CardContent>
         </Card>
