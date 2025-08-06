@@ -24,7 +24,6 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/rooms', label: 'Room Management', icon: BedDouble },
   { href: '/amenities', label: 'Amenities Management', icon: Shield },
-  { href: '/halls', label: 'Hall Booking', icon: Building },
   { href: '/reservations', label: 'Room Booking Management', icon: CalendarCheck },
   { 
     href: '/restaurant', 
