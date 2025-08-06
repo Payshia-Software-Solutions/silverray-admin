@@ -33,7 +33,7 @@ export default function NewAmenityPage() {
     const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<AmenityFormValues>({
         resolver: zodResolver(amenitySchema),
         defaultValues: {
-            company_id: 'COMP004',
+            company_id: 'com-001',
             created_by: 'admin',
             is_active: true,
         }

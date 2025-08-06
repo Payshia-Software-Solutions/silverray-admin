@@ -119,7 +119,7 @@ export default function AddNewRoomPage() {
         room_number: roomDataFromForm.room_number,
         amenities_id: roomDataFromForm.amenities.join(','),
         room_type_id: Number(roomDataFromForm.room_type_id),
-        company_id: 'COMP004',
+        company_id: 'com-001',
         descriptive_title: roomDataFromForm.descriptive_title,
         short_description: roomDataFromForm.short_description,
         adults_capacity: Number(roomDataFromForm.adults_capacity),

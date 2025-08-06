@@ -44,7 +44,7 @@ export default function NewCustomerPage() {
     const onSubmit: SubmitHandler<CustomerFormValues> = async (data) => {
       const dataToSend = {
           ...data,
-          company_id: 'COMP004', // This should be dynamic in a real app
+          company_id: 'com-001', // This should be dynamic in a real app
           created_by: 'admin_user',
           updated_by: 'admin_user',
       };

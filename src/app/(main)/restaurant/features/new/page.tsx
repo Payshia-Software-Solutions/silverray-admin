@@ -33,7 +33,7 @@ export default function NewRestaurantFeaturePage() {
     const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<FeatureFormValues>({
         resolver: zodResolver(featureSchema),
         defaultValues: {
-            company_id: 'COMP004',
+            company_id: 'com-001',
             created_by: 'admin',
             is_active: true,
         }

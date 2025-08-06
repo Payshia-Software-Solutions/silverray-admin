@@ -78,7 +78,7 @@ export default function AddExperiencePage() {
       advance_booking_required: data.advance_booking_required ? 1 : 0,
       walk_in_available: data.walk_in_available ? 1 : 0,
       is_available: 1, // Assuming new experiences are available by default
-      company_id: 'COMP-008', // This should be dynamic in a real app
+      company_id: 'com-001', // This should be dynamic in a real app
       created_by: 'admin@company.com',
       updated_by: 'admin@company.com',
     };
