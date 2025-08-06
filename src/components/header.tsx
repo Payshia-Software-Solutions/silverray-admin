@@ -64,9 +64,6 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'bookings' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Booking', description: `Details for booking #${pathSegments[1]}.` };
     }
-     if (pathSegments[0] === 'weddings' && pathSegments.length > 1 && pathSegments[1] === 'halls' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
-        return { title: 'Edit Hall', description: 'Updating details for a wedding hall.' };
-    }
      if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
         return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
     }

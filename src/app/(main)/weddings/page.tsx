@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -35,7 +36,7 @@ import {
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import HallsPage from './halls/page';
+import HallsPage from '../halls/page';
 
 const weddingPackages = [
   {
