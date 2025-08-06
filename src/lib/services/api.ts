@@ -305,7 +305,7 @@ export async function createRoomType(roomTypeData: Omit<RoomTypeFromApi, 'id' | 
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+            body: JSON.stringify(roomTypeData),
         });
         return handleResponse<RoomTypeFromApi>(response);
     } catch (error) {
@@ -327,7 +327,7 @@ export async function updateRoomType(id: number, roomTypeData: Partial<Omit<Room
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+      body: JSON.stringify(roomTypeData),
     });
     return handleResponse<RoomTypeFromApi>(response);
   } catch (error) {
@@ -731,17 +731,17 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
 
 // Hall API Functions
 export async function getHalls(): Promise<HallFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/halls`);
+  const response = await fetch(`${API_BASE_URL}/hallbookings`);
   return handleResponse<HallFromApi[]>(response);
 }
 
 export async function getHallById(id: number): Promise<HallFromApi> {
-    const response = await fetch(`${API_BASE_URL}/halls/${id}`);
+    const response = await fetch(`${API_BASE_URL}/hallbookings/${id}`);
     return handleResponse<HallFromApi>(response);
 }
 
 export async function createHall(hallData: any): Promise<HallFromApi> {
-    const response = await fetch(`${API_BASE_URL}/halls`, {
+    const response = await fetch(`${API_BASE_URL}/hallbookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(hallData),
@@ -750,7 +750,7 @@ export async function createHall(hallData: any): Promise<HallFromApi> {
 }
 
 export async function updateHall(id: number, hallData: Partial<HallFromApi>): Promise<HallFromApi> {
-    const response = await fetch(`${API_BASE_URL}/halls/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/hallbookings/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(hallData),
@@ -759,7 +759,7 @@ export async function updateHall(id: number, hallData: Partial<HallFromApi>): Pr
 }
 
 export async function deleteHall(id: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/halls/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/hallbookings/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
