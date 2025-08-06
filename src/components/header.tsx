@@ -13,7 +13,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/rooms/types/new': { title: 'Create New Room Type', description: 'Add a new category of room for your hotel.' },
   '/amenities': { title: 'Amenities Management', description: 'Manage all hotel amenities available for rooms.' },
   '/amenities/new': { title: 'Create New Amenity', description: 'Add a new amenity to your hotel.' },
-  '/halls': { title: 'Hall Management', description: 'Manage all halls available for weddings and events.' },
+  '/halls': { title: 'Hall Booking', description: 'Manage all halls available for weddings and events.' },
   '/halls/new': { title: 'Create New Hall', description: 'Add a new hall to your hotel.' },
   '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/reservations/new': { title: 'Create New Booking', description: 'Add a new room or suite booking.' },

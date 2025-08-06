@@ -144,7 +144,7 @@ export default function WeddingManagementPage() {
           <TabsList>
             <TabsTrigger value="wedding-packages">Wedding Packages</TabsTrigger>
             <TabsTrigger value="wedding-bookings">Wedding Bookings</TabsTrigger>
-            <TabsTrigger value="hall-management">Hall Management</TabsTrigger>
+            <TabsTrigger value="hall-management">Hall Booking</TabsTrigger>
           </TabsList>
           <TabsContent value="wedding-packages" className="space-y-4">
             <Card>
