@@ -217,7 +217,7 @@ export default function RestaurantDiningPage() {
               </TabsTrigger>
               <TabsTrigger value="features">
                 <Shield className="mr-2 h-4 w-4" />
-                Features Management
+                Restaurant Features
               </TabsTrigger>
             </TabsList>
             {activeTab === 'dining-venues' && (
