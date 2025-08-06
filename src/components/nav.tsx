@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList, PlusSquare } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList, PlusSquare, Building } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -34,6 +34,7 @@ const navItems = [
   { href: '/customers', label: 'Customer Management', icon: Users },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
   { href: '/weddings', label: 'Wedding Management', icon: Heart },
+  { href: '/halls', label: 'Halls Management', icon: Building },
   { href: '/website-content', label: 'Website Content', icon: Globe },
   { href: '/user-management', label: 'User Management', icon: UserCog },
   { href: '/api-example', label: 'API Example', icon: Terminal },
@@ -80,7 +81,7 @@ export function Nav() {
                 <span
                 className={cn(
                     'transition-opacity duration-200 text-sm font-medium',
-                    state === 'collapsed' && isMounted ? 'opacity-0' : 'opacity-100'
+                    (state === 'collapsed' && isMounted) && 'opacity-0'
                 )}
                 >
                 {item.label}

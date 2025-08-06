@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,19 +27,28 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-
-const associatedHalls = [
-    { id: 'grand-ballroom', label: 'Grand Ballroom' },
-    { id: 'garden-pavilion', label: 'Garden Pavilion' },
-    { id: 'rooftop-terrace', label: 'Rooftop Terrace' },
-    { id: 'crystal-hall', label: 'Crystal Hall' },
-    { id: 'seaside-deck', label: 'Seaside Deck' },
-    { id: 'heritage-room', label: 'Heritage Room' },
-];
+import { getHalls, type HallFromApi } from '@/lib/services/api';
 
 export default function NewWeddingPackagePage() {
   const [inclusions, setInclusions] = useState([{ id: 1, title: '', details: '' }]);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [halls, setHalls] = useState<HallFromApi[]>([]);
+  const [loadingHalls, setLoadingHalls] = useState(true);
+
+  useEffect(() => {
+    async function fetchHalls() {
+      try {
+        setLoadingHalls(true);
+        const data = await getHalls();
+        setHalls(data);
+      } catch (err) {
+        console.error("Failed to fetch halls:", err);
+      } finally {
+        setLoadingHalls(false);
+      }
+    }
+    fetchHalls();
+  }, []);
 
   const addInclusion = () => {
     setInclusions([...inclusions, { id: Date.now(), title: '', details: '' }]);
@@ -150,10 +159,10 @@ export default function NewWeddingPackagePage() {
           <CardContent className="p-6 space-y-4">
             <h3 className="text-lg font-semibold">Associated Halls</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {associatedHalls.map((hall) => (
+                {loadingHalls ? <p>Loading halls...</p> : halls.map((hall) => (
                   <div key={hall.id} className="flex items-center space-x-2">
-                    <Checkbox id={hall.id} />
-                    <Label htmlFor={hall.id} className="font-normal">{hall.label}</Label>
+                    <Checkbox id={`hall-${hall.id}`} />
+                    <Label htmlFor={`hall-${hall.id}`} className="font-normal">{hall.hall_name}</Label>
                   </div>
                 ))}
             </div>
