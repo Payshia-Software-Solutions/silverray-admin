@@ -250,6 +250,22 @@ export default function AddExperiencePage() {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+            <CardContent className="p-6 space-y-6">
+                 <h3 className="text-lg font-semibold">Image Gallery</h3>
+                <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
+                <div className="flex gap-4 items-center flex-wrap">
+                     <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
+                        <div className="flex flex-col items-center justify-center">
+                            <Plus className="w-8 h-8 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">Add Image</span>
+                        </div>
+                        <Input id="image-upload" type="file" className="hidden" accept="image/*" />
+                    </label>
+                </div>
+            </CardContent>
+        </Card>
         
         <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
