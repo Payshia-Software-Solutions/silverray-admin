@@ -1,133 +1,715 @@
+/**
+ * @fileoverview This file contains the functions for making API calls to the PHP back-end.
+ * It uses the native fetch API for all requests.
+ */
 
-'use client';
+// The base URL of your PHP server's router script
+const API_BASE_URL = 'http://localhost/Silver_server';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import Link from 'next/link';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
-import { Toaster } from '@/components/ui/toaster';
-import { getHallById, updateHall, type HallFromApi } from '@/lib/services/api';
-import { useParams, useRouter } from 'next/navigation';
+/**
+ * Defines the structure of a Room object as returned by the API.
+ */
+export interface RoomFromApi {
+  id: number;
+  room_number: string;
+  descriptive_title: string;
+  current_status: 'Available' | 'Booked' | 'Under Maintenance';
+  price_per_night: string;
+  currency: string;
+  room_type_id: number;
+  short_description: string;
+  adults_capacity: number;
+  children_capacity: number;
+  room_width: string;
+  room_height: string;
+  amenities_id: string; // Comma-separated string of amenity IDs
+  image_url: string;
+  company_id: string;
+  created_by: string;
+  updated_by: string | null;
+}
 
-const hallSchema = z.object({
-    hall_name: z.string().min(1, 'Hall Name is required'),
-    description: z.string().min(1, 'Description is required'),
-    is_active: z.boolean().default(true),
-    updated_by: z.string().min(1, 'Updated By is required'),
-});
-
-type HallFormValues = z.infer<typeof hallSchema>;
-
-export default function EditHallPage() {
-    const router = useRouter();
-    const params = useParams();
-    const id = Number(params?.id);
-    const { toast } = useToast();
-    const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<HallFormValues>({
-        resolver: zodResolver(hallSchema),
-        defaultValues: {
-            updated_by: 'admin'
-        }
-    });
-
-    useEffect(() => {
-        if (id) {
-            async function fetchHall() {
-                try {
-                    const hall = await getHallById(id);
-                    reset({
-                        ...hall,
-                        is_active: hall.is_active === 1,
-                    });
-                } catch (error: any) {
-                    toast({
-                        variant: 'destructive',
-                        title: 'Error fetching hall',
-                        description: error.message || 'An unexpected error occurred.',
-                    });
-                }
-            }
-            fetchHall();
-        }
-    }, [id, reset, toast]);
-
-    const onSubmit: SubmitHandler<HallFormValues> = async (data) => {
-        try {
-            const dataToSubmit = { 
-                ...data, 
-                updated_by: 'admin',
-                is_active: data.is_active ? 1 : 0,
-            };
-            await updateHall(id, dataToSubmit as any);
-            toast({
-                title: 'Success!',
-                description: 'Hall updated successfully.',
-            });
-            router.push('/halls');
-        } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Error updating hall',
-                description: error.message || 'An unexpected error occurred.',
-            });
-        }
+/**
+ * Defines the structure for a Reservation object from the API.
+ */
+export interface ReservationFromApi {
+  id: string;
+  checkInDate: string;
+  checkOutDate: string;
+  adults: number;
+  children: number;
+  totalAmount: string;
+  paymentStatus: 'Paid' | 'Pending' | 'Due';
+  bookingStatus: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  guest?: {
+    fullName: string;
+    email: string;
+  };
+  room?: {
+    id: string; // Room number
+    room_type_details: {
+      name: string; // Room type name
     };
-    
-    return (
-        <>
-            <Toaster />
-            <div className="space-y-6 max-w-2xl mx-auto">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Edit Hall</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="hall_name">Hall Name</Label>
-                                <Input id="hall_name" {...register('hall_name')} />
-                                {errors.hall_name && <p className="text-red-500 text-sm">{errors.hall_name.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" {...register('description')} />
-                                {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Controller
-                                    name="is_active"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Switch
-                                            id="is_active"
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    )}
-                                />
-                                <Label htmlFor="is_active">Active</Label>
-                            </div>
-                            
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" asChild>
-                                    <Link href="/halls">Cancel</Link>
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
-        </>
-    );
+  };
+}
+
+
+/**
+ * Defines the structure for a Booking object from the API.
+ */
+export interface BookingFromApi {
+  id: number;
+  booking_id: string;
+  room_type_id: string;
+  customer_id: string;
+  room_number: string;
+  company_id: string;
+  check_in_date: string;
+  check_out_date: string;
+  adults: number;
+  children: number;
+  numbers_of_night: number;
+  total_amount: string;
+  amount_paid: string;
+  balance_due: string;
+  payment_status: 'Paid' | 'Pending' | 'Due';
+  payment_method: 'Credit Card' | 'Cash' | 'Bank Transfer' | 'Online';
+  discount_code: string | null;
+  booking_status: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  booking_source: 'Online' | 'Phone' | 'Walk-in';
+  customer: {
+    full_name: string;
+    email: string;
+  };
+   roomType?: {
+    type_name: string;
+  };
+}
+
+
+/**
+ * Defines the structure of a RoomType object as returned by the API.
+ */
+export interface RoomTypeFromApi {
+  id: number;
+  room_type_id: string;
+  company_id: string;
+  type_name: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+/**
+ * Defines the structure of an Amenity object as returned by the API.
+ */
+export interface AmenityFromApi {
+  id: number;
+  amenities_id: number;
+  amenity_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+export interface CustomerFromApi {
+    id: number;
+    customer_id: string;
+    customer_type: 'individual' | 'corporate' | 'vip' | 'group';
+    company_id: string;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+    special_requests: string;
+    account_status: 'active' | 'inactive' | 'suspended' | 'pending';
+    created_at: string;
+    updated_at: string;
+    created_by: string;
+    updated_by: string;
+}
+
+export interface RestaurantFeatureFromApi {
+  id: number;
+  feature_id: string;
+  feature_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+export interface ExperienceFromApi {
+  id: number;
+  name: string;
+  company_id: string;
+  meeting_Point: string;
+  short_description: string;
+  detailed_description: string;
+  duration: string;
+  Price: string;
+  pricing_basis: string;
+  min_participants: number;
+  max_participants: number;
+  advance_booking_required: number;
+  walk_in_available: number;
+  day_of_week: string;
+  is_available: number;
+  schedule_note: string;
+  status: 'Active' | 'Inactive' | 'Seasonal';
+  images_url: string;
+  time_slot: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+
+/**
+ * A helper function to handle the response from the fetch API.
+ * It checks for errors and parses the JSON response.
+ * @param response The Response object from a fetch call.
+ * @returns A promise that resolves with the JSON data.
+ */
+async function handleResponse<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  if (!response.ok) {
+    // If the response is not ok, it might contain a server-side error message.
+    // We throw this as an error to be caught by the calling function.
+    throw new Error(`API request failed with status ${response.status}: ${text}`);
+  }
+  
+  // Find the start of the actual JSON content
+  const firstBracket = text.indexOf('[');
+  const firstBrace = text.indexOf('{');
+  
+  let startIndex = -1;
+
+  if (firstBracket === -1 && firstBrace === -1) {
+    // Neither bracket nor brace found, response is likely empty or not JSON
+    if (text.trim() === '') return {} as T;
+    throw new Error(`Invalid JSON response: ${text}`);
+  } else if (firstBracket === -1) {
+    startIndex = firstBrace;
+  } else if (firstBrace === -1) {
+    startIndex = firstBracket;
+  } else {
+    startIndex = Math.min(firstBracket, firstBrace);
+  }
+  
+  const jsonText = text.substring(startIndex);
+  
+  try {
+    if (jsonText.trim() === '') {
+      return {} as T;
+    }
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error("Failed to parse JSON:", jsonText);
+    throw new Error("Invalid JSON response from server.");
+  }
+}
+
+/**
+ * Fetches all rooms from the back-end.
+ * @returns A promise that resolves to an array of RoomFromApi objects.
+ */
+export async function getRooms(): Promise<RoomFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rooms`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return handleResponse<RoomFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch rooms:', error);
+    // In a real app, you might want to handle this more gracefully
+    throw error;
+  }
+}
+
+/**
+ * Fetches all room types from the back-end.
+ * @returns A promise that resolves to an array of RoomTypeFromApi objects.
+ */
+export async function getRoomTypes(): Promise<RoomTypeFromApi[]> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return handleResponse<RoomTypeFromApi[]>(response);
+    } catch (error) {
+        console.error('Failed to fetch room types:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetches a single room type by its ID.
+ * @param id The ID of the room type to fetch.
+ * @returns A promise that resolves to a RoomTypeFromApi object.
+ */
+export async function getRoomTypeById(id: number): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new room type.
+ * @param roomTypeData The data for the new room type.
+ * @returns A promise that resolves with the newly created room type data.
+ */
+export async function createRoomType(roomTypeData: Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RoomTypeFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+        });
+        return handleResponse<RoomTypeFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create room type:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room type.
+ * @param id The ID of the room type to update.
+ * @param roomTypeData The new data for the room type.
+ * @returns A promise that resolves with the updated room type data.
+ */
+export async function updateRoomType(id: number, roomTypeData: Partial<Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a room type by its ID.
+ * @param id The ID of the room type to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoomType(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room type ${id}:`, error);
+    throw error;
+  }
+}
+
+
+/**
+ * Fetches all amenities from the back-end.
+ * @returns A promise that resolves to an array of AmenityFromApi objects.
+ */
+export async function getAmenities(): Promise<AmenityFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch amenities:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches a single amenity by its ID.
+ * @param id The ID of the amenity to fetch.
+ * @returns A promise that resolves to an AmenityFromApi object.
+ */
+export async function getAmenityById(id: number): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new amenity.
+ * @param amenityData The data for the new amenity.
+ * @returns A promise that resolves with the newly created amenity data.
+ */
+export async function createAmenity(amenityData: Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<AmenityFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/amenities`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(amenityData),
+        });
+        return handleResponse<AmenityFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create amenity:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing amenity.
+ * @param id The ID of the amenity to update.
+ * @param amenityData The new data for the amenity.
+ * @returns A promise that resolves with the updated amenity data.
+ */
+export async function updateAmenity(id: number, amenityData: Partial<Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...amenityData, company_id: 'com-001' }),
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes an amenity by its ID.
+ * @param id The ID of the amenity to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteAmenity(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches all reservations from the back-end.
+ * @returns A promise that resolves to an array of ReservationFromApi objects.
+ */
+export async function getReservations(): Promise<ReservationFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/roombookings`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return handleResponse<ReservationFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch reservations:', error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new room.
+ * @param roomData The data for the new room.
+ * @returns A promise that resolves with the newly created room data.
+ */
+export async function createRoom(roomData: any): Promise<any> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<any>(response);
+    } catch (error) {
+        console.error('Failed to create room:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetches a single room by its ID.
+ * @param roomId The ID of the room to fetch.
+ * @returns A promise that resolves to a RoomFromApi object.
+ */
+export async function getRoomById(roomId: number): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to fetch room ${roomId}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room.
+ * @param roomId The ID of the room to update.
+ * @param roomData The data to update.
+ * @returns A promise that resolves with the updated room data.
+ */
+export async function updateRoom(roomId: number, roomData: Partial<RoomFromApi>): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to update room ${roomId}:`, error);
+        throw error;
+    }
+}
+
+
+/**
+ * Deletes a room by its ID.
+ * @param roomId The ID of the room to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoom(roomId: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room ${roomId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a reservation by its ID.
+ * @param bookingId The ID of the booking to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteBooking(bookingId: string): Promise<{ message: string }> {
+  try {
+    // Note: The backend route might need to be adjusted to handle IDs with '#'
+    const encodedBookingId = encodeURIComponent(bookingId);
+    const response = await fetch(`${API_BASE_URL}/roombooking/${encodedBookingId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete booking ${bookingId}:`, error);
+    throw error;
+  }
+}
+
+// Customer API functions
+export async function getCustomers(): Promise<CustomerFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/customers`);
+    return handleResponse<CustomerFromApi[]>(response);
+}
+
+export async function getCustomerById(id: number): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`);
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function createCustomer(customerData: Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function updateCustomer(id: number, customerData: Partial<Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function deleteCustomer(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Booking API Functions
+export async function getBookings(): Promise<BookingFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/room-bookings`);
+  return handleResponse<BookingFromApi[]>(response);
+}
+
+export async function getBookingById(id: number): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`);
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function createBooking(bookingData: any): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function updateBooking(id: number, bookingData: Partial<BookingFromApi>): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function deleteBookingById(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Restaurant Features API
+export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/features`);
+    return handleResponse<RestaurantFeatureFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch restaurant features:', error);
+    throw error;
+  }
+}
+
+export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`);
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
+}
+
+// Experiences API Functions
+export async function getExperiences(): Promise<ExperienceFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/experiences`);
+  return handleResponse<ExperienceFromApi[]>(response);
+}
+
+export async function getExperienceById(id: number): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`);
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function deleteExperience(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }

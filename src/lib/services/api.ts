@@ -175,19 +175,6 @@ export interface ExperienceFromApi {
   updated_by: string;
 }
 
-export interface HallFromApi {
-  id: number;
-  hall_id: string;
-  hall_name: string;
-  company_id: string;
-  description: string;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  updated_by: string;
-}
-
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -727,45 +714,4 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
-}
-
-// Hall API Functions
-export async function getHalls(): Promise<HallFromApi[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/halls`);
-    return handleResponse<HallFromApi[]>(response);
-  } catch (error) {
-    console.error('Failed to fetch halls:', error);
-    throw error;
-  }
-}
-
-export async function getHallById(id: number): Promise<HallFromApi> {
-  const response = await fetch(`${API_BASE_URL}/halls/${id}`);
-  return handleResponse<HallFromApi>(response);
-}
-
-export async function createHall(hallData: Omit<HallFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<HallFromApi> {
-  const response = await fetch(`${API_BASE_URL}/halls`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...hallData, company_id: 'com-001' }),
-  });
-  return handleResponse<HallFromApi>(response);
-}
-
-export async function updateHall(id: number, hallData: Partial<Omit<HallFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<HallFromApi> {
-  const response = await fetch(`${API_BASE_URL}/halls/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...hallData, company_id: 'com-001' }),
-  });
-  return handleResponse<HallFromApi>(response);
-}
-
-export async function deleteHall(id: number): Promise<{ message: string }> {
-  const response = await fetch(`${API_BASE_URL}/halls/${id}`, {
-    method: 'DELETE',
-  });
-  return handleResponse<{ message: string }>(response);
 }

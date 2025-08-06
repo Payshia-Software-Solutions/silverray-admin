@@ -34,7 +34,6 @@ const navItems = [
   { href: '/customers', label: 'Customer Management', icon: Users },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
   { href: '/weddings', label: 'Wedding Management', icon: Heart },
-  { href: '/halls', label: 'Halls Management', icon: Building },
   { href: '/website-content', label: 'Website Content', icon: Globe },
   { href: '/user-management', label: 'User Management', icon: UserCog },
   { href: '/api-example', label: 'API Example', icon: Terminal },

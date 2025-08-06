@@ -1,165 +1,715 @@
+/**
+ * @fileoverview This file contains the functions for making API calls to the PHP back-end.
+ * It uses the native fetch API for all requests.
+ */
 
-'use client';
+// The base URL of your PHP server's router script
+const API_BASE_URL = 'http://localhost/Silver_server';
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Trash2, X } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { getHalls, deleteHall, type HallFromApi } from '@/lib/services/api';
-import { useToast } from '@/hooks/use-toast';
-import { Toaster } from '@/components/ui/toaster';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader as DialogHeaderComponent, DialogTitle as DialogTitleComponent, DialogClose } from '@/components/ui/dialog';
+/**
+ * Defines the structure of a Room object as returned by the API.
+ */
+export interface RoomFromApi {
+  id: number;
+  room_number: string;
+  descriptive_title: string;
+  current_status: 'Available' | 'Booked' | 'Under Maintenance';
+  price_per_night: string;
+  currency: string;
+  room_type_id: number;
+  short_description: string;
+  adults_capacity: number;
+  children_capacity: number;
+  room_width: string;
+  room_height: string;
+  amenities_id: string; // Comma-separated string of amenity IDs
+  image_url: string;
+  company_id: string;
+  created_by: string;
+  updated_by: string | null;
+}
 
-export default function HallsPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [halls, setHalls] = useState<HallFromApi[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<HallFromApi | null>(null);
-  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
-  const [deletedItemName, setDeletedItemName] = useState<string>('');
-
-  useEffect(() => {
-    async function fetchHalls() {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getHalls();
-        setHalls(data);
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred while fetching halls.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchHalls();
-  }, []);
-
-  const handleDeleteClick = (hall: HallFromApi) => {
-    setItemToDelete(hall);
+/**
+ * Defines the structure for a Reservation object from the API.
+ */
+export interface ReservationFromApi {
+  id: string;
+  checkInDate: string;
+  checkOutDate: string;
+  adults: number;
+  children: number;
+  totalAmount: string;
+  paymentStatus: 'Paid' | 'Pending' | 'Due';
+  bookingStatus: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  guest?: {
+    fullName: string;
+    email: string;
   };
+  room?: {
+    id: string; // Room number
+    room_type_details: {
+      name: string; // Room type name
+    };
+  };
+}
 
-  const handleDeleteConfirm = async () => {
-    if (itemToDelete) {
-      try {
-        await deleteHall(itemToDelete.id);
-        setDeletedItemName(itemToDelete.hall_name);
-        setHalls(prev => prev.filter(item => item.id !== itemToDelete.id));
-        setShowDeleteSuccessDialog(true);
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error Deleting Hall",
-          description: error.message || "An unexpected error occurred.",
+
+/**
+ * Defines the structure for a Booking object from the API.
+ */
+export interface BookingFromApi {
+  id: number;
+  booking_id: string;
+  room_type_id: string;
+  customer_id: string;
+  room_number: string;
+  company_id: string;
+  check_in_date: string;
+  check_out_date: string;
+  adults: number;
+  children: number;
+  numbers_of_night: number;
+  total_amount: string;
+  amount_paid: string;
+  balance_due: string;
+  payment_status: 'Paid' | 'Pending' | 'Due';
+  payment_method: 'Credit Card' | 'Cash' | 'Bank Transfer' | 'Online';
+  discount_code: string | null;
+  booking_status: 'Confirmed' | 'Pending' | 'CheckedIn' | 'CheckedOut' | 'Cancelled';
+  booking_source: 'Online' | 'Phone' | 'Walk-in';
+  customer: {
+    full_name: string;
+    email: string;
+  };
+   roomType?: {
+    type_name: string;
+  };
+}
+
+
+/**
+ * Defines the structure of a RoomType object as returned by the API.
+ */
+export interface RoomTypeFromApi {
+  id: number;
+  room_type_id: string;
+  company_id: string;
+  type_name: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+/**
+ * Defines the structure of an Amenity object as returned by the API.
+ */
+export interface AmenityFromApi {
+  id: number;
+  amenities_id: number;
+  amenity_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+export interface CustomerFromApi {
+    id: number;
+    customer_id: string;
+    customer_type: 'individual' | 'corporate' | 'vip' | 'group';
+    company_id: string;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+    special_requests: string;
+    account_status: 'active' | 'inactive' | 'suspended' | 'pending';
+    created_at: string;
+    updated_at: string;
+    created_by: string;
+    updated_by: string;
+}
+
+export interface RestaurantFeatureFromApi {
+  id: number;
+  feature_id: string;
+  feature_name: string;
+  company_id: string;
+  description: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+export interface ExperienceFromApi {
+  id: number;
+  name: string;
+  company_id: string;
+  meeting_Point: string;
+  short_description: string;
+  detailed_description: string;
+  duration: string;
+  Price: string;
+  pricing_basis: string;
+  min_participants: number;
+  max_participants: number;
+  advance_booking_required: number;
+  walk_in_available: number;
+  day_of_week: string;
+  is_available: number;
+  schedule_note: string;
+  status: 'Active' | 'Inactive' | 'Seasonal';
+  images_url: string;
+  time_slot: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
+
+/**
+ * A helper function to handle the response from the fetch API.
+ * It checks for errors and parses the JSON response.
+ * @param response The Response object from a fetch call.
+ * @returns A promise that resolves with the JSON data.
+ */
+async function handleResponse<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  if (!response.ok) {
+    // If the response is not ok, it might contain a server-side error message.
+    // We throw this as an error to be caught by the calling function.
+    throw new Error(`API request failed with status ${response.status}: ${text}`);
+  }
+  
+  // Find the start of the actual JSON content
+  const firstBracket = text.indexOf('[');
+  const firstBrace = text.indexOf('{');
+  
+  let startIndex = -1;
+
+  if (firstBracket === -1 && firstBrace === -1) {
+    // Neither bracket nor brace found, response is likely empty or not JSON
+    if (text.trim() === '') return {} as T;
+    throw new Error(`Invalid JSON response: ${text}`);
+  } else if (firstBracket === -1) {
+    startIndex = firstBrace;
+  } else if (firstBrace === -1) {
+    startIndex = firstBracket;
+  } else {
+    startIndex = Math.min(firstBracket, firstBrace);
+  }
+  
+  const jsonText = text.substring(startIndex);
+  
+  try {
+    if (jsonText.trim() === '') {
+      return {} as T;
+    }
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error("Failed to parse JSON:", jsonText);
+    throw new Error("Invalid JSON response from server.");
+  }
+}
+
+/**
+ * Fetches all rooms from the back-end.
+ * @returns A promise that resolves to an array of RoomFromApi objects.
+ */
+export async function getRooms(): Promise<RoomFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rooms`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return handleResponse<RoomFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch rooms:', error);
+    // In a real app, you might want to handle this more gracefully
+    throw error;
+  }
+}
+
+/**
+ * Fetches all room types from the back-end.
+ * @returns A promise that resolves to an array of RoomTypeFromApi objects.
+ */
+export async function getRoomTypes(): Promise<RoomTypeFromApi[]> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
-      } finally {
-        setItemToDelete(null);
-      }
+        return handleResponse<RoomTypeFromApi[]>(response);
+    } catch (error) {
+        console.error('Failed to fetch room types:', error);
+        throw error;
     }
-  };
+}
 
-  return (
-    <>
-      <Toaster />
-      <div className="flex justify-end mb-6">
-        <Button onClick={() => router.push('/halls/new')}>
-          <Plus className="mr-2 h-4 w-4" /> Add New Hall
-        </Button>
-      </div>
-      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-        <Card>
-            <CardHeader>
-                <CardTitle>All Halls</CardTitle>
-            </CardHeader>
-          <CardContent className="p-0">
-            {loading && <p className="p-4 text-center">Loading halls...</p>}
-            {error && <p className="p-4 text-center text-red-500">{error}</p>}
-            {!loading && !error && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Hall Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {halls.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.hall_name}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.is_active ? 'default' : 'secondary'} className={item.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                            {item.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                            <Link href={`/halls/${item.id}`}>
-                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                              <span className="sr-only">View/Edit</span>
-                            </Link>
-                          </Button>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(item)}>
-                              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-          <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-            <div className="text-sm text-muted-foreground">
-              Showing 1 to {halls.length} of {halls.length} halls
-            </div>
-          </CardFooter>
-        </Card>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-center text-2xl font-bold">Delete Hall?</AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-lg">
-                Are you sure you want to delete the hall: <strong className="text-red-500">{itemToDelete?.hall_name}</strong>?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-center">
-            <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
-            <DialogHeaderComponent className="sr-only">
-                <DialogTitleComponent>Successfully Deleted</DialogTitleComponent>
-            </DialogHeaderComponent>
-            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
-                <div className="p-4 bg-red-100 rounded-full mb-4">
-                    <Trash2 className="h-8 w-8 text-red-600" />
-                </div>
-                <h2 className="text-xl font-bold">Successfully Deleted {deletedItemName}!</h2>
-            </div>
-            <DialogClose asChild>
-              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
-                  <X className="h-5 w-5" />
-                  <span className="sr-only">Close</span>
-              </button>
-            </DialogClose>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
+/**
+ * Fetches a single room type by its ID.
+ * @param id The ID of the room type to fetch.
+ * @returns A promise that resolves to a RoomTypeFromApi object.
+ */
+export async function getRoomTypeById(id: number): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new room type.
+ * @param roomTypeData The data for the new room type.
+ * @returns A promise that resolves with the newly created room type data.
+ */
+export async function createRoomType(roomTypeData: Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RoomTypeFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-types`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+        });
+        return handleResponse<RoomTypeFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create room type:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room type.
+ * @param id The ID of the room type to update.
+ * @param roomTypeData The new data for the room type.
+ * @returns A promise that resolves with the updated room type data.
+ */
+export async function updateRoomType(id: number, roomTypeData: Partial<Omit<RoomTypeFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RoomTypeFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...roomTypeData, company_id: 'com-001' }),
+    });
+    return handleResponse<RoomTypeFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update room type ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a room type by its ID.
+ * @param id The ID of the room type to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoomType(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/room-types/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room type ${id}:`, error);
+    throw error;
+  }
+}
+
+
+/**
+ * Fetches all amenities from the back-end.
+ * @returns A promise that resolves to an array of AmenityFromApi objects.
+ */
+export async function getAmenities(): Promise<AmenityFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch amenities:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches a single amenity by its ID.
+ * @param id The ID of the amenity to fetch.
+ * @returns A promise that resolves to an AmenityFromApi object.
+ */
+export async function getAmenityById(id: number): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to fetch amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new amenity.
+ * @param amenityData The data for the new amenity.
+ * @returns A promise that resolves with the newly created amenity data.
+ */
+export async function createAmenity(amenityData: Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<AmenityFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/amenities`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(amenityData),
+        });
+        return handleResponse<AmenityFromApi>(response);
+    } catch (error) {
+        console.error('Failed to create amenity:', error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing amenity.
+ * @param id The ID of the amenity to update.
+ * @param amenityData The new data for the amenity.
+ * @returns A promise that resolves with the updated amenity data.
+ */
+export async function updateAmenity(id: number, amenityData: Partial<Omit<AmenityFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<AmenityFromApi> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...amenityData, company_id: 'com-001' }),
+    });
+    return handleResponse<AmenityFromApi>(response);
+  } catch (error) {
+    console.error(`Failed to update amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes an amenity by its ID.
+ * @param id The ID of the amenity to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteAmenity(id: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete amenity ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches all reservations from the back-end.
+ * @returns A promise that resolves to an array of ReservationFromApi objects.
+ */
+export async function getReservations(): Promise<ReservationFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/roombookings`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return handleResponse<ReservationFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch reservations:', error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a new room.
+ * @param roomData The data for the new room.
+ * @returns A promise that resolves with the newly created room data.
+ */
+export async function createRoom(roomData: any): Promise<any> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<any>(response);
+    } catch (error) {
+        console.error('Failed to create room:', error);
+        throw error;
+    }
+}
+
+/**
+ * Fetches a single room by its ID.
+ * @param roomId The ID of the room to fetch.
+ * @returns A promise that resolves to a RoomFromApi object.
+ */
+export async function getRoomById(roomId: number): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to fetch room ${roomId}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing room.
+ * @param roomId The ID of the room to update.
+ * @param roomData The data to update.
+ * @returns A promise that resolves with the updated room data.
+ */
+export async function updateRoom(roomId: number, roomData: Partial<RoomFromApi>): Promise<RoomFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(roomData),
+        });
+        return handleResponse<RoomFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to update room ${roomId}:`, error);
+        throw error;
+    }
+}
+
+
+/**
+ * Deletes a room by its ID.
+ * @param roomId The ID of the room to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoom(roomId: number): Promise<{ message: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete room ${roomId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a reservation by its ID.
+ * @param bookingId The ID of the booking to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteBooking(bookingId: string): Promise<{ message: string }> {
+  try {
+    // Note: The backend route might need to be adjusted to handle IDs with '#'
+    const encodedBookingId = encodeURIComponent(bookingId);
+    const response = await fetch(`${API_BASE_URL}/roombooking/${encodedBookingId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse<{ message: string }>(response);
+  } catch (error) {
+    console.error(`Failed to delete booking ${bookingId}:`, error);
+    throw error;
+  }
+}
+
+// Customer API functions
+export async function getCustomers(): Promise<CustomerFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/customers`);
+    return handleResponse<CustomerFromApi[]>(response);
+}
+
+export async function getCustomerById(id: number): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`);
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function createCustomer(customerData: Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function updateCustomer(id: number, customerData: Partial<Omit<CustomerFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<CustomerFromApi> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData),
+    });
+    return handleResponse<CustomerFromApi>(response);
+}
+
+export async function deleteCustomer(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Booking API Functions
+export async function getBookings(): Promise<BookingFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/room-bookings`);
+  return handleResponse<BookingFromApi[]>(response);
+}
+
+export async function getBookingById(id: number): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`);
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function createBooking(bookingData: any): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function updateBooking(id: number, bookingData: Partial<BookingFromApi>): Promise<BookingFromApi> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+    });
+    return handleResponse<BookingFromApi>(response);
+}
+
+export async function deleteBookingById(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/room-bookings/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Restaurant Features API
+export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/features`);
+    return handleResponse<RestaurantFeatureFromApi[]>(response);
+  } catch (error) {
+    console.error('Failed to fetch restaurant features:', error);
+    throw error;
+  }
+}
+
+export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`);
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(featureData),
+  });
+  return handleResponse<RestaurantFeatureFromApi>(response);
+}
+
+export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
+}
+
+// Experiences API Functions
+export async function getExperiences(): Promise<ExperienceFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/experiences`);
+  return handleResponse<ExperienceFromApi[]>(response);
+}
+
+export async function getExperienceById(id: number): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`);
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+    });
+    return handleResponse<ExperienceFromApi>(response);
+}
+
+export async function deleteExperience(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }
