@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2, X } from 'lucide-react';
+import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2, X, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
