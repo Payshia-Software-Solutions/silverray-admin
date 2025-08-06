@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar as CalendarIcon, Search, Plus, Trash2, Eye, X, Info, CheckCircle, Utensils, Users, Flower2, Cake, Camera, Car, Music, BedDouble } from 'lucide-react';
+import { Calendar as CalendarIcon, Search, Plus, Trash2, Eye, X, Info, CheckCircle, Utensils, Users, Flower2, Cake, Camera, Car, Music, BedDouble, Building } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -35,6 +35,7 @@ import {
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import HallsPage from './halls/page';
 
 const weddingPackages = [
   {
@@ -143,6 +144,7 @@ export default function WeddingManagementPage() {
           <TabsList>
             <TabsTrigger value="wedding-packages">Wedding Packages</TabsTrigger>
             <TabsTrigger value="wedding-bookings">Wedding Bookings</TabsTrigger>
+            <TabsTrigger value="hall-management">Hall Management</TabsTrigger>
           </TabsList>
           <TabsContent value="wedding-packages" className="space-y-4">
             <Card>
@@ -344,6 +346,9 @@ export default function WeddingManagementPage() {
                       </div>
                   </CardFooter>
               </Card>
+          </TabsContent>
+           <TabsContent value="hall-management">
+             <HallsPage />
           </TabsContent>
         </Tabs>
         <AlertDialogContent>

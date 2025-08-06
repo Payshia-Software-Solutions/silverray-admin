@@ -68,7 +68,7 @@ export default function HallsPage() {
     <>
       <Toaster />
       <div className="flex justify-end mb-6">
-        <Button onClick={() => router.push('/halls/new')}>
+        <Button onClick={() => router.push('/weddings/halls/new')}>
           <Plus className="mr-2 h-4 w-4" /> Add New Hall
         </Button>
       </div>
@@ -103,7 +103,7 @@ export default function HallsPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-2">
                           <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                            <Link href={`/halls/${item.id}`}>
+                            <Link href={`/weddings/halls/${item.id}`}>
                               <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                               <span className="sr-only">View/Edit</span>
                             </Link>
