@@ -159,7 +159,7 @@ export default function NewWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                    <Button variant="outline" asChild className="bg-yellow-400 hover:bg-yellow-500">
+                    <Button variant="default" asChild>
                         <Link href="/package-inclusions">
                             <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
                         </Link>
