@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -780,6 +781,11 @@ export async function deleteHall(id: number): Promise<{ message: string }> {
 export async function getPackageInclusions(): Promise<PackageInclusionFromApi[]> {
   const response = await fetch(`${API_BASE_URL}/package-inclusions`, { cache: 'no-store' });
   return handleResponse<PackageInclusionFromApi[]>(response);
+}
+
+export async function getPackageInclusionById(id: number): Promise<PackageInclusionFromApi> {
+  const response = await fetch(`${API_BASE_URL}/package-inclusions/${id}`, { cache: 'no-store' });
+  return handleResponse<PackageInclusionFromApi>(response);
 }
 
 export async function createPackageInclusion(data: Omit<PackageInclusionFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<PackageInclusionFromApi> {

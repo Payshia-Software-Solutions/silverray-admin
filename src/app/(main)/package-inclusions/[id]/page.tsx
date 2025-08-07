@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getPackageInclusions, updatePackageInclusion, type PackageInclusionFromApi } from '@/lib/services/api';
+import { getPackageInclusionById, updatePackageInclusion, type PackageInclusionFromApi } from '@/lib/services/api';
 import { useParams, useRouter } from 'next/navigation';
 
 const inclusionSchema = z.object({
@@ -37,7 +37,7 @@ export default function EditInclusionPage() {
         if (id) {
             async function fetchInclusion() {
                 try {
-                    const inclusion = await getPackageInclusions().then(inclusions => inclusions.find(i => i.id === id));
+                    const inclusion = await getPackageInclusionById(id);
                     if(inclusion) {
                        reset(inclusion);
                     } else {
