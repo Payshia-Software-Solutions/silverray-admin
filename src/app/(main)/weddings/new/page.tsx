@@ -57,9 +57,14 @@ export default function NewWeddingPackagePage() {
         try {
             setLoadingInclusions(true);
             const data = await getPackageInclusions();
-            setInclusions(data);
+            if (Array.isArray(data)) {
+                setInclusions(data);
+            } else {
+                setInclusions([]); // Ensure inclusions is always an array
+            }
         } catch (err) {
             console.error("Failed to fetch inclusions:", err);
+            setInclusions([]);
         } finally {
             setLoadingInclusions(false);
         }
