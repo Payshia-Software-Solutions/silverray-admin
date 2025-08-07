@@ -31,6 +31,8 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
   '/weddings/new': { title: 'Create New Wedding Package', description: 'Design a new package for wedding events.' },
   '/weddings/booking/new': { title: 'Create Wedding Booking', description: 'Book a new wedding event for a client.' },
+  '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
+  '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'Add New Admin', description: 'Create a new administrative user account.' },
@@ -54,6 +56,9 @@ const getDynamicPageInfo = (pathname: string) => {
     }
     if (pathSegments[0] === 'halls' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Hall', description: `Updating details for a hall.` };
+    }
+     if (pathSegments[0] === 'package-inclusions' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Package Inclusion', description: `Updating details for an inclusion.` };
     }
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Customer', description: `Updating details for a customer.` };

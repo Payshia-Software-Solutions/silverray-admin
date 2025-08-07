@@ -188,6 +188,17 @@ export interface HallFromApi {
   updated_by: string;
 }
 
+export interface PackageInclusionFromApi {
+  id: number;
+  inclusion_type: string;
+  company_id: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -763,4 +774,35 @@ export async function deleteHall(id: number): Promise<{ message: string }> {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
+}
+
+// Package Inclusions API
+export async function getPackageInclusions(): Promise<PackageInclusionFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/package-inclusions`);
+  return handleResponse<PackageInclusionFromApi[]>(response);
+}
+
+export async function createPackageInclusion(data: Omit<PackageInclusionFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<PackageInclusionFromApi> {
+  const response = await fetch(`${API_BASE_URL}/package-inclusions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<PackageInclusionFromApi>(response);
+}
+
+export async function updatePackageInclusion(id: number, data: Partial<Omit<PackageInclusionFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<PackageInclusionFromApi> {
+  const response = await fetch(`${API_BASE_URL}/package-inclusions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<PackageInclusionFromApi>(response);
+}
+
+export async function deletePackageInclusion(id: number): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/package-inclusions/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
 }

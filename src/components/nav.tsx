@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList, PlusSquare, Building } from 'lucide-react';
+import { BedDouble, CalendarCheck, Globe, Heart, LayoutDashboard, Mail, Settings, Star, UserCog, Users, UtensilsCrossed, Terminal, Shield, Image, ClipboardList, PlusSquare, Building, Gift } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -34,6 +35,7 @@ const navItems = [
   { href: '/customers', label: 'Customer Management', icon: Users },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
   { href: '/weddings', label: 'Wedding Management', icon: Heart },
+  { href: '/package-inclusions', label: 'Package Inclusions', icon: Gift },
   { href: '/website-content', label: 'Website Content', icon: Globe },
   { href: '/user-management', label: 'User Management', icon: UserCog },
   { href: '/api-example', label: 'API Example', icon: Terminal },

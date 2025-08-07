@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,12 +28,13 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export default function NewWeddingPackagePage() {
-  const [inclusions, setInclusions] = useState([{ id: 1, title: '', details: '' }]);
+  const [inclusions, setInclusions] = useState<PackageInclusionFromApi[]>([]);
+  const [loadingInclusions, setLoadingInclusions] = useState(true);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [halls, setHalls] = useState<HallFromApi[]>([]);
   const [loadingHalls, setLoadingHalls] = useState(true);
@@ -50,15 +52,20 @@ export default function NewWeddingPackagePage() {
       }
     }
     fetchHalls();
+    
+    async function fetchInclusions() {
+        try {
+            setLoadingInclusions(true);
+            const data = await getPackageInclusions();
+            setInclusions(data);
+        } catch (err) {
+            console.error("Failed to fetch inclusions:", err);
+        } finally {
+            setLoadingInclusions(false);
+        }
+    }
+    fetchInclusions();
   }, []);
-
-  const addInclusion = () => {
-    setInclusions([...inclusions, { id: Date.now(), title: '', details: '' }]);
-  };
-
-  const removeInclusion = (id: number) => {
-    setInclusions(inclusions.filter(inclusion => inclusion.id !== id));
-  };
 
   const handleAddPackage = () => {
     // In a real app, you would handle form submission here.
@@ -90,7 +97,7 @@ export default function NewWeddingPackagePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select>
+                    <Select defaultValue="active">
                       <SelectTrigger id="status">
                         <SelectValue placeholder="Select Status" />
                       </SelectTrigger>
@@ -147,22 +154,20 @@ export default function NewWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                    <Button variant="outline" onClick={addInclusion}>
-                        <Plus className="mr-2 h-4 w-4" /> Add Inclusion
+                    <Button variant="outline" asChild>
+                        <Link href="/package-inclusions/new">
+                           <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+                        </Link>
                     </Button>
                 </div>
-                {inclusions.map((inclusion, index) => (
-                    <div key={inclusion.id} className="space-y-2">
-                        <Label>Inclusion {index + 1}</Label>
-                        <div className="flex items-center gap-2">
-                            <Input placeholder="Type/Title (e.g., Catering)" />
-                            <Input placeholder="Detailed description of this inclusion" />
-                            <Button variant="ghost" size="icon" onClick={() => removeInclusion(inclusion.id)}>
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
+                        <div key={inclusion.id} className="flex items-center space-x-2">
+                            <Checkbox id={`inclusion-${inclusion.id}`} />
+                            <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">{inclusion.inclusion_type}</Label>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </CardContent>
         </Card>
 
