@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -79,6 +79,11 @@ export default function PackageInclusionsPage() {
 
   const handleSaveChanges = async () => {
     for (const inclusion of inclusions) {
+        if (!inclusion.inclusion_type || !inclusion.description) {
+            toast({ variant: 'destructive', title: 'Missing Information', description: `Please fill out all fields for "${inclusion.inclusion_type || 'new inclusion'}".` });
+            return;
+        }
+
         try {
             const payload = {
                 inclusion_id: inclusion.inclusion_id,
@@ -125,7 +130,7 @@ export default function PackageInclusionsPage() {
         {!loading && !error && (
             <div className="space-y-4">
                 {inclusions.map((inclusion, index) => (
-                    <Card key={index}>
+                    <Card key={inclusion.id || index}>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-lg">Inclusion {index + 1}</CardTitle>
                             <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-100 hover:text-red-600" onClick={() => removeInclusion(index)}>
