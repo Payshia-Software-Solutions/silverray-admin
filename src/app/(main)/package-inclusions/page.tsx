@@ -88,6 +88,7 @@ export default function PackageInclusionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Inclusion ID</TableHead>
                     <TableHead>Inclusion Type</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -96,7 +97,8 @@ export default function PackageInclusionsPage() {
                 <TableBody>
                   {inclusions.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.inclusion_type}</TableCell>
+                      <TableCell className="font-medium">{item.inclusion_id}</TableCell>
+                      <TableCell>{item.inclusion_type}</TableCell>
                       <TableCell>{item.description}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-2">
