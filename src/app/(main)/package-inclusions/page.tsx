@@ -88,6 +88,7 @@ export default function PackageInclusionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Inclusion ID</TableHead>
                     <TableHead>Inclusion Type</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -96,6 +97,7 @@ export default function PackageInclusionsPage() {
                 <TableBody>
                   {inclusions.map((item) => (
                     <TableRow key={item.id}>
+                      <TableCell>{item.inclusion_id}</TableCell>
                       <TableCell className="font-medium">{item.inclusion_type}</TableCell>
                       <TableCell>{item.description}</TableCell>
                       <TableCell className="text-right">
