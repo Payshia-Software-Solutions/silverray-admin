@@ -3,7 +3,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
@@ -100,15 +100,8 @@ const getDynamicPageInfo = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const { title, description } = useMemo(() => {
-    if (!isMounted) return { title: 'Loading...', description: 'Please wait...' };
-
     if (pageInfo[pathname]) {
       return pageInfo[pathname];
     }
@@ -119,16 +112,8 @@ export function Header() {
     }
    
     return { title: 'Page Not Found', description: "The page you are looking for does not exist." };
-  }, [pathname, isMounted]);
+  }, [pathname]);
 
-  if (!isMounted) {
-    return (
-        <div className="grid gap-1">
-            <div className="h-9 w-1/2 rounded-md bg-muted animate-pulse" />
-            <div className="h-5 w-3/4 rounded-md bg-muted animate-pulse" />
-        </div>
-    );
-  }
 
   return (
     <div className="grid gap-1">
