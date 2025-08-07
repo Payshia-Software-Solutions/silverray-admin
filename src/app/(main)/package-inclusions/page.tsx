@@ -49,8 +49,10 @@ export default function PackageInclusionsPage() {
   }, []);
 
   const addInclusion = () => {
+    // Use a more unique temporary client-side ID
+    const tempId = `new-${Date.now()}-${Math.random()}`;
     const newInclusion: InclusionItem = {
-      inclusion_id: `incl-${Date.now()}`,
+      inclusion_id: tempId,
       inclusion_type: '',
       description: ''
     };
@@ -130,7 +132,7 @@ export default function PackageInclusionsPage() {
         {!loading && !error && (
             <div className="space-y-4">
                 {inclusions.map((inclusion, index) => (
-                    <Card key={inclusion.id || index}>
+                    <Card key={inclusion.id || inclusion.inclusion_id}>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-lg">Inclusion {index + 1}</CardTitle>
                             <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-100 hover:text-red-600" onClick={() => removeInclusion(index)}>
