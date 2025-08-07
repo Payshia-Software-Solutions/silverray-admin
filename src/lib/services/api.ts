@@ -778,7 +778,7 @@ export async function deleteHall(id: number): Promise<{ message: string }> {
 
 // Package Inclusions API
 export async function getPackageInclusions(): Promise<PackageInclusionFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/package-inclusions`);
+  const response = await fetch(`${API_BASE_URL}/package-inclusions`, { cache: 'no-store' });
   return handleResponse<PackageInclusionFromApi[]>(response);
 }
 
