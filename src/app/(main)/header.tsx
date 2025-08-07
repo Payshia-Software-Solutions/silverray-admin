@@ -3,7 +3,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
@@ -13,6 +13,8 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/rooms/types/new': { title: 'Create New Room Type', description: 'Add a new category of room for your hotel.' },
   '/amenities': { title: 'Amenities Management', description: 'Manage all hotel amenities available for rooms.' },
   '/amenities/new': { title: 'Create New Amenity', description: 'Add a new amenity to your hotel.' },
+  '/halls': { title: 'Hall Booking', description: 'Manage all halls available for weddings and events.' },
+  '/halls/new': { title: 'Add new Hall', description: 'Add a new hall to your hotel.' },
   '/reservations': { title: 'Booking Management (Rooms & Suites)', description: 'Manage Bookings' },
   '/reservations/new': { title: 'Create New Booking', description: 'Add a new room or suite booking.' },
   '/bookings': { title: 'Bookings Management', description: 'Manage all bookings.' },
@@ -49,6 +51,9 @@ const getDynamicPageInfo = (pathname: string) => {
     }
      if (pathSegments[0] === 'amenities' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Amenity', description: `Updating details for an amenity.` };
+    }
+    if (pathSegments[0] === 'halls' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Hall', description: `Updating details for a hall.` };
     }
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Customer', description: `Updating details for a customer.` };
@@ -95,15 +100,8 @@ const getDynamicPageInfo = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const { title, description } = useMemo(() => {
-    if (!isMounted) return { title: 'Loading...', description: 'Please wait...' };
-
     if (pageInfo[pathname]) {
       return pageInfo[pathname];
     }
@@ -114,16 +112,8 @@ export function Header() {
     }
    
     return { title: 'Page Not Found', description: "The page you are looking for does not exist." };
-  }, [pathname, isMounted]);
+  }, [pathname]);
 
-  if (!isMounted) {
-    return (
-        <div className="grid gap-1">
-            <div className="h-9 w-1/2 rounded-md bg-muted animate-pulse" />
-            <div className="h-5 w-3/4 rounded-md bg-muted animate-pulse" />
-        </div>
-    );
-  }
 
   return (
     <div className="grid gap-1">
