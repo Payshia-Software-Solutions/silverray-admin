@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -190,6 +189,7 @@ export interface HallFromApi {
 
 export interface PackageInclusionFromApi {
   id: number;
+  inclusion_id: string;
   inclusion_type: string;
   company_id: string;
   description: string;

@@ -16,6 +16,7 @@ import { createPackageInclusion } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const inclusionSchema = z.object({
+    inclusion_id: z.string().min(1, 'Inclusion ID is required'),
     inclusion_type: z.string().min(1, 'Inclusion Type is required'),
     description: z.string().min(1, 'Description is required'),
 });
@@ -63,6 +64,11 @@ export default function NewInclusionPage() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="inclusion_id">Inclusion ID</Label>
+                                <Input id="inclusion_id" {...register('inclusion_id')} />
+                                {errors.inclusion_id && <p className="text-red-500 text-sm">{errors.inclusion_id.message}</p>}
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="inclusion_type">Inclusion Type</Label>
                                 <Input id="inclusion_type" {...register('inclusion_type')} />
