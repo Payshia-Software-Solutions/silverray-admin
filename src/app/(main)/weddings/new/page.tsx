@@ -159,11 +159,6 @@ export default function NewWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                    <Button variant="outline" asChild>
-                        <Link href="/package-inclusions/new">
-                           <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
-                        </Link>
-                    </Button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
