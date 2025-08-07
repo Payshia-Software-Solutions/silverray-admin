@@ -30,9 +30,14 @@ export default function PackageInclusionsPage() {
         setLoading(true);
         setError(null);
         const data = await getPackageInclusions();
-        setInclusions(data);
+        if (Array.isArray(data)) {
+            setInclusions(data);
+        } else {
+            setInclusions([]);
+        }
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred while fetching package inclusions.');
+        setInclusions([]);
       } finally {
         setLoading(false);
       }
