@@ -28,6 +28,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { getHalls, type HallFromApi } from '@/lib/services/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export default function NewWeddingPackagePage() {
@@ -89,7 +90,16 @@ export default function NewWeddingPackagePage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Input id="status" placeholder="e.g., Active" />
+                    <Select>
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="seasonal">Seasonal</SelectItem>
+                      </SelectContent>
+                    </Select>
                 </div>
             </div>
             <div className="space-y-2">
