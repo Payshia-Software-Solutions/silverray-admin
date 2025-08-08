@@ -200,6 +200,24 @@ export interface PackageInclusionFromApi {
   updated_by: string;
 }
 
+export interface WeddingPackageFromApi {
+    id: number;
+    package_name: string;
+    hall_id: string;
+    company_id: string;
+    inclusions: string; // Comma-separated IDs
+    status: 'Active' | 'Inactive' | 'Seasonal';
+    short_description: string;
+    detailed_description: string;
+    price: string;
+    max_guests: number;
+    image_urls: string | null;
+    created_at: string;
+    updated_at: string;
+    created_by: string;
+    updated_by: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -811,4 +829,40 @@ export async function deletePackageInclusion(id: number): Promise<{ message: str
     method: 'DELETE',
   });
   return handleResponse<{ message: string }>(response);
+}
+
+// Wedding Packages API
+export async function getWeddingPackages(): Promise<WeddingPackageFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackage`);
+    return handleResponse<WeddingPackageFromApi[]>(response);
+}
+
+export async function getWeddingPackageById(id: number): Promise<WeddingPackageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`);
+    return handleResponse<WeddingPackageFromApi>(response);
+}
+
+export async function createWeddingPackage(data: Omit<WeddingPackageFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<WeddingPackageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    return handleResponse<WeddingPackageFromApi>(response);
+}
+
+export async function updateWeddingPackage(id: number, data: Partial<Omit<WeddingPackageFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<WeddingPackageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    return handleResponse<WeddingPackageFromApi>(response);
+}
+
+export async function deleteWeddingPackage(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }
