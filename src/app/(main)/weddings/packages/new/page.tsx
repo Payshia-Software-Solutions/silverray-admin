@@ -133,9 +133,7 @@ export default function NewWeddingPackagePage() {
           <BreadcrumbItem>
             <BreadcrumbLink href="/weddings">Wedding Management</BreadcrumbLink>
           </BreadcrumbItem>
-           <BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </BreadcrumbItem>
+          <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink href="/weddings/packages">Wedding Packages</BreadcrumbLink>
           </BreadcrumbItem>
