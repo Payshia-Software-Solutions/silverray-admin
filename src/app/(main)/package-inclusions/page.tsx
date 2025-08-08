@@ -108,11 +108,7 @@ export default function PackageInclusionsPage() {
         }
     }
     toast({ title: "Success", description: "All changes saved successfully."});
-    // Refetch data to get new IDs
-    const data = await getPackageInclusions();
-    if (Array.isArray(data)) {
-        setInclusions(data.map(item => ({ ...item, id: item.id })));
-    }
+    router.push('/weddings/new');
   };
 
   return (
