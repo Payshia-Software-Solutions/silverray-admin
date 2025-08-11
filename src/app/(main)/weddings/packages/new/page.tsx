@@ -109,7 +109,7 @@ export default function NewWeddingPackagePage() {
       created_by: 'admin@weddingvenue.com',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
-      inclusions: data.inclusions?.join(',') || '',
+      inclusions: data.inclusions?.join(',') || null,
       image_urls: null
     };
 
@@ -224,7 +224,7 @@ export default function NewWeddingPackagePage() {
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
                      <Button variant="default" asChild>
                         <Link href="/package-inclusions">
-                            <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+                            <Plus className="mr-2 h-4 w-4" /> Manage Inclusions
                         </Link>
                     </Button>
                 </div>
@@ -333,3 +333,4 @@ export default function NewWeddingPackagePage() {
     </div>
   );
 }
+
