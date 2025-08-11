@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, CalendarCheck, Building } from 'lucide-react';
-import WeddingPackagesPage from './packages/page';
-import WeddingBookingsPage from './booking/page';
-import HallsPage from './halls/page';
+import WeddingPackagesPage from '../weddingpackages/packages/page';
+import WeddingBookingsPage from '../weddingpackages/booking/page';
+import HallsPage from '../weddingpackages/halls/page';
 
 
 export default function WeddingManagementPage() {
