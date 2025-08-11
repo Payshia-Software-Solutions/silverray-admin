@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Award } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -214,9 +214,12 @@ export default function NewWeddingPackagePage() {
         </Card>
         
         <Card>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-6">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Package Inclusions</h3>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <span className="bg-primary/10 p-2 rounded-full"><Award className="h-5 w-5 text-primary"/></span>
+                        Package Inclusions
+                    </h3>
                      <Button variant="outline" asChild>
                         <Link href="/package-inclusions">
                             <Plus className="mr-2 h-4 w-4" /> Manage Inclusions
@@ -227,7 +230,7 @@ export default function NewWeddingPackagePage() {
                   name="inclusions"
                   control={control}
                   render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {loadingInclusions ? (
                         <p>Loading inclusions...</p>
                       ) : (
@@ -263,7 +266,7 @@ export default function NewWeddingPackagePage() {
                 name="hall_id"
                 control={control}
                 render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                             <SelectValue placeholder={loadingHalls ? "Loading halls..." : "Select a hall"} />
                         </SelectTrigger>
