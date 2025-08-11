@@ -108,7 +108,7 @@ export default function PackageInclusionsPage() {
         }
     }
     toast({ title: "Success", description: "All changes saved successfully."});
-    router.push('/weddings/new');
+    router.push('/weddingpackages/new');
   };
 
   return (
