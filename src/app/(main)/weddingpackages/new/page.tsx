@@ -224,14 +224,36 @@ export default function NewWeddingPackagePage() {
                         </Link>
                     </Button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
-                        <div key={inclusion.id} className="flex items-center space-x-2">
-                            <Checkbox id={`inclusion-${inclusion.id}`} value={String(inclusion.id)} {...register('inclusions')} />
-                            <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">{inclusion.inclusion_type}</Label>
-                        </div>
-                    ))}
-                </div>
+                <Controller
+                  name="inclusions"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {loadingInclusions ? (
+                        <p>Loading inclusions...</p>
+                      ) : (
+                        inclusions.map((inclusion) => (
+                          <div key={inclusion.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`inclusion-${inclusion.id}`}
+                              checked={field.value?.includes(String(inclusion.id))}
+                              onCheckedChange={(checked) => {
+                                const currentInclusions = field.value || [];
+                                const newInclusions = checked
+                                  ? [...currentInclusions, String(inclusion.id)]
+                                  : currentInclusions.filter((id) => id !== String(inclusion.id));
+                                field.onChange(newInclusions);
+                              }}
+                            />
+                            <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">
+                              {inclusion.inclusion_type}
+                            </Label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                />
             </CardContent>
         </Card>
 
