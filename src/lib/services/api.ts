@@ -843,7 +843,7 @@ export async function getWeddingPackageById(id: number): Promise<WeddingPackageF
 }
 
 export async function createWeddingPackage(data: Omit<WeddingPackageFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<WeddingPackageFromApi> {
-    const response = await fetch(`${API_BASE_URL}/weddingpackage`, {
+    const response = await fetch(`${API_BASE_URL}/weddingpackages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
