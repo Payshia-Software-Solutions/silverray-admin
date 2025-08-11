@@ -29,7 +29,8 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/experience': { title: 'Experience Management', description: 'Manage and showcase unique guest experiences and activities.' },
   '/experience/new': { title: 'Add New Experience', description: 'Create a new guest experience to offer.' },
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
-  '/weddings/packages/new': { title: 'New Wedding Packages', description: 'Design a new package for wedding events.' },
+  '/weddingpackages': { title: 'Wedding Packages', description: 'Design a new package for wedding events.' },
+  '/weddingpackages/new': { title: 'New Wedding Packages', description: 'Design a new package for wedding events.' },
   '/weddings/booking/new': { title: 'Create Wedding Booking', description: 'Book a new wedding event for a client.' },
   '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
   '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
@@ -72,7 +73,7 @@ const getDynamicPageInfo = (pathname: string) => {
      if (pathSegments[0] === 'weddings' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
         return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
     }
-    if (pathSegments[0] === 'weddings' && pathSegments[1] === 'packages' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
+    if (pathSegments[0] === 'weddingpackages' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: `Edit Wedding Package`, description: 'Update details for a wedding package.' };
     }
     if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {

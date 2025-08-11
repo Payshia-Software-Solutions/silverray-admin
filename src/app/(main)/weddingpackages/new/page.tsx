@@ -28,14 +28,14 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, createWeddingPackage, type WeddingPackageFromApi } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const packageSchema = z.object({
   package_name: z.string().min(1, 'Package name is required'),
@@ -51,20 +51,22 @@ const packageSchema = z.object({
 
 type PackageFormValues = z.infer<typeof packageSchema>;
 
-export default function EditWeddingPackagePage() {
-  const router = useRouter();
-  const params = useParams();
-  const id = Number(params?.id);
-  const { toast } = useToast();
 
+export default function NewWeddingPackagePage() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [inclusions, setInclusions] = useState<PackageInclusionFromApi[]>([]);
   const [loadingInclusions, setLoadingInclusions] = useState(true);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [halls, setHalls] = useState<HallFromApi[]>([]);
   const [loadingHalls, setLoadingHalls] = useState(true);
-  
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<PackageFormValues>({
+
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
+    defaultValues: {
+      status: 'Active',
+      inclusions: [],
+    }
   });
 
    useEffect(() => {
@@ -88,7 +90,7 @@ export default function EditWeddingPackagePage() {
             if (Array.isArray(data)) {
                 setInclusions(data);
             } else {
-                setInclusions([]);
+                setInclusions([]); // Ensure inclusions is always an array
             }
         } catch (err) {
             console.error("Failed to fetch inclusions:", err);
@@ -100,40 +102,24 @@ export default function EditWeddingPackagePage() {
     fetchInclusions();
   }, []);
 
-  useEffect(() => {
-    async function fetchPackage() {
-        if (!id) return;
-        try {
-            const pkg = await getWeddingPackageById(id);
-            reset({
-                ...pkg,
-                price: parseFloat(pkg.price),
-                inclusions: pkg.inclusions ? pkg.inclusions.split(',') : [],
-            });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${error.message}` });
-        }
-    }
-    fetchPackage();
-  }, [id, reset, toast]);
-
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
     const dataToSend = {
       ...data,
-      company_id: '3900',
+      company_id: '3900', // This should be dynamic in a real app
+      created_by: 'admin@weddingvenue.com',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
-      inclusions: data.inclusions?.join(',') || '',
+      inclusions: data.inclusions?.join(',') || null,
       image_urls: null
     };
 
     try {
-      await updateWeddingPackage(id, dataToSend as any);
+      await createWeddingPackage(dataToSend as any);
       setShowSuccessDialog(true);
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Error Updating Package",
+            title: "Error Creating Package",
             description: error.message || "An unexpected error occurred."
         });
     }
@@ -147,15 +133,13 @@ export default function EditWeddingPackagePage() {
           <BreadcrumbItem>
             <BreadcrumbLink href="/weddings">Wedding Management</BreadcrumbLink>
           </BreadcrumbItem>
-           <BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </BreadcrumbItem>
+          <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/weddings/packages">Wedding Packages</BreadcrumbLink>
+            <BreadcrumbLink href="/weddingpackages">Wedding Packages</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Edit Wedding Package</BreadcrumbPage>
+            <BreadcrumbPage>Create New Wedding Packages</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -176,7 +160,7 @@ export default function EditWeddingPackagePage() {
                         name="status"
                         control={control}
                         render={({ field }) => (
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <SelectTrigger id="status">
                                 <SelectValue placeholder="Select Status" />
                             </SelectTrigger>
@@ -238,48 +222,31 @@ export default function EditWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                     <Button variant="default" asChild>
+                     <Button variant="outline" asChild>
                         <Link href="/package-inclusions">
-                            <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+                            <Plus className="mr-2 h-4 w-4" /> Manage Inclusions
                         </Link>
                     </Button>
                 </div>
-                <Controller
-                    name="inclusions"
-                    control={control}
-                    render={({ field }) => (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
-                                <div key={inclusion.id} className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id={`inclusion-${inclusion.id}`} 
-                                        checked={field.value?.includes(String(inclusion.id))}
-                                        onCheckedChange={(checked) => {
-                                            const currentInclusions = field.value || [];
-                                            if (checked) {
-                                                field.onChange([...currentInclusions, String(inclusion.id)]);
-                                            } else {
-                                                field.onChange(currentInclusions.filter(id => id !== String(inclusion.id)));
-                                            }
-                                        }}
-                                    />
-                                    <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">{inclusion.inclusion_type}</Label>
-                                </div>
-                            ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
+                        <div key={inclusion.id} className="flex items-center space-x-2">
+                            <Checkbox id={`inclusion-${inclusion.id}`} value={String(inclusion.id)} {...register('inclusions')} />
+                            <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">{inclusion.inclusion_type}</Label>
                         </div>
-                    )}
-                />
+                    ))}
+                </div>
             </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-6 space-y-4">
             <h3 className="text-lg font-semibold">Associated Halls</h3>
-             <Controller
+            <Controller
                 name="hall_id"
                 control={control}
                 render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger>
                             <SelectValue placeholder={loadingHalls ? "Loading halls..." : "Select a hall"} />
                         </SelectTrigger>
@@ -334,11 +301,11 @@ export default function EditWeddingPackagePage() {
         </Card>
       
         <div className="flex justify-end gap-2">
-            <Button variant="outline" asChild type="button">
-            <Link href="/weddings/packages">Cancel</Link>
+            <Button variant="outline" asChild>
+            <Link href="/weddingpackages">Cancel</Link>
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? 'Creating...' : '+ Add Wedding Package'}
             </Button>
         </div>
       </form>
@@ -347,7 +314,7 @@ export default function EditWeddingPackagePage() {
             <DialogContent className="sm:max-w-md">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Success</DialogTitle>
-                    <DialogDescription>The package has been successfully updated.</DialogDescription>
+                    <DialogDescription>A new wedding package has been successfully created.</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
                     <div className="p-4 bg-blue-100 rounded-full mb-4">
@@ -355,10 +322,10 @@ export default function EditWeddingPackagePage() {
                            <CheckCircle2 className="h-8 w-8 text-blue-600" />
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Updated Wedding Package !</h2>
-                    <p className="text-muted-foreground">The package details have been saved.</p>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Wedding Package !</h2>
+                    <p className="text-muted-foreground">The new package is now available for booking.</p>
                     <DialogClose asChild>
-                        <Button className="mt-6 w-full" onClick={() => router.push('/weddings/packages')}>Done</Button>
+                        <Button className="mt-6 w-full" onClick={() => router.push('/weddingpackages')}>Done</Button>
                     </DialogClose>
                 </div>
             </DialogContent>
