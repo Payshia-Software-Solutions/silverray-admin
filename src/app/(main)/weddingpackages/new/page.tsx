@@ -109,8 +109,13 @@ export default function NewWeddingPackagePage() {
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || null,
-      image_urls: null
+      image_urls: null,
+      inclusion_type: data.inclusions?.join(',') || null, // Matching backend expectation
     };
+    
+    // remove inclusions from payload if it's not expected by the specific endpoint
+    // delete (dataToSend as any).inclusions;
+
 
     try {
       await createWeddingPackage(dataToSend as any);
