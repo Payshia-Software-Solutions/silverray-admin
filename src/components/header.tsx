@@ -29,7 +29,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/experience': { title: 'Experience Management', description: 'Manage and showcase unique guest experiences and activities.' },
   '/experience/new': { title: 'Add New Experience', description: 'Create a new guest experience to offer.' },
   '/weddings': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
-  '/weddings/packages/new': { title: 'Create New Wedding Package', description: 'Design a new package for wedding events.' },
+  '/weddings/packages/new': { title: 'New Wedding Packages', description: 'Design a new package for wedding events.' },
   '/weddings/booking/new': { title: 'Create Wedding Booking', description: 'Book a new wedding event for a client.' },
   '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
   '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
