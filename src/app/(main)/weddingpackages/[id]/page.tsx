@@ -147,12 +147,6 @@ export default function EditWeddingPackagePage() {
           <BreadcrumbItem>
             <BreadcrumbLink href="/weddingpackages">Wedding Management</BreadcrumbLink>
           </BreadcrumbItem>
-           <BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </BreadcrumbItem>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/weddingpackages">Wedding Packages</BreadcrumbLink>
-          </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>Edit Wedding Package</BreadcrumbPage>
