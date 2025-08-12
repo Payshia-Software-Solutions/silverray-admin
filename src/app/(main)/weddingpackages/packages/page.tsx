@@ -172,9 +172,11 @@ export default function WeddingPackagesPage() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem onSelect={() => router.push(`/weddingpackages/${pkg.id}`)}>Edit Package</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleDeleteClick(pkg)} className="text-red-500 focus:bg-red-100 focus:text-red-600">
-                            Delete Package
-                        </DropdownMenuItem>
+                         <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:bg-red-100 focus:text-red-600">
+                                Delete Package
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
                     </DropdownMenuContent>
                     </DropdownMenu>
                 </CardFooter>
