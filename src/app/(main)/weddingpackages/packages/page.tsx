@@ -11,13 +11,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -36,12 +29,13 @@ import {
     DialogDescription as DialogDescriptionComponent,
     DialogClose,
 } from '@/components/ui/dialog';
-import { Search, Plus, MoreHorizontal, Users, Gift, Check, Trash2, X } from 'lucide-react';
+import { Search, Plus, Users, Check, Trash2, X, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi, getPackageInclusions, type PackageInclusionFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import Link from 'next/link';
 
 
 export default function WeddingPackagesPage() {
@@ -162,23 +156,20 @@ export default function WeddingPackagesPage() {
                         <p className="text-xs text-muted-foreground">Starting From</p>
                         <p className="text-xl font-bold text-primary">LKR {Number(pkg.price).toLocaleString()}</p>
                     </div>
-                    <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">More options</span>
+                    <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                            <Link href={`/weddingpackages/${pkg.id}`}>
+                                <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                <span className="sr-only">Edit</span>
+                            </Link>
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onSelect={() => router.push(`/weddingpackages/${pkg.id}`)}>Edit Package</DropdownMenuItem>
                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:bg-red-100 focus:text-red-600">
-                                Delete Package
-                            </DropdownMenuItem>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(pkg)}>
+                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
                         </AlertDialogTrigger>
-                    </DropdownMenuContent>
-                    </DropdownMenu>
+                    </div>
                 </CardFooter>
                 </Card>
             ))}
