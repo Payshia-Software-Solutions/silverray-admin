@@ -44,7 +44,7 @@ export default function NewInclusionPage() {
                 title: 'Success!',
                 description: 'New inclusion created successfully.',
             });
-            router.push('/package-inclusions');
+            router.push('/weddingpackages/new');
         } catch (error: any) {
             toast({
                 variant: 'destructive',
