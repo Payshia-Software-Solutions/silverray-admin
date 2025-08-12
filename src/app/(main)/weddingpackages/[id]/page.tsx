@@ -123,7 +123,6 @@ export default function EditWeddingPackagePage() {
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
-      image_urls: null
     };
 
     try {
