@@ -100,7 +100,6 @@ export default function WeddingBookingsPage() {
                 <TableHead>Wedding Date</TableHead>
                 <TableHead>Package</TableHead>
                 <TableHead>Hall(s)</TableHead>
-                <TableHead>Guests</TableHead>
                 <TableHead>Total Price</TableHead>
                 <TableHead>Payment</TableHead>
                 <TableHead>Status</TableHead>
@@ -115,7 +114,6 @@ export default function WeddingBookingsPage() {
                   <TableCell>{booking.date}</TableCell>
                   <TableCell>{booking.package}</TableCell>
                   <TableCell>{booking.halls}</TableCell>
-                  <TableCell>{booking.guests}</TableCell>
                   <TableCell>{booking.price}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn('border-transparent', booking.paymentColor)}>{booking.payment}</Badge>

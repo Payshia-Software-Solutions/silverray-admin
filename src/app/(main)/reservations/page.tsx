@@ -238,7 +238,6 @@ export default function ReservationsPage() {
                     <TableHead>Room</TableHead>
                     <TableHead>Check-in</TableHead>
                     <TableHead>Check-out</TableHead>
-                    <TableHead>Guests</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Status</TableHead>
@@ -269,7 +268,6 @@ export default function ReservationsPage() {
                         </TableCell>
                         <TableCell>{format(new Date(res.check_in_date), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>{format(new Date(res.check_out_date), 'MMM dd, yyyy')}</TableCell>
-                        <TableCell>{`${res.adults} Adults`}{res.children > 0 ? `, ${res.children} Children` : ''}</TableCell>
                         <TableCell>{`LKR ${Number(res.total_amount).toLocaleString()}`}</TableCell>
                         <TableCell>
                             <Badge variant="outline" className={cn('border-transparent', paymentVariant[res.payment_status as keyof typeof paymentVariant])}>
