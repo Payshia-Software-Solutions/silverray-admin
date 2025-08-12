@@ -833,16 +833,16 @@ export async function deletePackageInclusion(id: number): Promise<{ message: str
 
 // Wedding Packages API
 export async function getWeddingPackages(): Promise<WeddingPackageFromApi[]> {
-    const response = await fetch(`${API_BASE_URL}/weddingpackage`);
+    const response = await fetch(`${API_BASE_URL}/weddingpackages`);
     return handleResponse<WeddingPackageFromApi[]>(response);
 }
 
 export async function getWeddingPackageById(id: number): Promise<WeddingPackageFromApi> {
-    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`);
+    const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`);
     return handleResponse<WeddingPackageFromApi>(response);
 }
 
-export async function createWeddingPackage(data: Omit<WeddingPackageFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<WeddingPackageFromApi> {
+export async function createWeddingPackage(data: any): Promise<WeddingPackageFromApi> {
     const response = await fetch(`${API_BASE_URL}/weddingpackages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -851,8 +851,8 @@ export async function createWeddingPackage(data: Omit<WeddingPackageFromApi, 'id
     return handleResponse<WeddingPackageFromApi>(response);
 }
 
-export async function updateWeddingPackage(id: number, data: Partial<Omit<WeddingPackageFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<WeddingPackageFromApi> {
-    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`, {
+export async function updateWeddingPackage(id: number, data: any): Promise<WeddingPackageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -861,7 +861,7 @@ export async function updateWeddingPackage(id: number, data: Partial<Omit<Weddin
 }
 
 export async function deleteWeddingPackage(id: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/weddingpackage/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);

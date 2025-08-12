@@ -68,11 +68,11 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'bookings' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Booking', description: `Details for booking #${pathSegments[1]}.` };
     }
+     if (pathSegments[0] === 'weddingpackages' && pathSegments.length > 1 && pathSegments[1] !== 'new' && pathSegments[1] !== 'booking') {
+        return { title: `Edit Wedding Package`, description: 'Update details for a wedding package.' };
+    }
      if (pathSegments[0] === 'weddingpackages' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
         return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
-    }
-    if (pathSegments[0] === 'weddingpackages' && pathSegments.length > 1 && pathSegments[1] !== 'new' && pathSegments[1] !== 'booking') {
-        return { title: `Edit Wedding Package`, description: 'Update details for a wedding package.' };
     }
     if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {
         if(pathSegments[1] === 'menu' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
