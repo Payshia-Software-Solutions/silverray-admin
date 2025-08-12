@@ -218,6 +218,24 @@ export interface WeddingPackageFromApi {
     updated_by: string;
 }
 
+export interface RestaurantFromApi {
+  id: number;
+  venue_name: string;
+  short_description: string;
+  detailed_description: string;
+  capacity: number;
+  operating_hours: string; // JSON string
+  features: string; // JSON string
+  images_url: string; // JSON string
+  status: 'Active' | 'Inactive' | 'Seasonal';
+  status_notes: string;
+  company_id: string;
+  created_by: string;
+  updated_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -862,6 +880,42 @@ export async function updateWeddingPackage(id: number, data: any): Promise<Weddi
 
 export async function deleteWeddingPackage(id: number): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Restaurant Venues API
+export async function getRestaurants(): Promise<RestaurantFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/restaurants`);
+  return handleResponse<RestaurantFromApi[]>(response);
+}
+
+export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`);
+    return handleResponse<RestaurantFromApi>(response);
+}
+
+export async function createRestaurant(restaurantData: Omit<RestaurantFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFromApi> {
+    const response = await fetch(`${API_BASE_URL}/restaurants`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(restaurantData),
+    });
+    return handleResponse<RestaurantFromApi>(response);
+}
+
+export async function updateRestaurant(id: number, restaurantData: Partial<Omit<RestaurantFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFromApi> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(restaurantData),
+    });
+    return handleResponse<RestaurantFromApi>(response);
+}
+
+export async function deleteRestaurant(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);

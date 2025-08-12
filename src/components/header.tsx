@@ -84,6 +84,9 @@ const getDynamicPageInfo = (pathname: string) => {
          if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
              return { title: 'Edit Restaurant Feature', description: `Updating details for a restaurant feature.` };
         }
+        if(pathSegments.length === 2 && pathSegments[1] !== 'new'){
+            return { title: 'Edit Restaurant Venue', description: `Updating details for a restaurant venue.` };
+        }
     }
     if (pathSegments[0] === 'experience' && pathSegments.length > 1) {
         const title = pathSegments[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());

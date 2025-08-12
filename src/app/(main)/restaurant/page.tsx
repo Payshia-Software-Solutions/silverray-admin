@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -40,6 +41,9 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import RestaurantFeaturesPage from './features/page';
+import { getRestaurants, deleteRestaurant, type RestaurantFromApi } from '@/lib/services/api';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 
 const menuItems = [
@@ -120,10 +124,16 @@ const reservations = [
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dining-venues');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  
+  const [venues, setVenues] = useState<RestaurantFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [venueToDelete, setVenueToDelete] = useState<RestaurantFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
-  const [venueToDelete, setVenueToDelete] = useState('');
+
   const [showDeleteItemDialog, setShowDeleteItemDialog] = useState(false);
   const [showDeleteItemSuccessDialog, setShowDeleteItemSuccessDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
@@ -131,16 +141,38 @@ export default function RestaurantDiningPage() {
   const [showDeleteReservationSuccessDialog, setShowDeleteReservationSuccessDialog] = useState(false);
   const [reservationToDelete, setReservationToDelete] = useState<typeof reservations[0] | null>(null);
 
-  const handleDeleteClick = (venueName: string) => {
-    setVenueToDelete(venueName);
-    setShowDeleteDialog(true);
+  useEffect(() => {
+    async function fetchVenues() {
+      try {
+        setLoading(true);
+        const data = await getRestaurants();
+        setVenues(data);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (activeTab === 'dining-venues') {
+      fetchVenues();
+    }
+  }, [activeTab]);
+
+  const handleDeleteClick = (venue: RestaurantFromApi) => {
+    setVenueToDelete(venue);
   }
 
-  const handleDeleteConfirm = () => {
-    console.log(`Deleting ${venueToDelete}`);
-    setShowDeleteDialog(false);
-    setShowDeleteSuccessDialog(true);
-    // Here you would add the logic to actually delete the venue
+  const handleDeleteConfirm = async () => {
+    if (!venueToDelete) return;
+    try {
+        await deleteRestaurant(venueToDelete.id);
+        setShowDeleteSuccessDialog(true);
+        setVenues(venues.filter(v => v.id !== venueToDelete.id));
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error deleting venue', description: error.message });
+    } finally {
+        setVenueToDelete(null);
+    }
   }
 
   const handleDeleteItemClick = (item: MenuItem) => {
@@ -167,39 +199,16 @@ export default function RestaurantDiningPage() {
     setShowDeleteReservationSuccessDialog(true);
   };
 
-  const venues = [
-      {
-        name: 'Main Restaurant',
-        image: 'https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-        imageHint: 'restaurant interior',
-        description: 'Elegant fine dining experience with international cuisine and sophisticated ambiance.',
-        capacity: 120,
-        hours: '6:00 AM - 11:00 PM',
-        status: 'Active'
-      },
-      {
-        name: 'Cafe 111',
-        image: 'https://images.unsplash.com/photo-1624583338957-4d155ca886dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2FmZSUyMGludGVyaW9yfGVufDB8fHx8MTc1MjgzNzA2NHww&ixlib=rb-4.1.0&q=80&w=1080',
-        imageHint: 'cafe interior',
-        description: 'Casual dining spot perfect for coffee, light meals, and relaxed conversations.',
-        capacity: 45,
-        hours: '7:00 AM - 10:00 PM',
-        status: 'Active'
-      },
-      {
-        name: 'Indian Restaurant',
-        image: 'https://images.unsplash.com/photo-1536305030588-45dc07a2a372?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjByZXN0YXVyYW50fGVufDB8fHx8MTc1MjgzNzA2NHww&ixlib=rb-4.1.0&q=80&w=1080',
-        imageHint: 'indian restaurant',
-        description: 'Authentic Indian cuisine with traditional spices and flavors in a cultural setting.',
-        capacity: 80,
-        hours: '11:00 AM - 11:00 PM',
-        status: 'Active'
-      }
-  ];
-
   return (
     <div className="space-y-6">
-      <AlertDialog open={showDeleteReservationDialog} onOpenChange={setShowDeleteReservationDialog}>
+      <Toaster />
+      <AlertDialog open={!!venueToDelete || showDeleteItemDialog || showDeleteReservationDialog} onOpenChange={(open) => {
+          if (!open) {
+            setVenueToDelete(null);
+            setShowDeleteItemDialog(false);
+            setShowDeleteReservationDialog(false);
+          }
+      }}>
         <Tabs defaultValue="dining-venues" className="space-y-4" onValueChange={setActiveTab}>
           <div className="flex justify-between items-center">
             <TabsList>
@@ -228,49 +237,53 @@ export default function RestaurantDiningPage() {
             )}
           </div>
           <TabsContent value="dining-venues" className="space-y-4">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {venues.map((venue) => (
-              <Card key={venue.name} className="flex flex-col">
-                <div className="relative w-full aspect-video">
-                  <Image
-                    src={venue.image}
-                    alt={venue.name}
-                    fill
-                    className="object-cover rounded-t-lg"
-                    data-ai-hint={venue.imageHint}
-                  />
-                  <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                    {venue.status}
-                  </span>
-                </div>
-                <CardContent className="p-4 flex-grow">
-                  <h3 className="text-lg font-semibold mb-1">
-                    {venue.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {venue.description}
-                  </p>
-                  <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                    <div className='flex items-center gap-2'>
-                      <Users className="h-4 w-4" />
-                      <span>{venue.capacity} Capacity</span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Clock className="h-4 w-4" />
-                      <span>{venue.hours}</span>
-                    </div>
+            {loading && <p>Loading venues...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {!loading && !error && (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {venues.map((venue) => (
+                <Card key={venue.id} className="flex flex-col">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src={venue.images_url || 'https://placehold.co/600x400.png'}
+                      alt={venue.venue_name}
+                      fill
+                      className="object-cover rounded-t-lg"
+                      data-ai-hint="restaurant interior"
+                    />
+                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      {venue.status}
+                    </span>
                   </div>
-                </CardContent>
-                <CardFooter className="flex justify-between p-4 pt-0 gap-2">
-                  <Button className="w-full" onClick={() => router.push('/restaurant/new')}>Edit</Button>
-                  <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue.name)}>
-                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </CardFooter>
-              </Card>
-              ))}
-            </div>
+                  <CardContent className="p-4 flex-grow">
+                    <h3 className="text-lg font-semibold mb-1">
+                      {venue.venue_name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {venue.short_description}
+                    </p>
+                    <div className="mt-4 flex justify-between text-sm text-muted-foreground">
+                      <div className='flex items-center gap-2'>
+                        <Users className="h-4 w-4" />
+                        <span>{venue.capacity} Capacity</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between p-4 pt-0 gap-2">
+                    <Button className="w-full" asChild>
+                      <Link href={`/restaurant/${venue.id}`}>Edit</Link>
+                    </Button>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
+                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                  </CardFooter>
+                </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="menu-items" className="space-y-4">
             <Card>
@@ -354,10 +367,12 @@ export default function RestaurantDiningPage() {
                                                   <span className="sr-only">View</span>
                                               </Link>
                                           </Button>
-                                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteItemClick(item)}>
-                                              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                              <span className="sr-only">Delete</span>
-                                          </Button>
+                                          <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteItemClick(item)}>
+                                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                                <span className="sr-only">Delete</span>
+                                            </Button>
+                                          </AlertDialogTrigger>
                                       </div>
                                   </TableCell>
                               </TableRow>
@@ -502,37 +517,36 @@ export default function RestaurantDiningPage() {
         </Tabs>
         <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
-                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Reservation ?</AlertDialogTitle>
+                <AlertDialogTitle className="text-center text-2xl font-bold">
+                    {venueToDelete && "Do you want to Delete this Venue ?"}
+                    {itemToDelete && "Do you want to Delete this Meal ?"}
+                    {reservationToDelete && "Do you want to Delete this Reservation ?"}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    {venueToDelete?.venue_name}
+                    {itemToDelete?.name}
+                    {reservationToDelete?.id}
+                </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center gap-4">
-                <AlertDialogCancel onClick={() => setShowDeleteReservationDialog(false)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteReservationConfirm}>Delete</AlertDialogAction>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={() => {
+                    if (venueToDelete) handleDeleteConfirm();
+                    if (itemToDelete) handleDeleteItemConfirm();
+                    if (reservationToDelete) handleDeleteReservationConfirm();
+                }}>Delete</AlertDialogAction>
             </AlertDialogFooter>
-            <button onClick={() => setShowDeleteReservationDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+            <button onClick={() => {
+                setVenueToDelete(null);
+                setItemToDelete(null);
+                setReservationToDelete(null);
+            }} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
                 <X className="h-5 w-5" />
             </button>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-red-500 text-lg">
-              {venueToDelete}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-center">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-           <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-              <X className="h-5 w-5" />
-            </button>
-        </AlertDialogContent>
-      </AlertDialog>
-
-       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+      <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
           <DialogContent className="sm:max-w-md">
              <DialogHeader className="sr-only">
                   <DialogTitle>Success</DialogTitle>
@@ -544,30 +558,15 @@ export default function RestaurantDiningPage() {
                          <Trash2 className="h-8 w-8 text-red-600" />
                       </div>
                   </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted {venueToDelete} !</h2>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted!</h2>
                   <DialogClose asChild>
                       <Button className="mt-6 w-full" onClick={() => {
                         setShowDeleteSuccessDialog(false);
-                        setVenueToDelete('');
                       }}>Done</Button>
                   </DialogClose>
               </div>
           </DialogContent>
       </Dialog>
-      <AlertDialog open={showDeleteItemDialog} onOpenChange={setShowDeleteItemDialog}>
-            <AlertDialogContent className="sm:max-w-md">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Meal ?</AlertDialogTitle>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="sm:justify-center gap-4">
-                    <AlertDialogCancel onClick={() => setShowDeleteItemDialog(false)}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteItemConfirm}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-                <button onClick={() => setShowDeleteItemDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
-                    <X className="h-5 w-5" />
-                </button>
-            </AlertDialogContent>
-        </AlertDialog>
       <Dialog open={showDeleteItemSuccessDialog} onOpenChange={setShowDeleteItemSuccessDialog}>
           <DialogContent className="sm:max-w-xs">
             <DialogHeader className="sr-only">
