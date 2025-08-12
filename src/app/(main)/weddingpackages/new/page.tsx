@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Award } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -108,9 +109,8 @@ export default function NewWeddingPackagePage() {
       created_by: 'admin@weddingvenue.com',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
-      inclusions: data.inclusions?.join(',') || null,
-      image_urls: null,
-      inclusion_type: data.inclusions?.join(',') || null,
+      inclusions: data.inclusions?.join(',') || '',
+      image_urls: null
     };
 
     try {
@@ -215,47 +215,39 @@ export default function NewWeddingPackagePage() {
         </Card>
         
         <Card>
-            <CardContent className="p-6 space-y-6">
+            <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <span className="bg-primary/10 p-2 rounded-full"><Award className="h-5 w-5 text-primary"/></span>
-                        Package Inclusions
-                    </h3>
-                     <Button variant="outline" asChild>
+                    <h3 className="text-lg font-semibold">Package Inclusions</h3>
+                     <Button variant="default" asChild>
                         <Link href="/package-inclusions">
-                            <Plus className="mr-2 h-4 w-4" /> Manage Inclusions
+                            <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
                         </Link>
                     </Button>
                 </div>
                 <Controller
-                  name="inclusions"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {loadingInclusions ? (
-                        <p>Loading inclusions...</p>
-                      ) : (
-                        inclusions.map((inclusion) => (
-                          <div key={inclusion.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`inclusion-${inclusion.id}`}
-                              checked={field.value?.includes(String(inclusion.id))}
-                              onCheckedChange={(checked) => {
-                                const currentInclusions = field.value || [];
-                                const newInclusions = checked
-                                  ? [...currentInclusions, String(inclusion.id)]
-                                  : currentInclusions.filter((id) => id !== String(inclusion.id));
-                                field.onChange(newInclusions);
-                              }}
-                            />
-                            <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">
-                              {inclusion.inclusion_type}
-                            </Label>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
+                    name="inclusions"
+                    control={control}
+                    render={({ field }) => (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {loadingInclusions ? <p>Loading inclusions...</p> : inclusions.map(inclusion => (
+                                <div key={inclusion.id} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                        id={`inclusion-${inclusion.id}`} 
+                                        checked={field.value?.includes(String(inclusion.id))}
+                                        onCheckedChange={(checked) => {
+                                            const currentInclusions = field.value || [];
+                                            if (checked) {
+                                                field.onChange([...currentInclusions, String(inclusion.id)]);
+                                            } else {
+                                                field.onChange(currentInclusions.filter(id => id !== String(inclusion.id)));
+                                            }
+                                        }}
+                                    />
+                                    <Label htmlFor={`inclusion-${inclusion.id}`} className="font-normal">{inclusion.inclusion_type}</Label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 />
             </CardContent>
         </Card>
@@ -263,7 +255,7 @@ export default function NewWeddingPackagePage() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <h3 className="text-lg font-semibold">Associated Halls</h3>
-            <Controller
+             <Controller
                 name="hall_id"
                 control={control}
                 render={({ field }) => (

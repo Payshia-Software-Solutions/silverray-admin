@@ -3,29 +3,26 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Plus, Eye, Trash2, X } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getPackageInclusions, deletePackageInclusion, createPackageInclusion, updatePackageInclusion, type PackageInclusionFromApi } from '@/lib/services/api';
+import { getPackageInclusions, deletePackageInclusion, type PackageInclusionFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader as DialogHeaderComponent, DialogTitle as DialogTitleComponent, DialogClose } from '@/components/ui/dialog';
 
-interface InclusionItem {
-  id?: number; // Optional for new items
-  inclusion_id: string;
-  inclusion_type: string;
-  description: string;
-}
-
-export default function PackageInclusionsPage() {
+export default function PackageInclusionsListPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [inclusions, setInclusions] = useState<InclusionItem[]>([]);
+  const [inclusions, setInclusions] = useState<PackageInclusionFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<PackageInclusionFromApi | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedItemName, setDeletedItemName] = useState<string>('');
 
   useEffect(() => {
     async function fetchInclusions() {
@@ -33,14 +30,9 @@ export default function PackageInclusionsPage() {
         setLoading(true);
         setError(null);
         const data = await getPackageInclusions();
-        if (Array.isArray(data)) {
-          setInclusions(data.map(item => ({ ...item, id: item.id })));
-        } else {
-          setInclusions([]);
-        }
+        setInclusions(data);
       } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred while fetching package inclusions.');
-        setInclusions([]);
+        setError(err.message || 'An unexpected error occurred while fetching inclusions.');
       } finally {
         setLoading(false);
       }
@@ -48,124 +40,119 @@ export default function PackageInclusionsPage() {
     fetchInclusions();
   }, []);
 
-  const addInclusion = () => {
-    // Use a more unique temporary client-side ID
-    const tempId = `new-${Date.now()}-${Math.random()}`;
-    const newInclusion: InclusionItem = {
-      inclusion_id: tempId,
-      inclusion_type: '',
-      description: ''
-    };
-    setInclusions([...inclusions, newInclusion]);
+  const handleDeleteClick = (inclusion: PackageInclusionFromApi) => {
+    setItemToDelete(inclusion);
   };
 
-  const removeInclusion = async (index: number) => {
-    const inclusionToRemove = inclusions[index];
-    if (inclusionToRemove.id) { // Only try to delete if it exists on the server
-        try {
-            await deletePackageInclusion(inclusionToRemove.id);
-            toast({ title: "Success", description: "Inclusion deleted successfully." });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: "Error", description: error.message });
-            return; // Don't remove from UI if delete fails
-        }
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        await deletePackageInclusion(itemToDelete.id);
+        setDeletedItemName(itemToDelete.inclusion_type);
+        setInclusions(prev => prev.filter(item => item.id !== itemToDelete.id));
+        setShowDeleteSuccessDialog(true);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error Deleting Inclusion",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setItemToDelete(null);
+      }
     }
-    setInclusions(inclusions.filter((_, i) => i !== index));
-  };
-  
-  const handleInputChange = (index: number, field: keyof InclusionItem, value: string) => {
-    const newInclusions = [...inclusions];
-    (newInclusions[index] as any)[field] = value;
-    setInclusions(newInclusions);
-  };
-
-  const handleSaveChanges = async () => {
-    for (const inclusion of inclusions) {
-        if (!inclusion.inclusion_type || !inclusion.description) {
-            toast({ variant: 'destructive', title: 'Missing Information', description: `Please fill out all fields for "${inclusion.inclusion_type || 'new inclusion'}".` });
-            return;
-        }
-
-        try {
-            const payload = {
-                inclusion_id: inclusion.inclusion_id,
-                inclusion_type: inclusion.inclusion_type,
-                description: inclusion.description,
-                company_id: 'comm2',
-                created_by: 'admin_user',
-                updated_by: 'admin_user',
-            };
-            if (inclusion.id) {
-                // Update existing
-                await updatePackageInclusion(inclusion.id, payload);
-            } else {
-                // Create new
-                await createPackageInclusion(payload);
-            }
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: `Error saving ${inclusion.inclusion_type}`, description: error.message });
-            return; // Stop on first error
-        }
-    }
-    toast({ title: "Success", description: "All changes saved successfully."});
-    router.push('/weddingpackages/new');
   };
 
   return (
     <>
       <Toaster />
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Package Inclusions</h1>
-            <Button onClick={addInclusion}>
-                <Plus className="mr-2 h-4 w-4" /> Add Inclusion
-            </Button>
-        </div>
-        
-        {loading && <p className="p-4 text-center">Loading inclusions...</p>}
-        {error && <p className="p-4 text-center text-red-500">{error}</p>}
-
-        {!loading && !error && (
-            <div className="space-y-4">
-                {inclusions.map((inclusion, index) => (
-                    <Card key={inclusion.id || inclusion.inclusion_id}>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle className="text-lg">Inclusion {index + 1}</CardTitle>
-                            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-100 hover:text-red-600" onClick={() => removeInclusion(index)}>
-                                <Trash2 className="h-5 w-5" />
-                            </Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor={`type-title-${index}`}>Type/Title</Label>
-                                    <Input 
-                                        id={`type-title-${index}`} 
-                                        placeholder="e.g., Catering"
-                                        value={inclusion.inclusion_type}
-                                        onChange={(e) => handleInputChange(index, 'inclusion_type', e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor={`details-${index}`}>Details</Label>
-                                    <Textarea 
-                                        id={`details-${index}`} 
-                                        placeholder="Detailed description of this inclusion"
-                                        value={inclusion.description}
-                                        onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        )}
-        
-        <div className="flex justify-end pt-4">
-            <Button onClick={handleSaveChanges} disabled={loading}>Save All Changes</Button>
-        </div>
+      <div className="flex justify-end mb-6">
+        <Button onClick={() => router.push('/package-inclusions/new')}>
+          <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+        </Button>
       </div>
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <Card>
+            <CardHeader>
+                <CardTitle>All Package Inclusions</CardTitle>
+            </CardHeader>
+          <CardContent className="p-0">
+            {loading && <p className="p-4 text-center">Loading inclusions...</p>}
+            {error && <p className="p-4 text-center text-red-500">{error}</p>}
+            {!loading && !error && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Inclusion Type</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {inclusions.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.inclusion_type}</TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                            <Link href={`/package-inclusions/${item.id}`}>
+                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                              <span className="sr-only">View/Edit</span>
+                            </Link>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(item)}>
+                              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+          <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+            <div className="text-sm text-muted-foreground">
+              Showing 1 to {inclusions.length} of {inclusions.length} inclusions
+            </div>
+          </CardFooter>
+        </Card>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl font-bold">Delete Inclusion?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-lg">
+                Are you sure you want to delete the inclusion: <strong className="text-red-500">{itemToDelete?.inclusion_type}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+                <DialogTitleComponent>Successfully Deleted</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                    <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold">Successfully Deleted {deletedItemName}!</h2>
+            </div>
+            <DialogClose asChild>
+              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </button>
+            </DialogClose>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
