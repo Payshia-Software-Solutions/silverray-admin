@@ -39,7 +39,7 @@ import {
 import { Search, Plus, MoreHorizontal, Users, Gift, Check, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi } from '@/lib/services/api';
+import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi, getPackageInclusions, type PackageInclusionFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -48,6 +48,7 @@ export default function WeddingPackagesPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [packages, setPackages] = useState<WeddingPackageFromApi[]>([]);
+  const [allInclusions, setAllInclusions] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [packageToDelete, setPackageToDelete] = useState<WeddingPackageFromApi | null>(null);
@@ -55,19 +56,26 @@ export default function WeddingPackagesPage() {
   const [deletedPackageName, setDeletedPackageName] = useState('');
 
    useEffect(() => {
-    async function fetchPackages() {
+    async function fetchPackagesAndInclusions() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getWeddingPackages();
-        setPackages(data);
+        const [packagesData, inclusionsData] = await Promise.all([
+          getWeddingPackages(),
+          getPackageInclusions()
+        ]);
+        setPackages(packagesData);
+        
+        const inclusionMap = new Map(inclusionsData.map(inc => [String(inc.id), inc.inclusion_type]));
+        setAllInclusions(inclusionMap);
+
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
       } finally {
         setLoading(false);
       }
     }
-    fetchPackages();
+    fetchPackagesAndInclusions();
   }, []);
 
   const handleDeleteClick = (pkg: WeddingPackageFromApi) => {
@@ -141,9 +149,9 @@ export default function WeddingPackagesPage() {
                     <div className="text-sm">
                     <p className="font-semibold mb-1">Key Inclusions:</p>
                     <ul className="space-y-1">
-                        {(pkg.inclusions?.split(',') || []).slice(0,3).map((item, index) => (
+                        {(pkg.inclusions?.split(',') || []).slice(0,3).map((id, index) => (
                            <li key={index} className="flex items-center gap-2 text-muted-foreground">
-                                <Check className="h-4 w-4 text-green-500" /> {item}
+                                <Check className="h-4 w-4 text-green-500" /> {allInclusions.get(id) || 'Unknown Inclusion'}
                            </li>
                         ))}
                     </ul>
