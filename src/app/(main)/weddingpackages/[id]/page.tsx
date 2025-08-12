@@ -119,7 +119,7 @@ export default function EditWeddingPackagePage() {
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
     const dataToSend = {
       ...data,
-      company_id: '3900',
+      company_id: 'COMP-008', // This was missing
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
