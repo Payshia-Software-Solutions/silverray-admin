@@ -62,6 +62,9 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Customer', description: `Updating details for a customer.` };
     }
+    if (pathSegments[0] === 'user-management' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit User', description: `Updating details for a user.` };
+    }
      if (pathSegments[0] === 'reservations' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` };
     }

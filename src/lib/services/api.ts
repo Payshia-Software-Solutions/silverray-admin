@@ -236,6 +236,19 @@ export interface RestaurantFromApi {
   updated_at: string;
 }
 
+export interface UserFromApi {
+    id: string;
+    full_name: string;
+    email: string;
+    role: string;
+    company_id: string;
+    avatar_url: string | null;
+    last_login: string | null;
+    status: 'Active' | 'Inactive';
+    created_at: string;
+    updated_at: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -703,7 +716,7 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
 // Restaurant Features API
 export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/features`);
+    const response = await fetch(`${API_BASE_URL}/restaurant-features`);
     return handleResponse<RestaurantFeatureFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch restaurant features:', error);
@@ -712,12 +725,12 @@ export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[
 }
 
 export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/features/${id}`);
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`);
   return handleResponse<RestaurantFeatureFromApi>(response);
 }
 
 export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/features`, {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -726,7 +739,7 @@ export async function createRestaurantFeature(featureData: Omit<RestaurantFeatur
 }
 
 export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -735,7 +748,7 @@ export async function updateRestaurantFeature(id: number, featureData: Partial<O
 }
 
 export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
-  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
     method: 'DELETE',
   });
   return handleResponse<{ message: string }>(response);
@@ -916,6 +929,42 @@ export async function updateRestaurant(id: number, restaurantData: Partial<Omit<
 
 export async function deleteRestaurant(id: number): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/restaurant/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// User Management API Functions
+export async function getUsers(): Promise<UserFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/user`);
+    return handleResponse<UserFromApi[]>(response);
+}
+
+export async function getUserById(id: string): Promise<UserFromApi> {
+    const response = await fetch(`${API_BASE_URL}/user/${id}`);
+    return handleResponse<UserFromApi>(response);
+}
+
+export async function createUser(userData: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+    });
+    return handleResponse<any>(response);
+}
+
+export async function updateUser(id: string, userData: Partial<UserFromApi>): Promise<UserFromApi> {
+    const response = await fetch(`${API_BASE_URL}/user/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+    });
+    return handleResponse<UserFromApi>(response);
+}
+
+export async function deleteUser(id: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/user/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
