@@ -703,7 +703,7 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
 // Restaurant Features API
 export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/restaurant-features`);
+    const response = await fetch(`${API_BASE_URL}/features`);
     return handleResponse<RestaurantFeatureFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch restaurant features:', error);
@@ -712,12 +712,12 @@ export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[
 }
 
 export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`);
+  const response = await fetch(`${API_BASE_URL}/features/${id}`);
   return handleResponse<RestaurantFeatureFromApi>(response);
 }
 
 export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features`, {
+  const response = await fetch(`${API_BASE_URL}/features`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -726,7 +726,7 @@ export async function createRestaurantFeature(featureData: Omit<RestaurantFeatur
 }
 
 export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -735,7 +735,7 @@ export async function updateRestaurantFeature(id: number, featureData: Partial<O
 }
 
 export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
     method: 'DELETE',
   });
   return handleResponse<{ message: string }>(response);

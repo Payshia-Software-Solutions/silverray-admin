@@ -84,7 +84,7 @@ const getDynamicPageInfo = (pathname: string) => {
          if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
              return { title: 'Edit Restaurant Feature', description: `Updating details for a restaurant feature.` };
         }
-        if(pathSegments.length === 2 && pathSegments[1] !== 'new'){
+        if(pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'features'){
             return { title: 'Edit Restaurant Venue', description: `Updating details for a restaurant venue.` };
         }
     }
