@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,17 +14,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Bold, Italic, Underline, Plus, Image as ImageIcon, X, UploadCloud, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import {
   Dialog,
   DialogContent,
@@ -40,17 +30,48 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getRestaurantFeatures, type RestaurantFeatureFromApi } from '@/lib/services/api';
+import { getRestaurantFeatures, type RestaurantFeatureFromApi, createRestaurant, type RestaurantFromApi } from '@/lib/services/api';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
+import { useRouter } from 'next/navigation';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+const restaurantSchema = z.object({
+  venue_name: z.string().min(1, "Venue name is required"),
+  short_description: z.string().optional(),
+  detailed_description: z.string().optional(),
+  capacity: z.coerce.number().min(1, "Capacity is required"),
+  status: z.enum(['Active', 'Inactive', 'Seasonal']),
+  status_notes: z.string().optional(),
+  operating_hours: z.any(),
+  features: z.array(z.string()).optional(),
+  images_url: z.string().optional(),
+});
+
+type RestaurantFormValues = z.infer<typeof restaurantSchema>;
+
 
 export default function NewRestaurantVenuePage() {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
+  
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<RestaurantFormValues>({
+    resolver: zodResolver(restaurantSchema),
+    defaultValues: {
+      status: 'Active',
+      capacity: 50,
+      operating_hours: daysOfWeek.reduce((acc, day) => ({ ...acc, [day]: { isOpen: true, open: '09:00', close: '22:00' } }), {}),
+      features: []
+    }
+  });
+
 
    useEffect(() => {
     async function fetchFeatures() {
@@ -66,26 +87,31 @@ export default function NewRestaurantVenuePage() {
     }
     fetchFeatures();
   }, []);
-  
-  const handleDelete = () => {
-    setShowDeleteDialog(false);
-    setShowDeleteSuccessDialog(true);
-  }
 
-  const handleSaveChanges = () => {
-    setShowSaveSuccessDialog(true);
+  const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
+    const dataToSend = {
+      ...data,
+      operating_hours: JSON.stringify(data.operating_hours),
+      features: JSON.stringify(data.features),
+      company_id: 'COMP001', 
+      created_by: 'admin_user',
+      updated_by: 'admin_user'
+    };
+    try {
+        await createRestaurant(dataToSend);
+        setShowSaveSuccessDialog(true);
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
+    }
   }
 
   return (
     <div className="space-y-6">
+      <Toaster />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink href="/restaurant">Restaurant Management</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-           <BreadcrumbItem>
-            <BreadcrumbLink href="/restaurant/features">Features Management</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -93,36 +119,39 @@ export default function NewRestaurantVenuePage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-
-      <div className="space-y-6">
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="venue-name">Venue Name</Label>
-              <Input id="venue-name" defaultValue="Main Restaurant" />
+              <Label htmlFor="venue-name">Venue Name *</Label>
+              <Input id="venue-name" {...register('venue_name')} />
+               {errors.venue_name && <p className="text-red-500 text-sm">{errors.venue_name.message}</p>}
             </div>
             <div>
               <Label htmlFor="short-description">Short Description</Label>
               <Textarea
                 id="short-description"
-                defaultValue="Elegant fine dining restaurant featuring contemporary cuisine with panoramic ocean views."
+                placeholder="e.g., Elegant fine dining with panoramic ocean views."
+                 {...register('short_description')}
               />
             </div>
             <div>
               <Label htmlFor="detailed-description">Detailed Description</Label>
               <div className="rounded-md border">
                 <div className="p-2 border-b">
-                   <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
-                   <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
-                   <Button variant="ghost" size="icon" className="h-8 w-8"><Underline className="h-4 w-4" /></Button>
+                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
+                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
+                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><Underline className="h-4 w-4" /></Button>
                 </div>
                 <Textarea
                   id="detailed-description"
                   className="min-h-[120px] border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  defaultValue="Experience culinary excellence at our signature Main Restaurant, where master chefs craft innovative dishes using the finest local and international ingredients. The sophisticated ambiance, complemented by floor-to-ceiling windows offering breathtaking ocean views, creates an unforgettable dining experience for our distinguished guests."
+                  placeholder="Full description of the venue, ambiance, cuisine style, etc."
+                   {...register('detailed_description')}
                 />
               </div>
             </div>
@@ -135,30 +164,42 @@ export default function NewRestaurantVenuePage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="capacity">Capacity</Label>
+              <Label htmlFor="capacity">Capacity *</Label>
               <div className="flex items-center gap-2">
-                <Input id="capacity" type="number" defaultValue="120" className="w-24" />
+                <Input id="capacity" type="number" className="w-24" {...register('capacity')} />
                 <span>guests</span>
               </div>
+              {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
             </div>
             <div>
               <Label>Operating Hours</Label>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                {daysOfWeek.map((day, index) => (
-                  <div key={day} className="space-y-2">
-                    <p className="font-medium text-sm">{day}</p>
-                    <div className="flex items-center gap-2">
-                      <Switch defaultChecked={day !== 'Sunday'} id={`open-${day}`} />
-                      <Label htmlFor={`open-${day}`}>{day !== 'Sunday' ? 'Open' : 'Closed'}</Label>
-                    </div>
-                     {day !== 'Sunday' && (
-                        <div className="flex items-center gap-1">
-                          <Input type="time" defaultValue={index < 5 ? "09:00" : "10:00"} className="w-full"/>
-                          <span>-</span>
-                          <Input type="time" defaultValue={index < 4 ? "22:00" : "23:00"} className="w-full"/>
+               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {daysOfWeek.map((day) => (
+                  <Controller
+                    key={day}
+                    name={`operating_hours.${day}`}
+                    control={control}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm">{day}</p>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            id={`open-${day}`}
+                            checked={field.value?.isOpen || false}
+                            onCheckedChange={(checked) => field.onChange({...field.value, isOpen: checked})}
+                          />
+                          <Label htmlFor={`open-${day}`}>{field.value?.isOpen ? 'Open' : 'Closed'}</Label>
                         </div>
-                     )}
-                  </div>
+                         {field.value?.isOpen && (
+                            <div className="flex items-center gap-1">
+                              <Input type="time" className="w-full" value={field.value.open} onChange={(e) => field.onChange({...field.value, open: e.target.value})} />
+                              <span>-</span>
+                              <Input type="time" className="w-full" value={field.value.close} onChange={(e) => field.onChange({...field.value, close: e.target.value})} />
+                            </div>
+                         )}
+                      </div>
+                    )}
+                  />
                 ))}
               </div>
             </div>
@@ -170,14 +211,31 @@ export default function NewRestaurantVenuePage() {
             <CardTitle>Features &amp; Ambiance</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
-                  <div key={feature.id} className="flex items-center space-x-2">
-                    <Checkbox id={`feature-${feature.id}`} />
-                    <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
-                  </div>
-                ))}
-            </div>
+            <Controller
+                name="features"
+                control={control}
+                render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
+                        <div key={feature.id} className="flex items-center space-x-2">
+                            <Checkbox 
+                            id={`feature-${feature.id}`}
+                            checked={field.value?.includes(String(feature.id))}
+                            onCheckedChange={(checked) => {
+                                const currentFeatures = field.value || [];
+                                if (checked) {
+                                field.onChange([...currentFeatures, String(feature.id)]);
+                                } else {
+                                field.onChange(currentFeatures.filter(id => id !== String(feature.id)));
+                                }
+                            }}
+                            />
+                            <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
+                        </div>
+                        ))}
+                    </div>
+                )}
+            />
           </CardContent>
         </Card>
 
@@ -197,44 +255,11 @@ export default function NewRestaurantVenuePage() {
                         Drag and drop images here
                     </p>
                     <p className="text-sm text-muted-foreground">or click to browse files</p>
-                    <Button className="mt-4">Browse Files</Button>
+                    <Button type="button" className="mt-4">Browse Files</Button>
                     </div>
                     <Input id="dropzone-file" type="file" className="hidden" />
                 </label>
              </div>
-             <div className="pt-6 flex flex-wrap gap-4">
-                <div className="relative">
-                    <Image 
-                        src="https://images.unsplash.com/photo-1729394405518-eaf2a0203aa7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyZXN0YXVyYW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzUyODM3MDY0fDA&ixlib=rb-4.1.0&q=80&w=1080" 
-                        alt="Restaurant interior" 
-                        width={200} 
-                        height={150} 
-                        className="rounded-lg object-cover aspect-[4/3]"
-                        data-ai-hint="restaurant interior" 
-                    />
-                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
-                </div>
-                 <div className="relative">
-                    <Image 
-                        src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyZXN0YXVyYW50fGVufDB8fHx8MTc1Mjg0NTg1MHww&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Restaurant outdoor seating"
-                        width={200}
-                        height={150}
-                        className="rounded-lg object-cover aspect-[4/3]"
-                        data-ai-hint="outdoor restaurant"
-                    />
-                </div>
-                <div className="relative">
-                    <Image 
-                        src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyZXN0YXVyYW50fGVufDB8fHx8MTc1Mjg0NTg1MHww&ixlib=rb-4.1.0&q=80&w=1080"
-                        alt="Restaurant bar area"
-                        width={200}
-                        height={150}
-                        className="rounded-lg object-cover aspect-[4/3]"
-                        data-ai-hint="restaurant bar"
-                    />
-                </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -245,74 +270,36 @@ export default function NewRestaurantVenuePage() {
           <CardContent className="grid md:grid-cols-2 gap-4">
             <div>
                 <Label htmlFor="current-status">Current Status</Label>
-                <Select defaultValue="active">
-                    <SelectTrigger id="current-status">
-                        <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="seasonal">Seasonal</SelectItem>
-                    </SelectContent>
-                </Select>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger id="current-status">
+                            <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="Inactive">Inactive</SelectItem>
+                            <SelectItem value="Seasonal">Seasonal</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  )}
+                />
             </div>
              <div>
                 <Label htmlFor="status-notes">Status Notes</Label>
-                <Input id="status-notes" placeholder="Optional notes about status" />
+                <Input id="status-notes" placeholder="Optional notes about status" {...register('status_notes')} />
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-between items-center">
-            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Venue
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-center text-red-500 text-lg">
-                    Main Restaurant
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="sm:justify-center">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDelete}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-                 <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                    <X className="h-5 w-5" />
-                  </button>
-              </AlertDialogContent>
-            </AlertDialog>
-            <div className="flex gap-2">
-                <Button variant="outline" asChild><Link href="/restaurant">Cancel</Link></Button>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-            </div>
+        <div className="flex justify-end gap-2">
+            <Button variant="outline" asChild type="button"><Link href="/restaurant">Cancel</Link></Button>
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Venue'}</Button>
         </div>
-      </div>
-       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
-          <DialogContent className="sm:max-w-md">
-             <DialogHeader className="sr-only">
-                  <DialogTitle>Success</DialogTitle>
-                  <DialogDescription>The venue was successfully deleted.</DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col items-center justify-center text-center p-8">
-                  <div className="p-4 bg-red-100 rounded-full mb-4">
-                      <div className="p-2 bg-red-200 rounded-full">
-                         <Trash2 className="h-8 w-8 text-red-600" />
-                      </div>
-                  </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted Main Restaurant !</h2>
-                  <DialogClose asChild>
-                      <Button className="mt-6 w-full" onClick={() => setShowDeleteSuccessDialog(false)}>Done</Button>
-                  </DialogClose>
-              </div>
-          </DialogContent>
-      </Dialog>
-      <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
+      </form>
+       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSaveSuccessDialog}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Success</DialogTitle>
@@ -324,9 +311,12 @@ export default function NewRestaurantVenuePage() {
                            <CheckCircle2 className="h-8 w-8 text-blue-600" />
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Created New Restaurants !</h2>
+                    <h2 className="text-xl font-bold mb-2">Successfully Created New Restaurant!</h2>
                     <DialogClose asChild>
-                        <Button className="mt-6" onClick={() => setShowSaveSuccessDialog(false)}>Done</Button>
+                        <Button className="mt-6" onClick={() => {
+                            setShowSaveSuccessDialog(false);
+                            router.push('/restaurant');
+                        }}>Done</Button>
                     </DialogClose>
                 </div>
             </DialogContent>
