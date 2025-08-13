@@ -95,10 +95,10 @@ export default function NewRestaurantVenuePage() {
       features: JSON.stringify(data.features),
       company_id: 'COMP001', 
       created_by: 'admin_user',
-      updated_by: 'admin_user'
+      updated_by: null
     };
     try {
-        await createRestaurant(dataToSend);
+        await createRestaurant(dataToSend as any);
         setShowSaveSuccessDialog(true);
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
