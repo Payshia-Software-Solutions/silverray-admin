@@ -146,9 +146,10 @@ export default function RestaurantDiningPage() {
       try {
         setLoading(true);
         const data = await getRestaurants();
-        setVenues(data);
+        setVenues(Array.isArray(data) ? data : []);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
+        setVenues([]);
       } finally {
         setLoading(false);
       }
