@@ -177,7 +177,7 @@ export default function NewRestaurantVenuePage() {
                 {daysOfWeek.map((day) => (
                   <Controller
                     key={day}
-                    name={`operating_hours.${day}`}
+                    name={`operating_hours.${day.toLowerCase()}`}
                     control={control}
                     render={({ field }) => (
                       <div className="space-y-2">
