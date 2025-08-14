@@ -35,6 +35,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'Add New Admin', description: 'Create a new administrative user account.' },
+  '/user-management/roles/new': { title: 'Add New Role', description: 'Define a new user role and its permissions.' },
   '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
   '/api-example': { title: 'API Connection Example', description: 'Demonstrating how to connect to a PHP back-end.'},
   '/customers': { title: 'Customer Management', description: 'View and manage your customer database.' },
@@ -62,8 +63,13 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Customer', description: `Updating details for a customer.` };
     }
-    if (pathSegments[0] === 'user-management' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit User', description: `Updating details for a user.` };
+    if (pathSegments[0] === 'user-management' && pathSegments.length > 1) {
+        if (pathSegments[1] !== 'new' && pathSegments[1] !== 'roles') {
+            return { title: 'Edit User', description: `Updating details for a user.` };
+        }
+        if (pathSegments[1] === 'roles' && pathSegments[2] && pathSegments[2] !== 'new') {
+            return { title: 'Edit Role', description: 'Update an existing user role and its permissions.' };
+        }
     }
      if (pathSegments[0] === 'reservations' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` };

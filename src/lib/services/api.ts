@@ -249,6 +249,17 @@ export interface UserFromApi {
     updated_at: string;
 }
 
+export interface RoleFromApi {
+    id: string;
+    name: string;
+    description: string;
+    permissions: string;
+    is_active: number;
+    company_id: string;
+    created_at: string;
+    updated_at: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -716,7 +727,7 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
 // Restaurant Features API
 export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/restaurant-features`);
+    const response = await fetch(`${API_BASE_URL}/features`);
     return handleResponse<RestaurantFeatureFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch restaurant features:', error);
@@ -965,6 +976,42 @@ export async function updateUser(id: string, userData: Partial<UserFromApi>): Pr
 
 export async function deleteUser(id: string): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/user/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
+// Role Management API Functions
+export async function getRoles(): Promise<RoleFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/role`);
+    return handleResponse<RoleFromApi[]>(response);
+}
+
+export async function getRoleById(id: string): Promise<RoleFromApi> {
+    const response = await fetch(`${API_BASE_URL}/role/${id}`);
+    return handleResponse<RoleFromApi>(response);
+}
+
+export async function createRole(roleData: any): Promise<RoleFromApi> {
+    const response = await fetch(`${API_BASE_URL}/role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roleData),
+    });
+    return handleResponse<RoleFromApi>(response);
+}
+
+export async function updateRole(id: string, roleData: Partial<RoleFromApi>): Promise<RoleFromApi> {
+    const response = await fetch(`${API_BASE_URL}/role/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roleData),
+    });
+    return handleResponse<RoleFromApi>(response);
+}
+
+export async function deleteRole(id: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/role/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
