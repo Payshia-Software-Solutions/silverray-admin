@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X, CheckCircle2, Shield } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Settings, Search, Eye, X, CheckCircle2, Shield, Pencil } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
@@ -44,6 +44,7 @@ import RestaurantFeaturesPage from './features/page';
 import { getRestaurants, deleteRestaurant, type RestaurantFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import { cn } from '@/lib/utils';
 
 
 const menuItems = [
@@ -243,44 +244,50 @@ export default function RestaurantDiningPage() {
             {!loading && !error && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {venues.map((venue) => (
-                <Card key={venue.id} className="flex flex-col">
-                  <div className="relative w-full aspect-video">
-                    <Image
-                      src={venue.images_url || 'https://placehold.co/600x400.png'}
-                      alt={venue.venue_name}
-                      fill
-                      className="object-cover rounded-t-lg"
-                      data-ai-hint="restaurant interior"
-                    />
-                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                      {venue.status}
-                    </span>
-                  </div>
-                  <CardContent className="p-4 flex-grow">
-                    <h3 className="text-lg font-semibold mb-1">
-                      {venue.venue_name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {venue.short_description}
-                    </p>
-                    <div className="mt-4 flex justify-between text-sm text-muted-foreground">
-                      <div className='flex items-center gap-2'>
-                        <Users className="h-4 w-4" />
-                        <span>{venue.capacity} Capacity</span>
-                      </div>
+                <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                    <div className="relative w-full h-48">
+                        <Image
+                        src={venue.images_url || 'https://placehold.co/600x400.png'}
+                        alt={venue.venue_name}
+                        fill
+                        className="object-cover"
+                        data-ai-hint="restaurant interior"
+                        />
+                        {venue.status && (
+                        <span className={cn(
+                            'absolute top-2 right-2 px-2.5 py-1 text-xs font-semibold rounded-full text-white',
+                            venue.status === 'Active' && 'bg-green-500',
+                            venue.status === 'Seasonal' && 'bg-orange-500',
+                            venue.status === 'Inactive' && 'bg-gray-500'
+                        )}>
+                            {venue.status}
+                        </span>
+                        )}
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between p-4 pt-0 gap-2">
-                    <Button className="w-full" asChild>
-                      <Link href={`/restaurant/${venue.id}`}>Edit</Link>
-                    </Button>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
-                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </AlertDialogTrigger>
-                  </CardFooter>
+                    <CardContent className="p-4 flex flex-col flex-grow">
+                        <h3 className="text-lg font-semibold mb-2">{venue.venue_name}</h3>
+                        <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
+                        <div className="space-y-1.5 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4"/>
+                                <span>Up to {venue.capacity} guests</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
+                        <Button className="w-full" variant="outline" asChild>
+                            <Link href={`/restaurant/${venue.id}`}>
+                                <Pencil className="mr-2 h-4 w-4"/>
+                                Edit
+                            </Link>
+                        </Button>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
+                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                    </CardFooter>
                 </Card>
                 ))}
               </div>
@@ -613,3 +620,4 @@ export default function RestaurantDiningPage() {
     </div>
   );
 }
+
