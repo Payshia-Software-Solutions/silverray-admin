@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getUserById, updateUser, type UserFromApi } from '@/lib/services/api';
+import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi } from '@/lib/services/api';
 import { useRouter, useParams } from 'next/navigation';
 
 const userSchema = z.object({
@@ -41,26 +42,36 @@ export default function EditAdminPage() {
     const params = useParams();
     const id = params.id as string;
     const { toast } = useToast();
+    const [roles, setRoles] = useState<RoleFromApi[]>([]);
+    const [loadingRoles, setLoadingRoles] = useState(true);
 
     const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
         resolver: zodResolver(userSchema),
     });
 
     useEffect(() => {
-        if(id) {
-            async function fetchUser() {
-                try {
-                    const userData = await getUserById(id);
-                    reset(userData);
-                } catch(error: any) {
-                     toast({
-                        variant: 'destructive',
-                        title: 'Error fetching user',
-                        description: error.message || 'An unexpected error occurred.',
-                    });
-                }
+        async function fetchInitialData() {
+            setLoadingRoles(true);
+            try {
+                const [userData, rolesData] = await Promise.all([
+                    getUserById(id),
+                    getRoles()
+                ]);
+                reset(userData);
+                setRoles(rolesData);
+            } catch (error: any) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Error fetching data',
+                    description: error.message || 'An unexpected error occurred.',
+                });
+            } finally {
+                setLoadingRoles(false);
             }
-            fetchUser();
+        }
+
+        if(id) {
+            fetchInitialData();
         }
     }, [id, reset, toast]);
 
@@ -155,16 +166,16 @@ export default function EditAdminPage() {
                         name="role"
                         control={control}
                         render={({ field }) => (
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={loadingRoles}>
                                 <SelectTrigger id="role-assignment">
-                                    <SelectValue placeholder="Select a role" />
+                                    <SelectValue placeholder={loadingRoles ? "Loading roles..." : "Select a role"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Super Admin">Super Admin</SelectItem>
-                                    <SelectItem value="Booking Manager">Booking Manager</SelectItem>
-                                    <SelectItem value="Restaurant Manager">Restaurant Manager</SelectItem>
-                                    <SelectItem value="Front Desk">Front Desk</SelectItem>
-                                    <SelectItem value="Housekeeping">Housekeeping</SelectItem>
+                                    {roles.map(role => (
+                                        <SelectItem key={role.id} value={role.name}>
+                                            {role.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         )}

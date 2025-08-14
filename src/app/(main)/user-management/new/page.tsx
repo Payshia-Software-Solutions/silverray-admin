@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { User, Shield, Upload, Eye, EyeOff, UserPlus, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,12 +27,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createUser } from '@/lib/services/api';
+import { createUser, getRoles, type RoleFromApi } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const userSchema = z.object({
@@ -57,14 +57,35 @@ export default function AddNewAdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [roles, setRoles] = useState<RoleFromApi[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
   
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
       resolver: zodResolver(userSchema),
       defaultValues: {
           status: 'Active',
           company_id: 'comp_001', // Default value
       }
   });
+
+  useEffect(() => {
+    async function fetchRoles() {
+        try {
+            setLoadingRoles(true);
+            const data = await getRoles();
+            setRoles(data);
+        } catch (err: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Error fetching roles',
+                description: err.message,
+            });
+        } finally {
+            setLoadingRoles(false);
+        }
+    }
+    fetchRoles();
+  }, [toast]);
 
   const handleCreateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
@@ -171,19 +192,25 @@ export default function AddNewAdminPage() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="role-assignment">Role Assignment *</Label>
-                    <Select name="role" onValueChange={(value) => (document.getElementsByName('role')[0] as HTMLInputElement).value = value}>
-                    <SelectTrigger id="role-assignment">
-                        <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Super Admin">Super Admin</SelectItem>
-                        <SelectItem value="Booking Manager">Booking Manager</SelectItem>
-                        <SelectItem value="Restaurant Manager">Restaurant Manager</SelectItem>
-                        <SelectItem value="Front Desk">Front Desk</SelectItem>
-                        <SelectItem value="Housekeeping">Housekeeping</SelectItem>
-                    </SelectContent>
-                    </Select>
-                     {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
+                    <Controller
+                        name="role"
+                        control={control}
+                        render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value} disabled={loadingRoles}>
+                                <SelectTrigger id="role-assignment">
+                                    <SelectValue placeholder={loadingRoles ? "Loading roles..." : "Select a role"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {roles.map(role => (
+                                        <SelectItem key={role.id} value={role.name}>
+                                            {role.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    />
+                    {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="company_id">Company ID *</Label>
@@ -192,10 +219,16 @@ export default function AddNewAdminPage() {
                 </div>
                 <div className="space-y-2">
                     <Label>Account Status</Label>
-                    <div className="flex items-center space-x-2 pt-2">
-                    <Switch id="account-status" {...register('status')} />
-                    <Label htmlFor="account-status" className="font-normal">Active</Label>
-                    </div>
+                     <Controller
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                             <div className="flex items-center space-x-2 pt-2">
+                                <Switch id="account-status" checked={field.value === 'Active'} onCheckedChange={(checked) => field.onChange(checked ? 'Active' : 'Inactive')} />
+                                <Label htmlFor="account-status" className="font-normal">{field.value}</Label>
+                            </div>
+                        )}
+                    />
                 </div>
                 </div>
             </CardContent>
