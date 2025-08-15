@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -201,6 +200,31 @@ export default function RestaurantDiningPage() {
     setShowDeleteReservationSuccessDialog(true);
   };
 
+  const getOperatingHours = (hours: string | undefined): string => {
+    if (!hours) return 'N/A';
+    try {
+      const parsed = JSON.parse(hours);
+      const firstOpenDay = Object.values(parsed).find((day: any) => day.isOpen) as any;
+      if (firstOpenDay) {
+        return `${formatTime(firstOpenDay.open)} - ${formatTime(firstOpenDay.close)}`;
+      }
+      return 'Closed';
+    } catch (e) {
+      return 'N/A';
+    }
+  };
+
+  const formatTime = (time: string): string => {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h, 10);
+    const minute = parseInt(m, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
+    return `${formattedHour}:${m} ${ampm}`;
+  };
+
+
   return (
     <div className="space-y-6">
       <Toaster />
@@ -237,6 +261,12 @@ export default function RestaurantDiningPage() {
                 Add New Venue
               </Button>
             )}
+             {activeTab === 'menu-items' && (
+              <Button onClick={() => router.push('/restaurant/menu/new')}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add New Item
+              </Button>
+            )}
           </div>
           <TabsContent value="dining-venues" className="space-y-4">
             {loading && <p>Loading venues...</p>}
@@ -244,38 +274,42 @@ export default function RestaurantDiningPage() {
             {!loading && !error && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {venues.map((venue) => (
-                <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                    <div className="relative w-full h-48">
+                <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+                     <div className="relative w-full h-48">
                         <Image
-                        src={venue.images_url || 'https://placehold.co/600x400.png'}
-                        alt={venue.venue_name}
-                        fill
-                        className="object-cover"
-                        data-ai-hint="restaurant interior"
+                            src={venue.images_url || 'https://placehold.co/600x400.png'}
+                            alt={venue.venue_name}
+                            fill
+                            className="object-cover"
+                            data-ai-hint="restaurant interior"
                         />
                         {venue.status && (
-                        <span className={cn(
-                            'absolute top-2 right-2 px-2.5 py-1 text-xs font-semibold rounded-full text-white',
+                        <Badge className={cn(
+                            'absolute top-3 right-3 text-sm',
                             venue.status === 'Active' && 'bg-green-500',
                             venue.status === 'Seasonal' && 'bg-orange-500',
                             venue.status === 'Inactive' && 'bg-gray-500'
                         )}>
                             {venue.status}
-                        </span>
+                        </Badge>
                         )}
                     </div>
                     <CardContent className="p-4 flex flex-col flex-grow">
-                        <h3 className="text-lg font-semibold mb-2">{venue.venue_name}</h3>
+                        <h3 className="text-xl font-bold mb-2 text-primary">{venue.venue_name}</h3>
                         <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
-                        <div className="space-y-1.5 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4"/>
-                                <span>Up to {venue.capacity} guests</span>
+                                <span>{venue.capacity} Capacity</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4"/>
+                                <span>{getOperatingHours(venue.operating_hours)}</span>
                             </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
-                        <Button className="w-full" variant="outline" asChild>
+                        <Button className="w-full" variant="default" asChild>
                             <Link href={`/restaurant/${venue.id}`}>
                                 <Pencil className="mr-2 h-4 w-4"/>
                                 Edit
@@ -283,7 +317,7 @@ export default function RestaurantDiningPage() {
                         </Button>
                         <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
-                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                <Trash2 className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
                                 <span className="sr-only">Delete</span>
                             </Button>
                         </AlertDialogTrigger>
@@ -620,4 +654,3 @@ export default function RestaurantDiningPage() {
     </div>
   );
 }
-
