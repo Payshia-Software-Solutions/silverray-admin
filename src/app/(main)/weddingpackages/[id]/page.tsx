@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -110,7 +110,7 @@ export default function EditWeddingPackagePage() {
                 inclusions: pkg.inclusions ? pkg.inclusions.split(',') : [],
             });
         } catch (error: any) {
-            toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${error.message}` });
+            toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${'\''.repeat(1) + error.message}` });
         }
     }
     fetchPackage();
@@ -232,8 +232,8 @@ export default function EditWeddingPackagePage() {
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
                      <div className="flex gap-2">
                         <Button variant="outline" asChild>
-                            <Link href="/weddingpackages/halls/new">
-                                <Plus className="mr-2 h-4 w-4" /> Add New Hall
+                            <Link href="/weddingpackages?tab=hall-management">
+                                <Pencil className="mr-2 h-4 w-4" /> Manage Halls
                             </Link>
                         </Button>
                         <Button variant="default" asChild>
