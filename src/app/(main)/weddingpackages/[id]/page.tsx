@@ -230,11 +230,18 @@ export default function EditWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                     <Button variant="default" asChild>
-                        <Link href="/package-inclusions">
-                            <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
-                        </Link>
-                    </Button>
+                     <div className="flex gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href="/weddingpackages/halls/new">
+                                <Plus className="mr-2 h-4 w-4" /> Add New Hall
+                            </Link>
+                        </Button>
+                        <Button variant="default" asChild>
+                            <Link href="/package-inclusions/new">
+                                <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
                 <Controller
                     name="inclusions"
