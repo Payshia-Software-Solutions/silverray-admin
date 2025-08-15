@@ -110,18 +110,13 @@ export default function EditRoomPage() {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
   }
-
-  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+  
+  const handleSaveConfirm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setShowSaveConfirmDialog(true);
-  }
-
-  const handleSaveConfirm = async () => {
     if (!room) return;
     setIsSubmitting(true);
     
-    const form = document.getElementById('edit-room-form') as HTMLFormElement;
-    const formData = new FormData(form);
+    const formData = new FormData(event.currentTarget);
 
     const roomDataForApi = {
         room_number: room.room_number,
@@ -168,7 +163,7 @@ export default function EditRoomPage() {
   }
 
   return (
-    <form id="edit-room-form" onSubmit={handleSave} className="space-y-6">
+    <form id="edit-room-form" onSubmit={(e) => { e.preventDefault(); setShowSaveConfirmDialog(true); }} className="space-y-6">
       <Toaster />
       <Breadcrumb>
         <BreadcrumbList>
@@ -386,22 +381,24 @@ export default function EditRoomPage() {
                 <Button type="submit">Save Changes</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <AlertDialogHeader className="sr-only">
-                    <AlertDialogTitle>Update Room</AlertDialogTitle>
-                    <AlertDialogDescription>Are you sure you want to update this room?</AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="text-center p-4">
-                    <h2 className="text-2xl font-bold mb-4">Do you want to Update this Room ?</h2>
-                </div>
-                <AlertDialogFooter className="sm:justify-center">
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSaveConfirm} disabled={isSubmitting}>
-                        {isSubmitting ? 'Saving...' : 'Save Changes'}
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-                 <button onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                    <X className="h-5 w-5" />
-                </button>
+                <form onSubmit={handleSaveConfirm}>
+                    <AlertDialogHeader className="sr-only">
+                        <AlertDialogTitle>Update Room</AlertDialogTitle>
+                        <AlertDialogDescription>Are you sure you want to update this room?</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="text-center p-4">
+                        <h2 className="text-2xl font-bold mb-4">Do you want to Update this Room ?</h2>
+                    </div>
+                    <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel type="button" onClick={() => setShowSaveConfirmDialog(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Saving...' : 'Save Changes'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                    <button type="button" onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                        <X className="h-5 w-5" />
+                    </button>
+                </form>
             </AlertDialogContent>
             </AlertDialog>
         </div>
