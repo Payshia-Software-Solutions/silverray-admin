@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,7 +21,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getRestaurantFeatures, type RestaurantFeatureFromApi, getRestaurantById, updateRestaurant, type RestaurantFromApi } from '@/lib/services/api';
+import { getRestaurantFeatures, type RestaurantFeatureFromApi, getRestaurantById, updateRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi, updateOperatingHours } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { useRouter, useParams } from 'next/navigation';
@@ -64,10 +63,13 @@ export default function EditRestaurantVenuePage() {
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+  const [operatingHoursId, setOperatingHoursId] = useState<string | null>(null);
 
-  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<RestaurantFormValues>({
+  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting }, watch } = useForm<RestaurantFormValues>({
       resolver: zodResolver(restaurantSchema),
   });
+
+  const venueName = watch('venue_name');
   
   useEffect(() => {
     async function fetchFeatures() {
@@ -89,10 +91,24 @@ export default function EditRestaurantVenuePage() {
         if (!id) return;
         try {
             const data = await getRestaurantById(id);
+            setOperatingHoursId(data.operating_hours_id);
+
+            const hoursData = await getOperatingHoursById(data.operating_hours_id);
+            
+            const operatingHoursTransformed = daysOfWeek.reduce((acc, day) => {
+                const lowerDay = day.toLowerCase();
+                acc[lowerDay] = {
+                    isOpen: (hoursData as any)[`${lowerDay}_open`] === 1,
+                    open: (hoursData as any)[`${lowerDay}_open_time`],
+                    close: (hoursData as any)[`${lowerDay}_close_time`],
+                };
+                return acc;
+            }, {} as any);
+            
             reset({
               ...data,
-              operating_hours: data.operating_hours ? JSON.parse(data.operating_hours) : {},
-              features: data.features ? JSON.parse(data.features) : [],
+              features: data.feature_id ? data.feature_id.split(',') : [],
+              operating_hours: operatingHoursTransformed,
             });
         } catch(e: any) {
             toast({ variant: 'destructive', title: 'Failed to fetch restaurant data', description: e.message });
@@ -102,16 +118,44 @@ export default function EditRestaurantVenuePage() {
   }, [id, reset, toast]);
 
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
-    const dataToSend = {
-      ...data,
-      operating_hours: JSON.stringify(data.operating_hours),
-      features: JSON.stringify(data.features),
-      company_id: '5', // This should be dynamic in a real app
-      updated_by: '101'
-    };
+     if (!operatingHoursId) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Operating hours ID is missing.' });
+        return;
+    }
+
     try {
-        await updateRestaurant(id, dataToSend);
+        // Step 1: Update operating hours record
+        const operatingHoursPayload = {
+            capacity: data.capacity,
+            company_id: 'COMP001',
+            ...Object.fromEntries(
+                Object.entries(data.operating_hours).flatMap(([day, times]: [string, any]) => [
+                    [`${day}_open`, times.isOpen ? 1 : 0],
+                    [`${day}_open_time`, times.open],
+                    [`${day}_close_time`, times.close],
+                ])
+            )
+        };
+        await updateOperatingHours(operatingHoursId, operatingHoursPayload);
+        
+        // Step 2: Update restaurant venue record
+        const restaurantData = {
+          venue_name: data.venue_name,
+          short_description: data.short_description,
+          detailed_description: data.detailed_description,
+          capacity: data.capacity,
+          operating_hours_id: operatingHoursId,
+          feature_id: data.features?.join(',') || '',
+          images_url: data.images_url,
+          status: data.status,
+          status_notes: data.status_notes,
+          company_id: 'COMP001',
+          updated_by: 'admin_user'
+        };
+
+        await updateRestaurant(id, restaurantData as any);
         setShowSaveSuccessDialog(true);
+
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error saving venue', description: error.message });
     }
@@ -128,7 +172,7 @@ export default function EditRestaurantVenuePage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Edit Venue</BreadcrumbPage>
+            <BreadcrumbPage>Edit: {venueName || 'Venue'}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

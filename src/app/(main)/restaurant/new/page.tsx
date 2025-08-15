@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,7 +29,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getRestaurantFeatures, type RestaurantFeatureFromApi, createRestaurant, type RestaurantFromApi } from '@/lib/services/api';
+import { getRestaurantFeatures, type RestaurantFeatureFromApi, createRestaurant, createOperatingHours } from '@/lib/services/api';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,7 +66,7 @@ export default function NewRestaurantVenuePage() {
     defaultValues: {
       status: 'Active',
       capacity: 50,
-      operating_hours: daysOfWeek.reduce((acc, day) => ({ ...acc, [day]: { isOpen: true, open: '09:00', close: '22:00' } }), {}),
+      operating_hours: daysOfWeek.reduce((acc, day) => ({ ...acc, [day.toLowerCase()]: { isOpen: true, open: '09:00', close: '22:00' } }), {}),
       features: []
     }
   });
@@ -89,17 +88,41 @@ export default function NewRestaurantVenuePage() {
   }, []);
 
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
-    const dataToSend = {
-      ...data,
-      operating_hours: JSON.stringify(data.operating_hours),
-      features: JSON.stringify(data.features),
-      company_id: 'COMP001', 
-      created_by: 'admin_user',
-      updated_by: null
-    };
     try {
-        await createRestaurant(dataToSend as any);
+        // Step 1: Create operating hours record
+        const operatingHoursPayload = {
+            capacity: data.capacity,
+            company_id: 'COMP001',
+            ...Object.fromEntries(
+                Object.entries(data.operating_hours).flatMap(([day, times]: [string, any]) => [
+                    [`${day}_open`, times.isOpen ? 1 : 0],
+                    [`${day}_open_time`, times.open],
+                    [`${day}_close_time`, times.close],
+                ])
+            )
+        };
+        const hoursResponse = await createOperatingHours(operatingHoursPayload);
+        const operatingHoursId = hoursResponse.id;
+
+        // Step 2: Create restaurant venue record with the new operating_hours_id
+        const restaurantData = {
+          venue_name: data.venue_name,
+          short_description: data.short_description,
+          detailed_description: data.detailed_description,
+          capacity: data.capacity,
+          operating_hours_id: operatingHoursId,
+          feature_id: data.features?.join(',') || '',
+          images_url: data.images_url,
+          status: data.status,
+          status_notes: data.status_notes,
+          company_id: 'COMP001',
+          created_by: 'admin_user',
+          updated_by: null
+        };
+        
+        await createRestaurant(restaurantData as any);
         setShowSaveSuccessDialog(true);
+
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
     }

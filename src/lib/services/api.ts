@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -224,8 +223,8 @@ export interface RestaurantFromApi {
   short_description: string;
   detailed_description: string;
   capacity: number;
-  operating_hours: string; // JSON string
-  features: string; // JSON string
+  operating_hours_id: string;
+  feature_id: string;
   images_url: string; // JSON string
   status: 'Active' | 'Inactive' | 'Seasonal';
   status_notes: string;
@@ -235,6 +234,34 @@ export interface RestaurantFromApi {
   created_at: string;
   updated_at: string;
 }
+
+export interface OperatingHoursFromApi {
+    id: number;
+    capacity: number;
+    monday_open: number;
+    monday_open_time: string;
+    monday_close_time: string;
+    tuesday_open: number;
+    tuesday_open_time: string;
+    tuesday_close_time: string;
+    wednesday_open: number;
+    wednesday_open_time: string;
+    wednesday_close_time: string;
+    thursday_open: number;
+    thursday_open_time: string;
+    thursday_close_time: string;
+    friday_open: number;
+    friday_open_time: string;
+    friday_close_time: string;
+    saturday_open: number;
+    saturday_open_time: string;
+    saturday_close_time: string;
+    sunday_open: number;
+    sunday_open_time: string;
+    sunday_close_time: string;
+    company_id: string;
+}
+
 
 export interface UserFromApi {
     id: string;
@@ -735,13 +762,13 @@ export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[
   }
 }
 
-export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`);
+export async function getRestaurantFeatureById(id: string): Promise<RestaurantFeatureFromApi> {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`);
   return handleResponse<RestaurantFeatureFromApi>(response);
 }
 
 export async function createRestaurantFeature(featureData: Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features`, {
+  const response = await fetch(`${API_BASE_URL}/features`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -750,7 +777,7 @@ export async function createRestaurantFeature(featureData: Omit<RestaurantFeatur
 }
 
 export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(featureData),
@@ -759,7 +786,7 @@ export async function updateRestaurantFeature(id: number, featureData: Partial<O
 }
 
 export async function deleteRestaurantFeature(id: number): Promise<{ message: string }> {
-  const response = await fetch(`${API_BASE_URL}/restaurant-features/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/features/${id}`, {
     method: 'DELETE',
   });
   return handleResponse<{ message: string }>(response);
@@ -1015,4 +1042,28 @@ export async function deleteRole(id: string): Promise<{ message: string }> {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
+}
+
+// Operating Hours API Functions
+export async function getOperatingHoursById(id: string): Promise<OperatingHoursFromApi> {
+  const response = await fetch(`${API_BASE_URL}/operating_hours/${id}`);
+  return handleResponse<OperatingHoursFromApi>(response);
+}
+
+export async function createOperatingHours(hoursData: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/operating_hours`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hoursData),
+    });
+    return handleResponse<any>(response);
+}
+
+export async function updateOperatingHours(id: string, hoursData: any): Promise<OperatingHoursFromApi> {
+    const response = await fetch(`${API_BASE_URL}/operating_hours/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hoursData),
+    });
+    return handleResponse<OperatingHoursFromApi>(response);
 }
