@@ -31,6 +31,7 @@ import Image from 'next/image';
 import { createRoom, getRoomTypes, getAmenities, type RoomTypeFromApi, type AmenityFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import { useRouter } from 'next/navigation';
 
 interface ImageSlot {
   file: File | null;
@@ -50,7 +51,7 @@ const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
 
 
 export default function AddNewRoomPage() {
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const router = useRouter();
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>(initialImageSlots);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -135,11 +136,11 @@ export default function AddNewRoomPage() {
 
     try {
       const result = await createRoom(roomDataForApi);
-      console.log('Room created:', result);
-      // Here you would typically also handle the image uploads
-      // For each slot in imageSlots, if there's a file, upload it
-      // and associate it with the newly created room ID from `result`.
-      setShowSuccessDialog(true);
+      toast({
+        title: "Success!",
+        description: `Room ${result.room_number} has been created.`,
+      });
+      router.push(`/rooms/${result.id}`);
     } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
@@ -413,26 +414,6 @@ export default function AddNewRoomPage() {
             {isSubmitting ? 'Creating...' : '+ Create New Room'}
         </Button>
       </div>
-
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="sr-only">
-                    <DialogTitle>Success</DialogTitle>
-                    <DialogDescription>A new room has been successfully created.</DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col items-center justify-center text-center p-8">
-                    <div className="p-4 bg-blue-100 rounded-full mb-4">
-                        <div className="p-2 bg-blue-200 rounded-full">
-                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Created New Room!</h2>
-                    <DialogClose asChild>
-                        <Button className="mt-6" onClick={() => setShowSuccessDialog(false)}>Done</Button>
-                    </DialogClose>
-                </div>
-            </DialogContent>
-        </Dialog>
     </form>
     </>
   );
