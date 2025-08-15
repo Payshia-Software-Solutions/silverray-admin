@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -219,7 +218,7 @@ export default function NewWeddingPackagePage() {
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
                      <Button variant="default" asChild>
-                        <Link href="/package-inclusions">
+                        <Link href="/package-inclusions/new">
                             <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
                         </Link>
                     </Button>

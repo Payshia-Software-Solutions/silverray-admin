@@ -754,7 +754,7 @@ export async function deleteBookingById(id: number): Promise<{ message: string }
 // Restaurant Features API
 export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/features`);
+    const response = await fetch(`${API_BASE_URL}/restaurant-features`);
     return handleResponse<RestaurantFeatureFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch restaurant features:', error);
