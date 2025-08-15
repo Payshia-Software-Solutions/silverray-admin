@@ -230,18 +230,11 @@ export default function EditWeddingPackagePage() {
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Package Inclusions</h3>
-                     <div className="flex gap-2">
-                        <Button variant="outline" asChild>
-                            <Link href="/weddingpackages?tab=hall-management">
-                                <Pencil className="mr-2 h-4 w-4" /> Manage Halls
-                            </Link>
-                        </Button>
-                        <Button variant="default" asChild>
-                            <Link href="/package-inclusions/new">
-                                <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
-                            </Link>
-                        </Button>
-                    </div>
+                    <Button variant="default" asChild>
+                        <Link href="/package-inclusions/new">
+                            <Plus className="mr-2 h-4 w-4" /> Add New Inclusion
+                        </Link>
+                    </Button>
                 </div>
                 <Controller
                     name="inclusions"
@@ -293,6 +286,13 @@ export default function EditWeddingPackagePage() {
                 )}
             />
             {errors.hall_id && <p className="text-red-500 text-sm">{errors.hall_id.message}</p>}
+            <div className="flex justify-end">
+                <Button variant="outline" asChild>
+                    <Link href="/weddingpackages/halls">
+                        <Pencil className="mr-2 h-4 w-4" /> Manage Halls
+                    </Link>
+                </Button>
+            </div>
           </CardContent>
         </Card>
         
