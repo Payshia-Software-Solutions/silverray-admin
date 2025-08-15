@@ -287,7 +287,7 @@ export default function EditWeddingPackagePage() {
             />
             {errors.hall_id && <p className="text-red-500 text-sm">{errors.hall_id.message}</p>}
             <div className="flex justify-end">
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild className="bg-yellow-500 text-yellow-900 hover:bg-yellow-600">
                     <Link href="/weddingpackages/halls">
                         <Pencil className="mr-2 h-4 w-4" /> Manage Halls
                     </Link>
