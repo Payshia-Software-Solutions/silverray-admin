@@ -60,6 +60,8 @@ export default function EditRoomPage() {
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+  
+  const formRef = React.useRef<HTMLFormElement>(null);
 
    useEffect(() => {
     async function fetchData() {
@@ -111,12 +113,12 @@ export default function EditRoomPage() {
     setShowDeleteSuccessDialog(true);
   }
   
-  const handleSaveConfirm = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!room) return;
+  const handleSaveConfirm = async () => {
+    if (!room || !formRef.current) return;
+    
     setIsSubmitting(true);
     
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(formRef.current);
 
     const roomDataForApi = {
         room_number: room.room_number,
@@ -163,7 +165,7 @@ export default function EditRoomPage() {
   }
 
   return (
-    <form id="edit-room-form" onSubmit={(e) => { e.preventDefault(); setShowSaveConfirmDialog(true); }} className="space-y-6">
+    <form ref={formRef} id="edit-room-form" onSubmit={(e) => { e.preventDefault(); setShowSaveConfirmDialog(true); }} className="space-y-6">
       <Toaster />
       <Breadcrumb>
         <BreadcrumbList>
@@ -381,24 +383,22 @@ export default function EditRoomPage() {
                 <Button type="submit">Save Changes</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <form onSubmit={handleSaveConfirm}>
-                    <AlertDialogHeader className="sr-only">
-                        <AlertDialogTitle>Update Room</AlertDialogTitle>
-                        <AlertDialogDescription>Are you sure you want to update this room?</AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="text-center p-4">
-                        <h2 className="text-2xl font-bold mb-4">Do you want to Update this Room ?</h2>
-                    </div>
-                    <AlertDialogFooter className="sm:justify-center">
-                        <AlertDialogCancel type="button" onClick={() => setShowSaveConfirmDialog(false)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Saving...' : 'Save Changes'}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                    <button type="button" onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                        <X className="h-5 w-5" />
-                    </button>
-                </form>
+                  <AlertDialogHeader className="sr-only">
+                      <AlertDialogTitle>Update Room</AlertDialogTitle>
+                      <AlertDialogDescription>Are you sure you want to update this room?</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="text-center p-4">
+                      <h2 className="text-2xl font-bold mb-4">Do you want to Update this Room ?</h2>
+                  </div>
+                  <AlertDialogFooter className="sm:justify-center">
+                      <AlertDialogCancel type="button" onClick={() => setShowSaveConfirmDialog(false)}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction type="button" onClick={handleSaveConfirm} disabled={isSubmitting}>
+                          {isSubmitting ? 'Saving...' : 'Save Changes'}
+                      </AlertDialogAction>
+                  </AlertDialogFooter>
+                  <button type="button" onClick={() => setShowSaveConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                      <X className="h-5 w-5" />
+                  </button>
             </AlertDialogContent>
             </AlertDialog>
         </div>
