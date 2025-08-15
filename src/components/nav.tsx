@@ -37,7 +37,6 @@ const navItems = [
   { href: '/weddingpackages', label: 'Wedding Management', icon: Heart },
   { href: '/website-content', label: 'Website Content', icon: Globe },
   { href: '/user-management', label: 'User Management', icon: UserCog },
-  { href: '/api-example', label: 'API Example', icon: Terminal },
  
 ];
 
