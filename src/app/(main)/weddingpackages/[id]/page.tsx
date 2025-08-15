@@ -107,10 +107,10 @@ export default function EditWeddingPackagePage() {
             reset({
                 ...pkg,
                 price: parseFloat(pkg.price),
-                inclusions: pkg.inclusions ? pkg.inclusions.split(',') : [],
+                inclusions: pkg.inclusions ? pkg.inclusions.split(',').filter(id => id) : [],
             });
         } catch (error: any) {
-            toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${'\''.repeat(1) + error.message}` });
+            toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${error.message}` });
         }
     }
     fetchPackage();
@@ -119,7 +119,7 @@ export default function EditWeddingPackagePage() {
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
     const dataToSend = {
       ...data,
-      company_id: 'COMP-008', // This was missing
+      company_id: '3900', // This was missing
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
