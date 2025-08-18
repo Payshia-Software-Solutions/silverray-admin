@@ -60,8 +60,9 @@ export default function NewRestaurantVenuePage() {
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
-  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<RestaurantFormValues>({
+  const { register, handleSubmit, control, formState: { errors, isSubmitting }, setValue } = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
       status: 'Active',
@@ -112,7 +113,7 @@ export default function NewRestaurantVenuePage() {
           capacity: data.capacity,
           operating_hours_id: operatingHoursId,
           feature_id: data.features?.join(',') || '',
-          images_url: data.images_url,
+          images_url: imagePreview,
           status: data.status,
           status_notes: data.status_notes,
           company_id: 'COMP001',
@@ -127,6 +128,28 @@ export default function NewRestaurantVenuePage() {
         toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
     }
   }
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue('images_url', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setValue('images_url', '');
+    const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -267,22 +290,29 @@ export default function NewRestaurantVenuePage() {
             <CardTitle>Venue Images</CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="flex items-center justify-center w-full">
-                <label
-                    htmlFor="dropzone-file"
-                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <UploadCloud className="w-10 h-10 mb-4 text-muted-foreground" />
-                    <p className="mb-2 text-lg text-muted-foreground">
-                        Drag and drop images here
-                    </p>
-                    <p className="text-sm text-muted-foreground">or click to browse files</p>
-                    <Button type="button" className="mt-4">Browse Files</Button>
-                    </div>
-                    <Input id="dropzone-file" type="file" className="hidden" />
-                </label>
-             </div>
+            {!imagePreview ? (
+              <label
+                htmlFor="dropzone-file"
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <UploadCloud className="w-10 h-10 mb-4 text-muted-foreground" />
+                  <p className="mb-2 text-lg text-muted-foreground">
+                    Drag and drop images here
+                  </p>
+                  <p className="text-sm text-muted-foreground">or click to browse files</p>
+                </div>
+                <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} />
+              </label>
+            ) : (
+                <div className="relative w-full max-w-md">
+                    <Image src={imagePreview} alt="Venue preview" width={400} height={300} className="rounded-lg object-cover w-full aspect-[4/3]" />
+                    <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove image</span>
+                    </Button>
+                </div>
+            )}
           </CardContent>
         </Card>
 
