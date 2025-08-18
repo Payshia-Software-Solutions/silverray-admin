@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -68,20 +68,33 @@ const experienceSchema = z.object({
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+}
+
+const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
+    file: null,
+    preview: null,
+    isPrimary: i === 0,
+}));
+
+
 export default function EditExperiencePage() {
     const router = useRouter();
     const params = useParams();
     const id = Number(params?.id);
     const { toast } = useToast();
 
-    const [images, setImages] = useState<{ src: string; alt: string; hint: string; primary: boolean }[]>([]);
+    const [imageSlots, setImageSlots] = useState<ImageSlot[]>(initialImageSlots);
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
     const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
     const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset, watch } = useForm<ExperienceFormValues>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset, watch, setValue } = useForm<ExperienceFormValues>({
         resolver: zodResolver(experienceSchema),
     });
 
@@ -98,7 +111,9 @@ export default function EditExperiencePage() {
                         walk_in_available: experience.walk_in_available === 1,
                     });
                      if (experience.images_url) {
-                        setImages([{ src: experience.images_url, alt: experience.name, hint: 'experience photo', primary: true }]);
+                        const newImageSlots = [...initialImageSlots];
+                        newImageSlots[0] = { ...newImageSlots[0], preview: experience.images_url };
+                        setImageSlots(newImageSlots);
                     }
                 } catch (error: any) {
                     toast({
@@ -113,13 +128,18 @@ export default function EditExperiencePage() {
     }, [id, reset, toast]);
     
     const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
+        // In a real app, you'd handle image uploads here, e.g., to a cloud storage.
+        // For now, we'll just use the preview URL if it's new, or the existing one.
+        const primaryImageSlot = imageSlots.find(slot => slot.isPrimary && slot.preview);
+        const imageUrl = primaryImageSlot ? primaryImageSlot.preview : null;
+
         try {
             const dataToSubmit = {
                 ...data,
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
-                images_url: images.length > 0 && images[0]?.src ? images[0].src : null,
+                images_url: imageUrl,
             };
             await updateExperience(id, dataToSubmit);
             setShowSaveConfirmDialog(false);
@@ -150,25 +170,54 @@ export default function EditExperiencePage() {
         }
     };
 
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const file = event.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImages([...images, { 
-                    src: reader.result as string, 
-                    alt: 'New image', 
-                    hint: 'uploaded image', 
-                    primary: false 
-                }]);
+                const newImageSlots = [...imageSlots];
+                newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
+                setImageSlots(newImageSlots);
+                // If this is the primary slot, update the form value
+                if (newImageSlots[index].isPrimary) {
+                    setValue('images_url', reader.result as string);
+                }
             };
             reader.readAsDataURL(file);
         }
     };
 
     const removeImage = (indexToRemove: number) => {
-        setImages(images.filter((_, index) => index !== indexToRemove));
-    }
+        const newImageSlots = [...imageSlots];
+        newImageSlots[indexToRemove] = { file: null, preview: null, isPrimary: false };
+
+        // If we removed the primary, make the first available image primary
+        if (imageSlots[indexToRemove].isPrimary) {
+            let foundNewPrimary = false;
+            for (let i = 0; i < newImageSlots.length; i++) {
+                if (newImageSlots[i].preview) {
+                    newImageSlots[i].isPrimary = true;
+                    setValue('images_url', newImageSlots[i].preview);
+                    foundNewPrimary = true;
+                    break;
+                }
+            }
+            if (!foundNewPrimary) {
+                 setValue('images_url', '');
+            }
+        }
+        setImageSlots(newImageSlots);
+    };
+
+    const setPrimaryImage = (selectedIndex: number) => {
+        const newImageSlots = imageSlots.map((slot, index) => ({
+            ...slot,
+            isPrimary: index === selectedIndex,
+        }));
+        setImageSlots(newImageSlots);
+        setValue('images_url', newImageSlots[selectedIndex].preview);
+    };
+
 
   return (
     <>
@@ -358,35 +407,51 @@ export default function EditExperiencePage() {
             <Card>
               <CardContent className="p-6 space-y-6">
                 <h3 className="text-lg font-semibold">Image Gallery</h3>
-                <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
-                <div className="flex gap-4 items-center flex-wrap">
-                    {images.map((image, index) => {
-                       const isValidSrc = image.src && (image.src.startsWith('http') || image.src.startsWith('data:'));
-                       return isValidSrc ? (
-                        <div key={index} className="relative group">
-                            <Image src={image.src} alt={image.alt} width={200} height={150} className="rounded-lg" data-ai-hint={image.hint} />
-                            {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
-                            <div className="absolute top-1 right-1">
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => removeImage(index)}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                       ) : null
-                    })}
-                     <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
-                        <div className="flex flex-col items-center justify-center">
-                            <Plus className="w-8 h-8 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">Add Image</span>
-                        </div>
-                        <Input id="image-upload" type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                    </label>
+                <p className="text-sm text-muted-foreground">Upload up to 5 images. Click the star to set as primary thumbnail.</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {imageSlots.map((slot, index) => (
+                    <div key={index} className="relative aspect-video group">
+                      {slot.preview ? (
+                        <>
+                          <Image
+                            src={slot.preview}
+                            alt={`Experience image ${index + 1}`}
+                            fill
+                            className="rounded-lg object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => removeImage(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                           {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                        </>
+                      ) : (
+                        <label
+                          htmlFor={`image-upload-${index}`}
+                          className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                        >
+                          <div className="flex flex-col items-center justify-center text-center">
+                            <Upload className="w-8 h-8 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                          </div>
+                          <Input
+                            id={`image-upload-${index}`}
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, index)}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -439,3 +504,5 @@ export default function EditExperiencePage() {
     </>
   );
 }
+
+    
