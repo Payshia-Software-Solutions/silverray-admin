@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -204,14 +205,15 @@ export default function RestaurantDiningPage() {
   const getOperatingHours = (hours: any): string => {
     if (!hours) return 'N/A';
     try {
-        const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours;
-        if (typeof parsed !== 'object' || parsed === null) return 'N/A';
-        const firstOpenDay = Object.values(parsed).find((day: any) => day.isOpen) as { open: string, close: string };
+        // The data is already an object from the joined query, no need to parse
+        if (typeof hours !== 'object' || hours === null) return 'N/A';
+        const firstOpenDay = Object.values(hours).find((day: any) => day.isOpen) as { open: string, close: string };
         if (firstOpenDay) {
             return `${formatTime(firstOpenDay.open)} - ${formatTime(firstOpenDay.close)}`;
         }
         return 'Closed';
     } catch (e) {
+        console.error("Error parsing operating hours:", e, "Raw data:", hours);
         return 'N/A';
     }
   };
@@ -254,7 +256,7 @@ export default function RestaurantDiningPage() {
           )}
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
-          <AlertDialog>
+          <AlertDialog open={!!venueToDelete} onOpenChange={(open) => !open && setVenueToDelete(null)}>
             {loading && <p>Loading venues...</p>}
             {error && <p className="text-red-500">{error}</p>}
             {!loading && !error && (

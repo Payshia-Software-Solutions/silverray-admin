@@ -29,7 +29,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getRestaurantFeatures, type RestaurantFeatureFromApi, createRestaurant } from '@/lib/services/api';
+import { getRestaurantFeatures, type RestaurantFeatureFromApi, createRestaurant, createOperatingHours } from '@/lib/services/api';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -89,24 +89,46 @@ export default function NewRestaurantVenuePage() {
   }, []);
 
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
-    const restaurantData = {
-      venue_name: data.venue_name,
-      short_description: data.short_description,
-      detailed_description: data.detailed_description,
-      capacity: data.capacity,
-      feature_id: data.features?.join(',') || '',
-      images_url: imagePreview,
-      status: data.status,
-      status_notes: data.status_notes,
-      company_id: 'COMP001',
-      created_by: 'admin_user',
-      updated_by: null,
-      operating_hours: data.operating_hours
-    };
-    
     try {
-      await createRestaurant(restaurantData);
-      setShowSaveSuccessDialog(true);
+        // Step 1: Create operating hours record
+        const operatingHoursPayload = {
+            capacity: data.capacity,
+            company_id: 'COMP001',
+            ...Object.fromEntries(
+                Object.entries(data.operating_hours).flatMap(([day, times]: [string, any]) => [
+                    [`${day}_open`, times.isOpen ? 1 : 0],
+                    [`${day}_open_time`, times.open],
+                    [`${day}_close_time`, times.close],
+                ])
+            )
+        };
+        
+        const operatingHoursResponse = await createOperatingHours(operatingHoursPayload);
+        const operatingHoursId = operatingHoursResponse.id;
+
+        if (!operatingHoursId) {
+            throw new Error("Failed to get ID for operating hours.");
+        }
+
+        // Step 2: Create restaurant venue record
+        const restaurantData = {
+          venue_name: data.venue_name,
+          short_description: data.short_description || '',
+          detailed_description: data.detailed_description || '',
+          capacity: data.capacity,
+          operating_hours_id: operatingHoursId,
+          feature_id: data.features?.join(',') || '',
+          images_url: imagePreview,
+          status: data.status,
+          status_notes: data.status_notes || '',
+          company_id: 'COMP001',
+          created_by: 'admin_user',
+          updated_by: null,
+        };
+
+        await createRestaurant(restaurantData);
+        setShowSaveSuccessDialog(true);
+
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
     }
@@ -360,5 +382,3 @@ export default function NewRestaurantVenuePage() {
     </div>
   );
 }
-
-    

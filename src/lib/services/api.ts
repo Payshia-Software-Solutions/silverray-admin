@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -938,12 +939,12 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 
 // Restaurant Venues API
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/restaurants`);
+  const response = await fetch(`${API_BASE_URL}/restaurant`);
   return handleResponse<RestaurantFromApi[]>(response);
 }
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`);
+    const response = await fetch(`${API_BASE_URL}/restaurant/${id}`);
     return handleResponse<RestaurantFromApi>(response);
 }
 
@@ -957,7 +958,7 @@ export async function createRestaurant(restaurantData: any): Promise<RestaurantF
 }
 
 export async function updateRestaurant(id: number, restaurantData: Partial<RestaurantFromApi>): Promise<RestaurantFromApi> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/restaurant/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(restaurantData),
@@ -966,7 +967,7 @@ export async function updateRestaurant(id: number, restaurantData: Partial<Resta
 }
 
 export async function deleteRestaurant(id: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/restaurant/${id}`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
