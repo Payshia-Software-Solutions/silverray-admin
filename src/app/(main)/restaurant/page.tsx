@@ -174,7 +174,7 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteItemConfirm = () => {
-    console.log(`Deleting ${itemToDelete?.name}`);
+    console.log(`Deleting \${itemToDelete?.name}`);
     setShowDeleteSuccessDialog(true);
     setItemToDelete(null);
   }
@@ -184,7 +184,7 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteReservationConfirm = () => {
-    console.log(`Deleting reservation ${reservationToDelete?.id}`);
+    console.log(`Deleting reservation \${reservationToDelete?.id}`);
     setShowDeleteSuccessDialog(true);
     setReservationToDelete(null);
   };
@@ -196,20 +196,23 @@ export default function RestaurantDiningPage() {
     const hour = parseInt(h, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
-    return `${formattedHour}:${m} ${ampm}`;
+    return `\${formattedHour}:\${m} \${ampm}`;
   };
 
-  const getOperatingHours = (hours: string | undefined): string => {
+  const getOperatingHours = (hours: any): string => {
     if (!hours) return 'N/A';
     try {
-      const parsed = JSON.parse(hours);
-      const firstOpenDay = Object.values(parsed).find((day: any) => day.isOpen) as { open: string, close: string };
-      if (firstOpenDay) {
-        return `${formatTime(firstOpenDay.open)} - ${formatTime(firstOpenDay.close)}`;
-      }
-      return 'Closed';
+        // If hours is already an object, use it directly.
+        // If it's a string, parse it.
+        const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours;
+        const firstOpenDay = Object.values(parsed).find((day: any) => day.isOpen) as { open: string, close: string };
+        if (firstOpenDay) {
+            return `\${formatTime(firstOpenDay.open)} - \${formatTime(firstOpenDay.close)}`;
+        }
+        return 'Closed';
     } catch (e) {
-      return 'N/A';
+        console.error("Failed to parse operating hours:", e);
+        return 'N/A';
     }
   };
 
@@ -287,13 +290,13 @@ export default function RestaurantDiningPage() {
                           </div>
                           <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4"/>
-                              <span>{getOperatingHours(venue.operating_hours)}</span>
+                              <span>{getOperatingHours(venue.operating_hours_id)}</span>
                           </div>
                       </div>
                   </CardContent>
                   <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
                       <Button className="w-full" variant="default" asChild>
-                          <Link href={`/restaurant/${venue.id}`}>
+                          <Link href={`/restaurant/\${venue.id}`}>
                               <Pencil className="mr-2 h-4 w-4"/>
                               Edit
                           </Link>
@@ -401,7 +404,7 @@ export default function RestaurantDiningPage() {
                                   <AlertDialog>
                                     <div className="flex justify-end gap-1">
                                         <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                            <Link href={`/restaurant/menu/${item.id}`}>
+                                            <Link href={`/restaurant/menu/\${item.id}`}>
                                                 <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                                 <span className="sr-only">View</span>
                                             </Link>
@@ -533,7 +536,7 @@ export default function RestaurantDiningPage() {
                         <AlertDialog>
                           <div className="flex justify-end gap-1">
                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                  <Link href={`/restaurant/reservations/${res.id.replace('#', '')}`}>
+                                  <Link href={`/restaurant/reservations/\${res.id.replace('#', '')}`}>
                                       <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                       <span className="sr-only">View</span>
                                   </Link>
