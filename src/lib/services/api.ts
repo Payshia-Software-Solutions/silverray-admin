@@ -948,7 +948,7 @@ export async function getRestaurantById(id: number): Promise<RestaurantFromApi> 
     return handleResponse<RestaurantFromApi>(response);
 }
 
-export async function createRestaurant(restaurantData: Omit<RestaurantFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<RestaurantFromApi> {
+export async function createRestaurant(restaurantData: Omit<RestaurantFromApi, 'id' | 'created_at' | 'updated_at' | 'operating_hours_id'> & { [key: string]: any }): Promise<RestaurantFromApi> {
     const response = await fetch(`${API_BASE_URL}/restaurant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
