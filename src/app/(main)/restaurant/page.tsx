@@ -130,6 +130,7 @@ export default function RestaurantDiningPage() {
 
   const [venueToDelete, setVenueToDelete] = useState<RestaurantFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedVenueName, setDeletedVenueName] = useState('');
 
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [reservationToDelete, setReservationToDelete] = useState<typeof reservations[0] | null>(null);
@@ -160,6 +161,7 @@ export default function RestaurantDiningPage() {
     if (!venueToDelete) return;
     try {
         await deleteRestaurant(venueToDelete.id);
+        setDeletedVenueName(venueToDelete.venue_name);
         setShowDeleteSuccessDialog(true);
         setVenues(venues.filter(v => v.id !== venueToDelete.id));
     } catch (error: any) {
@@ -174,7 +176,7 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteItemConfirm = () => {
-    console.log(`Deleting \${itemToDelete?.name}`);
+    console.log(`Deleting ${itemToDelete?.name}`);
     setShowDeleteSuccessDialog(true);
     setItemToDelete(null);
   }
@@ -184,7 +186,7 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteReservationConfirm = () => {
-    console.log(`Deleting reservation \${reservationToDelete?.id}`);
+    console.log(`Deleting reservation ${reservationToDelete?.id}`);
     setShowDeleteSuccessDialog(true);
     setReservationToDelete(null);
   };
@@ -196,22 +198,20 @@ export default function RestaurantDiningPage() {
     const hour = parseInt(h, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
-    return `\${formattedHour}:\${m} \${ampm}`;
+    return `${formattedHour}:${m} ${ampm}`;
   };
 
   const getOperatingHours = (hours: any): string => {
     if (!hours) return 'N/A';
     try {
-        // If hours is already an object, use it directly.
-        // If it's a string, parse it.
         const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours;
+        if (typeof parsed !== 'object' || parsed === null) return 'N/A';
         const firstOpenDay = Object.values(parsed).find((day: any) => day.isOpen) as { open: string, close: string };
         if (firstOpenDay) {
-            return `\${formatTime(firstOpenDay.open)} - \${formatTime(firstOpenDay.close)}`;
+            return `${formatTime(firstOpenDay.open)} - ${formatTime(firstOpenDay.close)}`;
         }
         return 'Closed';
     } catch (e) {
-        console.error("Failed to parse operating hours:", e);
         return 'N/A';
     }
   };
@@ -254,77 +254,77 @@ export default function RestaurantDiningPage() {
           )}
         </div>
         <TabsContent value="dining-venues" className="space-y-4">
-          {loading && <p>Loading venues...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {!loading && !error && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {venues.map((venue) => (
-              <AlertDialog key={venue.id}>
-                <Card className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
-                    <div className="relative w-full h-48">
-                      <Image
-                          src={venue.images_url || 'https://placehold.co/600x400.png'}
-                          alt={venue.venue_name}
-                          fill
-                          className="object-cover"
-                          data-ai-hint="restaurant interior"
-                      />
-                      {venue.status && (
-                      <Badge className={cn(
-                          'absolute top-3 right-3 text-sm',
-                          venue.status === 'Active' && 'bg-green-500',
-                          venue.status === 'Seasonal' && 'bg-orange-500',
-                          venue.status === 'Inactive' && 'bg-gray-500'
-                      )}>
-                          {venue.status}
-                      </Badge>
-                      )}
-                  </div>
-                  <CardContent className="p-4 flex flex-col flex-grow">
-                      <h3 className="text-xl font-bold mb-2 text-primary">{venue.venue_name}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4"/>
-                              <span>{venue.capacity} Capacity</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4"/>
-                              <span>{getOperatingHours(venue.operating_hours_id)}</span>
-                          </div>
-                      </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
-                      <Button className="w-full" variant="default" asChild>
-                          <Link href={`/restaurant/\${venue.id}`}>
-                              <Pencil className="mr-2 h-4 w-4"/>
-                              Edit
-                          </Link>
-                      </Button>
-                      <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
-                              <Trash2 className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
-                              <span className="sr-only">Delete</span>
-                          </Button>
-                      </AlertDialogTrigger>
-                  </CardFooter>
-                </Card>
-                 <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Venue?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to delete the venue "{venueToDelete?.venue_name}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setVenueToDelete(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              ))}
-            </div>
-          )}
+          <AlertDialog>
+            {loading && <p>Loading venues...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {!loading && !error && (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {venues.map((venue) => (
+                  <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+                      <div className="relative w-full h-48">
+                        <Image
+                            src={venue.images_url || 'https://placehold.co/600x400.png'}
+                            alt={venue.venue_name}
+                            fill
+                            className="object-cover"
+                            data-ai-hint="restaurant interior"
+                        />
+                        {venue.status && (
+                        <Badge className={cn(
+                            'absolute top-3 right-3 text-sm',
+                            venue.status === 'Active' && 'bg-green-500',
+                            venue.status === 'Seasonal' && 'bg-orange-500',
+                            venue.status === 'Inactive' && 'bg-gray-500'
+                        )}>
+                            {venue.status}
+                        </Badge>
+                        )}
+                    </div>
+                    <CardContent className="p-4 flex flex-col flex-grow">
+                        <h3 className="text-xl font-bold mb-2 text-primary">{venue.venue_name}</h3>
+                        <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4"/>
+                                <span>{venue.capacity} Capacity</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4"/>
+                                <span>{getOperatingHours(venue.operating_hours_id)}</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
+                        <Button className="w-full" variant="default" asChild>
+                            <Link href={`/restaurant/${venue.id}`}>
+                                <Pencil className="mr-2 h-4 w-4"/>
+                                Edit
+                            </Link>
+                        </Button>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
+                                <Trash2 className="h-5 w-5 text-muted-foreground group-hover:text-red-500" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Venue?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to delete the venue "{venueToDelete?.venue_name}"? This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setVenueToDelete(null)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </TabsContent>
         <TabsContent value="menu-items" className="space-y-4">
           <Card>
@@ -404,7 +404,7 @@ export default function RestaurantDiningPage() {
                                   <AlertDialog>
                                     <div className="flex justify-end gap-1">
                                         <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                            <Link href={`/restaurant/menu/\${item.id}`}>
+                                            <Link href={`/restaurant/menu/${item.id}`}>
                                                 <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                                 <span className="sr-only">View</span>
                                             </Link>
@@ -536,7 +536,7 @@ export default function RestaurantDiningPage() {
                         <AlertDialog>
                           <div className="flex justify-end gap-1">
                              <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                  <Link href={`/restaurant/reservations/\${res.id.replace('#', '')}`}>
+                                  <Link href={`/restaurant/reservations/${res.id.replace('#', '')}`}>
                                       <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                                       <span className="sr-only">View</span>
                                   </Link>
@@ -596,7 +596,7 @@ export default function RestaurantDiningPage() {
                          <Trash2 className="h-8 w-8 text-red-600" />
                       </div>
                   </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Deleted!</h2>
+                  <h2 className="text-xl font-bold mb-2">Successfully Deleted {deletedVenueName}!</h2>
                   <DialogClose asChild>
                       <Button className="mt-6 w-full" onClick={() => {
                         setShowDeleteSuccessDialog(false);
