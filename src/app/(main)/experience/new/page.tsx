@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2, X, DollarSign } from 'lucide-react';
+import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2, X, DollarSign, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -57,11 +57,18 @@ const experienceSchema = z.object({
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+}
+
 export default function AddExperiencePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<ExperienceFormValues>({
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null }));
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue } = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
       status: 'Active',
@@ -71,6 +78,35 @@ export default function AddExperiencePage() {
       max_participants: 20
     }
   });
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImageSlots = [...imageSlots];
+        newImageSlots[index] = { file, preview: reader.result as string };
+        setImageSlots(newImageSlots);
+        if (index === 0) { // Set the first image as the main one
+            setValue('images_url', reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImageSlots = [...imageSlots];
+    const wasPrimary = index === 0 && newImageSlots[index].preview;
+    newImageSlots[index] = { file: null, preview: null };
+    setImageSlots(newImageSlots);
+
+    // If the primary image was removed, clear the form value
+    if (wasPrimary) {
+        setValue('images_url', undefined);
+    }
+  };
+
 
   const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
     const dataToSend = {
@@ -254,15 +290,50 @@ export default function AddExperiencePage() {
         <Card>
             <CardContent className="p-6 space-y-6">
                  <h3 className="text-lg font-semibold">Image Gallery</h3>
-                <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
-                <div className="flex gap-4 items-center flex-wrap">
-                     <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
-                        <div className="flex flex-col items-center justify-center">
-                            <Plus className="w-8 h-8 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">Add Image</span>
-                        </div>
-                        <Input id="image-upload" type="file" className="hidden" accept="image/*" />
-                    </label>
+                <p className="text-sm text-muted-foreground">Upload up to 5 images. The first image will be the primary one.</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {imageSlots.map((slot, index) => (
+                      <div key={index} className="relative aspect-video">
+                      {slot.preview ? (
+                          <div className="group">
+                          <Image
+                              src={slot.preview}
+                              alt={`Preview ${index + 1}`}
+                              fill
+                              className="rounded-lg object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => removeImage(index)}
+                              >
+                              <Trash2 className="h-4 w-4" />
+                              </Button>
+                          </div>
+                          </div>
+                      ) : (
+                          <label
+                          htmlFor={`image-upload-${index}`}
+                          className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                          >
+                          <div className="flex flex-col items-center justify-center text-center">
+                              <Plus className="w-8 h-8 text-muted-foreground" />
+                              <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                          </div>
+                          <Input
+                              id={`image-upload-${index}`}
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => handleImageChange(e, index)}
+                          />
+                          </label>
+                      )}
+                      </div>
+                  ))}
                 </div>
             </CardContent>
         </Card>
