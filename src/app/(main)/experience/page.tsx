@@ -138,11 +138,13 @@ export default function ExperienceManagementPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {loading && Array.from({ length: 6 }).map((_, i) => <Card key={i} className="h-80 animate-pulse bg-muted"></Card>)}
           {error && <p className="text-red-500 col-span-full">{error}</p>}
-          {!loading && !error && experiences.map((experience) => (
+          {!loading && !error && experiences.map((experience) => {
+            const isValidImageUrl = experience.images_url && (experience.images_url.startsWith('http') || experience.images_url.startsWith('data:'));
+            return (
             <Card key={experience.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
               <div className="relative w-full h-48">
                 <Image
-                  src={experience.images_url || 'https://placehold.co/600x400'}
+                  src={isValidImageUrl ? experience.images_url : 'https://placehold.co/600x400'}
                   alt={experience.name}
                   fill
                   className="object-cover"
@@ -192,7 +194,7 @@ export default function ExperienceManagementPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )})}
         </div>
         <AlertDialogContent>
             <AlertDialogHeader>
