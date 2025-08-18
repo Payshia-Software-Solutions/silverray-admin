@@ -299,19 +299,16 @@ export default function EditWeddingPackagePage() {
         <Card>
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold">Package Images</h3>
-             <div className="flex items-center justify-center w-full">
+            <div className="flex gap-4 items-center flex-wrap">
               <label
-                htmlFor="dropzone-file"
-                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                htmlFor="image-upload"
+                className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
               >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    Drag and drop images here, or <Button asChild variant="link" className="p-0"><span className="font-semibold text-primary">browse files</span></Button>
-                  </p>
-                  <p className="text-xs text-muted-foreground">Supports: JPG, PNG, WebP (Max 5MB each)</p>
+                <div className="flex flex-col items-center justify-center">
+                  <Plus className="w-8 h-8 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Add Image</span>
                 </div>
-                <Input id="dropzone-file" type="file" className="hidden" />
+                <Input id="image-upload" type="file" className="hidden" accept="image/*" />
               </label>
             </div>
           </CardContent>
