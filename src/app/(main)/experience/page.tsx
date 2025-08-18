@@ -170,7 +170,7 @@ export default function ExperienceManagementPage() {
                     </div>
                     <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4"/>
-                        <span>${experience.Price} per {experience.pricing_basis}</span>
+                        <span>LKR {Number(experience.Price).toFixed(2)} per {experience.pricing_basis}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Ticket className="h-4 w-4"/>
