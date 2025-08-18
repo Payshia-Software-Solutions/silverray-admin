@@ -89,14 +89,6 @@ export default function NewRestaurantVenuePage() {
   }, []);
 
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
-    const operatingHoursPayload = Object.fromEntries(
-        Object.entries(data.operating_hours).flatMap(([day, times]: [string, any]) => [
-            [`${day}_open`, times.isOpen ? 1 : 0],
-            [`${day}_open_time`, times.open],
-            [`${day}_close_time`, times.close],
-        ])
-    );
-
     const restaurantData = {
       venue_name: data.venue_name,
       short_description: data.short_description,
@@ -109,11 +101,11 @@ export default function NewRestaurantVenuePage() {
       company_id: 'COMP001',
       created_by: 'admin_user',
       updated_by: null,
-      ...operatingHoursPayload
+      operating_hours: data.operating_hours
     };
     
     try {
-      await createRestaurant(restaurantData as any);
+      await createRestaurant(restaurantData);
       setShowSaveSuccessDialog(true);
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error creating venue', description: error.message });
@@ -368,3 +360,5 @@ export default function NewRestaurantVenuePage() {
     </div>
   );
 }
+
+    

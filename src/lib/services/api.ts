@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -949,7 +948,7 @@ export async function getRestaurantById(id: number): Promise<RestaurantFromApi> 
 }
 
 export async function createRestaurant(restaurantData: any): Promise<RestaurantFromApi> {
-    const response = await fetch(`${API_BASE_URL}/restaurants`, {
+    const response = await fetch(`${API_BASE_URL}/restaurant`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(restaurantData),
@@ -1068,3 +1067,5 @@ export async function updateOperatingHours(id: string, hoursData: any): Promise<
     });
     return handleResponse<OperatingHoursFromApi>(response);
 }
+
+    
