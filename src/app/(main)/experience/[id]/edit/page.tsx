@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Clock, Trash2, X, CheckCircle2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -44,12 +44,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getExperienceById, updateExperience, type ExperienceFromApi } from '@/lib/services/api';
+import { getExperienceById, updateExperience, type ExperienceFromApi, deleteExperience } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const experienceSchema = z.object({
   name: z.string().min(1, 'Experience name is required'),
-  meeting_Point: z.string().min(1, 'Meeting point is required'),
+  meeting_Point: z.string().optional().nullable(),
   short_description: z.string().optional(),
   detailed_description: z.string().optional(),
   duration: z.string().min(1, 'Duration is required'),
@@ -63,7 +63,7 @@ const experienceSchema = z.object({
   time_slot: z.string().min(1, 'Time slot is required'),
   schedule_note: z.string().optional(),
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
-  images_url: z.string().optional(),
+  images_url: z.string().optional().nullable(),
 });
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
@@ -134,11 +134,20 @@ export default function EditExperiencePage() {
         }
     };
     
-    const handleDelete = () => {
-        // In a real app, you would handle the delete logic here
-        setDeletedExperienceTitle(experienceName);
-        setShowDeleteConfirmDialog(false);
-        setShowDeleteSuccessDialog(true);
+    const handleDelete = async () => {
+        try {
+          await deleteExperience(id);
+          setDeletedExperienceTitle(experienceName);
+          setShowDeleteConfirmDialog(false);
+          setShowDeleteSuccessDialog(true);
+        } catch (error: any) {
+           toast({
+              variant: "destructive",
+              title: "Error Deleting Experience",
+              description: error.message || "An unexpected error occurred.",
+          });
+          setShowDeleteConfirmDialog(false);
+        }
     };
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
