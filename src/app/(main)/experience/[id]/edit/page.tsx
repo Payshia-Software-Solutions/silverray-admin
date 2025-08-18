@@ -156,6 +156,10 @@ export default function EditExperiencePage() {
         }
     };
 
+    const removeImage = (indexToRemove: number) => {
+        setImages(images.filter((_, index) => index !== indexToRemove));
+    }
+
   return (
     <>
     <Toaster />
@@ -347,9 +351,20 @@ export default function EditExperiencePage() {
                 <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
                 <div className="flex gap-4 items-center flex-wrap">
                     {images.map((image, index) => (
-                        <div key={index} className="relative">
+                        <div key={index} className="relative group">
                             <Image src={image.src} alt={image.alt} width={200} height={150} className="rounded-lg" data-ai-hint={image.hint} />
                             {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                            <div className="absolute top-1 right-1">
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => removeImage(index)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     ))}
                      <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
