@@ -119,6 +119,7 @@ export default function EditExperiencePage() {
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
+                images_url: images[0]?.src || null, // Safely access image source
             };
             await updateExperience(id, dataToSubmit);
             setShowSaveConfirmDialog(false);
@@ -163,7 +164,7 @@ export default function EditExperiencePage() {
   return (
     <>
     <Toaster />
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(() => setShowSaveConfirmDialog(true))}>
         <div className="space-y-6">
           <Breadcrumb>
             <BreadcrumbList>
@@ -181,7 +182,7 @@ export default function EditExperiencePage() {
             <Button variant="outline" asChild type="button"><Link href={`/experience`}>Cancel</Link></Button>
             <AlertDialog open={showSaveConfirmDialog} onOpenChange={setShowSaveConfirmDialog}>
                 <AlertDialogTrigger asChild>
-                    <Button type="submit" variant="default">Save Changes</Button>
+                    <Button type="button" variant="default">Save Changes</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -242,9 +243,9 @@ export default function EditExperiencePage() {
                   <Label htmlFor="detailed-description">Detailed Description</Label>
                   <div className="rounded-md border">
                     <div className="p-2 border-b flex items-center gap-1">
-                       <Button variant="ghost" size="icon" className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
-                       <Button variant="ghost" size="icon" className="h-8 w-8"><List className="h-4 w-4" /></Button>
+                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><Bold className="h-4 w-4" /></Button>
+                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><Italic className="h-4 w-4" /></Button>
+                       <Button type="button" variant="ghost" size="icon" className="h-8 w-8"><List className="h-4 w-4" /></Button>
                     </div>
                     <Textarea
                       id="detailed-description"
