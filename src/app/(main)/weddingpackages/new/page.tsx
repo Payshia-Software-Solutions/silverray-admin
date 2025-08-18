@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -50,6 +50,10 @@ const packageSchema = z.object({
 
 type PackageFormValues = z.infer<typeof packageSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+}
 
 export default function NewWeddingPackagePage() {
   const router = useRouter();
@@ -59,6 +63,7 @@ export default function NewWeddingPackagePage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [halls, setHalls] = useState<HallFromApi[]>([]);
   const [loadingHalls, setLoadingHalls] = useState(true);
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null }));
 
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
@@ -101,7 +106,31 @@ export default function NewWeddingPackagePage() {
     fetchInclusions();
   }, []);
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImageSlots = [...imageSlots];
+        newImageSlots[index] = { file, preview: reader.result as string };
+        setImageSlots(newImageSlots);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImageSlots = [...imageSlots];
+    newImageSlots[index] = { file: null, preview: null };
+    setImageSlots(newImageSlots);
+  };
+
+
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
+    // In a real app, you'd handle image uploads here, e.g., to a cloud storage.
+    // For now, we'll just use a placeholder for the image URL.
+    const primaryImage = imageSlots.find(slot => slot.preview)?.preview || null;
+
     const dataToSend = {
       ...data,
       company_id: '3900',
@@ -109,7 +138,7 @@ export default function NewWeddingPackagePage() {
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
-      image_urls: null
+      image_urls: primaryImage,
     };
 
     try {
@@ -279,35 +308,49 @@ export default function NewWeddingPackagePage() {
         <Card>
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold">Package Images</h3>
-             <div className="flex items-center justify-center w-full">
-              <label
-                htmlFor="dropzone-file"
-                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    Drag and drop images here, or <Button asChild variant="link" className="p-0"><span className="font-semibold text-primary">browse files</span></Button>
-                  </p>
-                  <p className="text-xs text-muted-foreground">Supports: JPG, PNG, WebP (Max 5MB each)</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {imageSlots.map((slot, index) => (
+                <div key={index} className="relative aspect-video">
+                  {slot.preview ? (
+                    <div className="group">
+                      <Image
+                        src={slot.preview}
+                        alt={`Preview ${index + 1}`}
+                        fill
+                        className="rounded-lg object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => removeImage(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor={`image-upload-${index}`}
+                      className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                    >
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <Plus className="w-8 h-8 text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                      </div>
+                      <Input
+                        id={`image-upload-${index}`}
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, index)}
+                      />
+                    </label>
+                  )}
                 </div>
-                <Input id="dropzone-file" type="file" className="hidden" />
-              </label>
-            </div>
-            <div className="flex flex-wrap gap-4">
-                <div className="relative">
-                    <Image src="https://images.unsplash.com/photo-1595431677320-991c68277257?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwaGFsbCUyMGdvbGR8ZW58MHx8fHwxNzUyODQzMjQwfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding hall" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding hall gold" />
-                    <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>
-                </div>
-                 <div className="relative">
-                    <Image src="https://images.unsplash.com/photo-1550081692-564a275a4073?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBkZWNvcmF0aW9ufGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding decor" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding table decoration" />
-                </div>
-                 <div className="relative">
-                    <Image src="https://images.unsplash.com/photo-1579344475510-53c8253138b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwY2VyZW1vbnklMjBhcmNofGVufDB8fHx8MTc1Mjg0MzI0MHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding ceremony" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding ceremony arch" />
-                </div>
-                 <div className="relative">
-                    <Image src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZmxvd2Vyc3xlbnwwfHx8fDE3NTI4NDM0NDF8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Wedding flowers" width={200} height={150} className="rounded-lg object-cover" data-ai-hint="wedding flowers" />
-                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
