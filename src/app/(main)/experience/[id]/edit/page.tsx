@@ -119,7 +119,7 @@ export default function EditExperiencePage() {
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
-                images_url: images[0]?.src || null, // Safely access image source
+                images_url: images.length > 0 ? images[0]?.src : null,
             };
             await updateExperience(id, dataToSubmit);
             setShowSaveConfirmDialog(false);
@@ -352,6 +352,7 @@ export default function EditExperiencePage() {
                 <p className="text-sm text-muted-foreground">Drag to reorder images. Click the star to set as primary thumbnail.</p>
                 <div className="flex gap-4 items-center flex-wrap">
                     {images.map((image, index) => (
+                       image.src && (
                         <div key={index} className="relative group">
                             <Image src={image.src} alt={image.alt} width={200} height={150} className="rounded-lg" data-ai-hint={image.hint} />
                             {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
@@ -367,6 +368,7 @@ export default function EditExperiencePage() {
                                 </Button>
                             </div>
                         </div>
+                       )
                     ))}
                      <label htmlFor="image-upload" className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
                         <div className="flex flex-col items-center justify-center">
