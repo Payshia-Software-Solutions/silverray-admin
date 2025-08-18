@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -762,7 +763,7 @@ export async function getRestaurantFeatures(): Promise<RestaurantFeatureFromApi[
   }
 }
 
-export async function getRestaurantFeatureById(id: string): Promise<RestaurantFeatureFromApi> {
+export async function getRestaurantFeatureById(id: number): Promise<RestaurantFeatureFromApi> {
   const response = await fetch(`${API_BASE_URL}/features/${id}`);
   return handleResponse<RestaurantFeatureFromApi>(response);
 }
@@ -776,7 +777,7 @@ export async function createRestaurantFeature(featureData: Omit<RestaurantFeatur
   return handleResponse<RestaurantFeatureFromApi>(response);
 }
 
-export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at'>>): Promise<RestaurantFeatureFromApi> {
+export async function updateRestaurantFeature(id: number, featureData: Partial<Omit<RestaurantFeatureFromApi, 'id' | 'created_at' | 'updated_at' | 'feature_id'>>): Promise<RestaurantFeatureFromApi> {
   const response = await fetch(`${API_BASE_URL}/features/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

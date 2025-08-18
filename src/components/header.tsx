@@ -36,7 +36,6 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/user-management/new': { title: 'Add New Admin', description: 'Create a new administrative user account.' },
   '/user-management/roles/new': { title: 'Add New Role', description: 'Define a new user role and its permissions.' },
   '/settings': { title: 'Settings', description: 'Manage your application and hotel settings.' },
-  '/api-example': { title: 'API Connection Example', description: 'Demonstrating how to connect to a PHP back-end.'},
   '/customers': { title: 'Customer Management', description: 'View and manage your customer database.' },
   '/customers/new': { title: 'Add New Customer', description: 'Add a new customer to your database.' },
 };
