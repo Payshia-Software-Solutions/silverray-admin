@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { User, Shield, Upload, UserPlus } from 'lucide-react';
+import { User, Shield, Upload, UserPlus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -26,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi } from '@/lib/services/api';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 
 const userSchema = z.object({
   full_name: z.string().min(1, "Full Name is required"),
@@ -33,6 +33,7 @@ const userSchema = z.object({
   role: z.string().min(1, "Role is required"),
   company_id: z.string().min(1, "Company ID is required"),
   status: z.enum(['Active', 'Inactive']),
+  avatar_url: z.string().optional().nullable(),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -44,8 +45,9 @@ export default function EditAdminPage() {
     const { toast } = useToast();
     const [roles, setRoles] = useState<RoleFromApi[]>([]);
     const [loadingRoles, setLoadingRoles] = useState(true);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
+    const { register, handleSubmit, control, reset, setValue, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
         resolver: zodResolver(userSchema),
     });
 
@@ -58,6 +60,9 @@ export default function EditAdminPage() {
                     getRoles()
                 ]);
                 reset(userData);
+                if (userData.avatar_url) {
+                    setImagePreview(userData.avatar_url);
+                }
                 setRoles(rolesData);
             } catch (error: any) {
                  toast({
@@ -77,7 +82,11 @@ export default function EditAdminPage() {
 
   const handleUpdateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
-        await updateUser(id, data);
+        const dataToSend = {
+            ...data,
+            avatar_url: imagePreview,
+        };
+        await updateUser(id, dataToSend);
         toast({
             title: 'Success!',
             description: 'User updated successfully.',
@@ -91,6 +100,28 @@ export default function EditAdminPage() {
         });
     }
   };
+  
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue('avatar_url', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+      setImagePreview(null);
+      setValue('avatar_url', null);
+      const fileInput = document.getElementById('profile-picture-upload') as HTMLInputElement;
+      if (fileInput) {
+          fileInput.value = '';
+      }
+  };
+
 
   return (
     <>
@@ -122,16 +153,26 @@ export default function EditAdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                     <div className="col-span-1 flex flex-col items-center text-center gap-4">
                         <Label htmlFor="profile-picture">Profile Picture (Optional)</Label>
-                        <div className="flex flex-col items-center justify-center h-32 w-32 border-2 border-dashed rounded-full bg-muted/50">
-                            <UserPlus className="h-12 w-12 text-muted-foreground" />
+                        <div className="relative h-32 w-32 rounded-full border-2 border-dashed bg-muted/50 flex items-center justify-center">
+                            {imagePreview ? (
+                                <>
+                                    <Image src={imagePreview} alt="Profile Preview" layout="fill" className="rounded-full object-cover" />
+                                    <Button variant="destructive" size="icon" className="absolute top-0 right-0 h-7 w-7 rounded-full" onClick={removeImage}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            ) : (
+                                 <UserPlus className="h-12 w-12 text-muted-foreground" />
+                            )}
                         </div>
+
                         <Button variant="outline" size="sm" asChild type="button">
                             <label htmlFor="profile-picture-upload">
                                 <Upload className="mr-2 h-4 w-4" />
                                 Upload Photo
                             </label>
                         </Button>
-                        <Input id="profile-picture-upload" type="file" className="hidden" />
+                        <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                         <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
                     </div>
                     <div className="col-span-2 space-y-6">
