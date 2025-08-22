@@ -288,6 +288,23 @@ export interface RoleFromApi {
     updated_at: string;
 }
 
+export interface EventFromApi {
+  id: number;
+  event_name: string;
+  event_type: 'Corporate' | 'Private Party' | 'Wedding' | 'Conference';
+  event_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  hall_id: string; // Comma-separated hall IDs
+  guest_count: number;
+  booking_status: 'Confirmed' | 'Pending' | 'Cancelled';
+  company_id: string | null;
+  created_by: string;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -1069,6 +1086,41 @@ export async function updateOperatingHours(id: string, hoursData: any): Promise<
     return handleResponse<OperatingHoursFromApi>(response);
 }
 
+// Event API Functions
+export async function getEvents(): Promise<EventFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/events`);
+  return handleResponse<EventFromApi[]>(response);
+}
+
+export async function getEventById(id: number): Promise<EventFromApi> {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`);
+    return handleResponse<EventFromApi>(response);
+}
+
+export async function createEvent(eventData: any): Promise<EventFromApi> {
+    const response = await fetch(`${API_BASE_URL}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData),
+    });
+    return handleResponse<EventFromApi>(response);
+}
+
+export async function updateEvent(id: number, eventData: Partial<EventFromApi>): Promise<EventFromApi> {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData),
+    });
+    return handleResponse<EventFromApi>(response);
+}
+
+export async function deleteEvent(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
     
 
     

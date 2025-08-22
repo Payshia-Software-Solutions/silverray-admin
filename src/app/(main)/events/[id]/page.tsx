@@ -22,21 +22,21 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, createEvent } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getEventById, updateEvent } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const eventSchema = z.object({
   event_name: z.string().min(1, 'Event name is required'),
   event_type: z.enum(['Corporate', 'Private Party', 'Wedding', 'Conference']),
   event_date: z.date({ required_error: "Event date is required." }),
-  start_time: z.string().optional(),
-  end_time: z.string().optional(),
+  start_time: z.string().optional().nullable(),
+  end_time: z.string().optional().nullable(),
   hall_ids: z.array(z.string()).min(1, "At least one hall must be selected"),
   guest_count: z.coerce.number().min(1, "Guest count must be at least 1"),
   booking_status: z.enum(['Confirmed', 'Pending', 'Cancelled']),
@@ -45,58 +45,64 @@ const eventSchema = z.object({
 type EventFormValues = z.infer<typeof eventSchema>;
 
 
-export default function NewEventPage() {
+export default function EditEventPage() {
     const router = useRouter();
+    const params = useParams();
+    const id = Number(params?.id);
     const { toast } = useToast();
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [halls, setHalls] = useState<HallFromApi[]>([]);
     const [loadingHalls, setLoadingHalls] = useState(true);
 
-     const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<EventFormValues>({
+     const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<EventFormValues>({
         resolver: zodResolver(eventSchema),
-        defaultValues: {
-            event_type: 'Corporate',
-            booking_status: 'Pending',
-            hall_ids: [],
-        },
     });
 
     useEffect(() => {
-        async function fetchHalls() {
+        async function fetchInitialData() {
             try {
                 setLoadingHalls(true);
-                const data = await getHalls();
-                setHalls(data);
+                const [eventData, hallData] = await Promise.all([
+                    getEventById(id),
+                    getHalls()
+                ]);
+
+                reset({
+                    ...eventData,
+                    event_date: new Date(eventData.event_date),
+                    hall_ids: eventData.hall_id.split(','),
+                });
+                setHalls(hallData);
+
             } catch (err) {
-                console.error("Failed to fetch halls:", err);
+                console.error("Failed to fetch data:", err);
                 toast({
                     variant: "destructive",
-                    title: "Error fetching halls",
-                    description: "Could not load halls. Please try again later.",
+                    title: "Error fetching data",
+                    description: "Could not load event or hall data. Please try again later.",
                 })
             } finally {
                 setLoadingHalls(false);
             }
         }
-        fetchHalls();
-    }, [toast]);
+        if(id) fetchInitialData();
+    }, [id, reset, toast]);
 
     const onSubmit: SubmitHandler<EventFormValues> = async (data) => {
         const dataToSend = {
             ...data,
             event_date: format(data.event_date, 'yyyy-MM-dd'),
             hall_id: data.hall_ids.join(','),
-            created_by: 'admin@silverray.com',
-            company_id: 'com-001',
+            updated_by: 'admin@silverray.com',
         };
         
         try {
-            await createEvent(dataToSend);
+            await updateEvent(id, dataToSend);
             setShowSuccessDialog(true);
         } catch (error: any) {
              toast({
                 variant: 'destructive',
-                title: 'Error creating event',
+                title: 'Error updating event',
                 description: error.message || 'An unexpected error occurred.',
             });
         }
@@ -108,8 +114,8 @@ export default function NewEventPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl mx-auto">
             <Card>
                 <CardHeader>
-                    <CardTitle>Create New Event</CardTitle>
-                    <CardDescription>Fill in the details to plan and create a new event.</CardDescription>
+                    <CardTitle>Edit Event</CardTitle>
+                    <CardDescription>Update the details of the event.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
                      <div className="space-y-4">
@@ -120,7 +126,7 @@ export default function NewEventPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="event-name">Event Name *</Label>
-                                <Input id="event-name" placeholder="e.g., Annual Tech Conference 2025" {...register('event_name')} />
+                                <Input id="event-name" {...register('event_name')} />
                                 {errors.event_name && <p className="text-red-500 text-sm">{errors.event_name.message}</p>}
                             </div>
                             <div className="space-y-2">
@@ -129,7 +135,7 @@ export default function NewEventPage() {
                                     name="event_type"
                                     control={control}
                                     render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <SelectTrigger id="event-type"><SelectValue placeholder="Select event type" /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="Corporate">Corporate</SelectItem>
@@ -217,7 +223,7 @@ export default function NewEventPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="guests">Number of Guests *</Label>
-                            <Input id="guests" type="number" placeholder="150" {...register('guest_count')} />
+                            <Input id="guests" type="number" {...register('guest_count')} />
                              {errors.guest_count && <p className="text-red-500 text-sm">{errors.guest_count.message}</p>}
                         </div>
                     </div>
@@ -233,7 +239,7 @@ export default function NewEventPage() {
                                 name="booking_status"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger id="booking-status"><SelectValue placeholder="Select Status" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="Confirmed">Confirmed</SelectItem>
@@ -254,7 +260,7 @@ export default function NewEventPage() {
                   <Link href="/events">Cancel</Link>
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating...' : '+ Create Event'}
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </Button>
             </div>
 
@@ -262,7 +268,7 @@ export default function NewEventPage() {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader className="sr-only">
                         <DialogTitle>Success</DialogTitle>
-                        <DialogDescription>A new event has been successfully created.</DialogDescription>
+                        <DialogDescription>The event has been successfully updated.</DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center text-center p-8">
                         <div className="p-3 bg-blue-100 rounded-full mb-4">
@@ -270,7 +276,7 @@ export default function NewEventPage() {
                             <CheckCircle2 className="h-6 w-6 text-blue-600" />
                             </div>
                         </div>
-                        <h2 className="text-xl font-bold mb-2">Successfully Created Event!</h2>
+                        <h2 className="text-xl font-bold mb-2">Successfully Updated Event!</h2>
                         <DialogClose asChild>
                             <Button className="mt-6 w-full" onClick={() => router.push('/events')}>Done</Button>
                         </DialogClose>
