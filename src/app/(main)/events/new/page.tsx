@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,10 +22,29 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import { getHalls, type HallFromApi } from '@/lib/services/api';
 
 export default function NewEventPage() {
     const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [halls, setHalls] = useState<HallFromApi[]>([]);
+    const [loadingHalls, setLoadingHalls] = useState(true);
+
+    useEffect(() => {
+        async function fetchHalls() {
+            try {
+                setLoadingHalls(true);
+                const data = await getHalls();
+                setHalls(data);
+            } catch (err) {
+                console.error("Failed to fetch halls:", err);
+                // Optionally show a toast or error message
+            } finally {
+                setLoadingHalls(false);
+            }
+        }
+        fetchHalls();
+    }, []);
 
     const handleCreateEvent = () => {
         setShowSuccessDialog(true);
@@ -101,12 +120,16 @@ export default function NewEventPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="hall">Hall/Venue *</Label>
-                                <Select>
-                                    <SelectTrigger id="hall"><SelectValue placeholder="Select a hall" /></SelectTrigger>
+                                <Select disabled={loadingHalls}>
+                                    <SelectTrigger id="hall">
+                                        <SelectValue placeholder={loadingHalls ? "Loading halls..." : "Select a hall"} />
+                                    </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="grand-ballroom">Grand Ballroom</SelectItem>
-                                        <SelectItem value="terrace-garden">Terrace Garden</SelectItem>
-                                        <SelectItem value="conference-a">Conference Hall A</SelectItem>
+                                        {halls.map((hall) => (
+                                             <SelectItem key={hall.id} value={String(hall.id)} disabled={!hall.is_active}>
+                                                {hall.hall_name} {!hall.is_active && '(Unavailable)'}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
