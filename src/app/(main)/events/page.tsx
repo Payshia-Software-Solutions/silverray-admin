@@ -36,7 +36,7 @@ export default function EventManagementPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <Button onClick={() => { /* router.push('/events/new') */ }}>
+        <Button onClick={() => router.push('/events/new')}>
           <Plus className="mr-2 h-4 w-4" /> Add New Event
         </Button>
       </div>
