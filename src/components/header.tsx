@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -29,6 +30,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/experience/new': { title: 'Add New Experience', description: 'Create a new guest experience to offer.' },
   '/weddingpackages': { title: 'Wedding Management', description: 'Manage wedding packages, halls, and bookings' },  
   '/weddingpackages/new': { title: 'Create New Wedding Package', description: 'Design a new package for wedding events.' },
+  '/events': { title: 'Event Management', description: 'Plan and manage corporate events, parties, and other functions.' },
   '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
   '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
