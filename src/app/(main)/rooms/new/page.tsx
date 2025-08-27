@@ -110,9 +110,10 @@ export default function AddNewRoomPage() {
     const formData = new FormData(event.currentTarget);
     const selectedAmenities = formData.getAll('amenities');
     
-    // For now, we'll just use the preview URL of the first image if it exists.
-    // In a real app, you'd upload the file and get a URL back.
-    const imageUrl = imageSlots.find(slot => slot.preview)?.preview || '';
+    const imageUrls = imageSlots
+        .map(slot => slot.preview)
+        .filter(preview => !!preview) // Filter out null or empty previews
+        .join(',');
 
     const roomDataFromForm = {
         room_number: formData.get('id'),
@@ -126,7 +127,7 @@ export default function AddNewRoomPage() {
         price_per_night: formData.get('pricePerNight'),
         current_status: formData.get('status'),
         amenities: selectedAmenities,
-        image_url: imageUrl,
+        image_url: imageUrls,
     };
 
     const roomDataForApi = {
@@ -138,9 +139,9 @@ export default function AddNewRoomPage() {
         short_description: roomDataFromForm.short_description,
         adults_capacity: Number(roomDataFromForm.adults_capacity),
         children_capacity: Number(roomDataFromForm.children_capacity),
-        room_width: Number(roomDataFromForm.room_width || 0),
-        room_height: Number(roomDataFromForm.room_height || 0),
-        price_per_night: Number(roomDataFromForm.price_per_night),
+        room_width: (roomDataFromForm.room_width || '0'),
+        room_height: (roomDataFromForm.room_height || '0'),
+        price_per_night: (roomDataFromForm.price_per_night),
         currency: 'LKR',
         current_status: roomDataFromForm.current_status,
         room_images: roomDataFromForm.image_url,
@@ -251,8 +252,8 @@ export default function AddNewRoomPage() {
                 <div className="space-y-2">
                     <Label>Room Size</Label>
                     <div className="flex items-center gap-2">
-                        <Input name="roomWidth" type="number" placeholder="Width" className="w-24" />
-                        <Input name="roomHeight" type="number" placeholder="Height" className="w-24" />
+                        <Input name="roomWidth" type="text" placeholder="Width" className="w-24" />
+                        <Input name="roomHeight" type="text" placeholder="Height" className="w-24" />
                         <span className="text-sm text-muted-foreground">sqft</span>
                     </div>
                 </div>
@@ -273,7 +274,7 @@ export default function AddNewRoomPage() {
                     <Label htmlFor="price">Price per night</Label>
                     <div className="flex items-center">
                         <span className="p-2 border rounded-l-md bg-muted text-muted-foreground text-sm">LKR</span>
-                        <Input id="price" name="pricePerNight" type="number" placeholder="25000" className="rounded-l-none" />
+                        <Input id="price" name="pricePerNight" type="text" placeholder="25000" className="rounded-l-none" />
                     </div>
                  </div>
                  <div className="space-y-2">
@@ -378,3 +379,5 @@ export default function AddNewRoomPage() {
     </>
   );
 }
+
+    
