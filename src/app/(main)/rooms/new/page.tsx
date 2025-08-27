@@ -130,7 +130,7 @@ export default function AddNewRoomPage() {
         price_per_night: Number(roomDataFromForm.price_per_night),
         currency: 'LKR',
         current_status: roomDataFromForm.current_status,
-        image_url: '/images/rooms/default.jpg',
+        room_images: '/images/rooms/default.jpg',
         created_by: 'admin',
     };
 
