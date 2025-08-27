@@ -33,26 +33,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { useRouter } from 'next/navigation';
 
-interface ImageSlot {
-  file: File | null;
-  preview: string | null;
-  isPrimary: boolean;
-  imageName: string;
-  altText: string;
-}
-
-const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
-    file: null,
-    preview: null,
-    isPrimary: i === 0,
-    imageName: '',
-    altText: '',
-}));
-
-
 export default function AddNewRoomPage() {
   const router = useRouter();
-  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(initialImageSlots);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);
@@ -114,6 +96,7 @@ export default function AddNewRoomPage() {
         price_per_night: formData.get('pricePerNight'),
         current_status: formData.get('status'),
         amenities: selectedAmenities,
+        room_images: formData.get('imageUrl'),
     };
 
     const roomDataForApi = {
@@ -130,7 +113,7 @@ export default function AddNewRoomPage() {
         price_per_night: Number(roomDataFromForm.price_per_night),
         currency: 'LKR',
         current_status: roomDataFromForm.current_status,
-        room_images: '/images/rooms/default.jpg',
+        room_images: roomDataFromForm.room_images,
         created_by: 'admin',
     };
 
@@ -153,49 +136,6 @@ export default function AddNewRoomPage() {
     }
   };
   
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newImageSlots = [...imageSlots];
-        newImageSlots[index].file = file;
-        newImageSlots[index].preview = reader.result as string;
-        newImageSlots[index].imageName = file.name;
-        setImageSlots(newImageSlots);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const newImageSlots = [...imageSlots];
-    newImageSlots[index].file = null;
-    newImageSlots[index].preview = null;
-    newImageSlots[index].imageName = '';
-    newImageSlots[index].altText = '';
-    setImageSlots(newImageSlots);
-    const fileInput = document.getElementById(`image-upload-${index}`) as HTMLInputElement;
-    if (fileInput) {
-        fileInput.value = '';
-    }
-  };
-
-  const handleSetPrimary = (selectedIndex: number) => {
-    const newImageSlots = imageSlots.map((slot, index) => ({
-      ...slot,
-      isPrimary: index === selectedIndex,
-    }));
-    setImageSlots(newImageSlots);
-  };
-  
-  const handleDetailChange = (index: number, field: keyof ImageSlot, value: string | boolean) => {
-      const newImageSlots = [...imageSlots];
-      (newImageSlots[index] as any)[field] = value;
-      setImageSlots(newImageSlots);
-  };
-
-
   return (
     <>
     <Toaster />
@@ -343,66 +283,19 @@ export default function AddNewRoomPage() {
         </Card>
 
         <Card>
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
-                    Room Images
-                </h3>
-                 <p className="text-sm text-muted-foreground">Upload up to 5 images. The first image will be the primary one by default.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {imageSlots.map((slot, index) => (
-                    <div key={index} className="space-y-3">
-                        <div className="aspect-video w-full">
-                        {slot.preview ? (
-                             <div className="relative w-full h-full">
-                                <Image src={slot.preview} alt={`Room image preview ${index + 1}`} layout="fill" className="rounded-lg object-cover" />
-                                <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => removeImage(index)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <label
-                                htmlFor={`image-upload-${index}`}
-                                className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                            >
-                                <div className="flex flex-col items-center justify-center text-center">
-                                    <Plus className="w-8 h-8 text-muted-foreground" />
-                                    <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                                </div>
-                                <Input id={`image-upload-${index}`} type="file" className="hidden" onChange={(e) => handleImageChange(e, index)} accept="image/png, image/jpeg" />
-                            </label>
-                        )}
-                        </div>
-                        {slot.preview && (
-                             <div className="space-y-3">
-                                <div className="space-y-1">
-                                    <Label htmlFor={`image-name-${index}`} className="text-xs">Image Name</Label>
-                                    <Input id={`image-name-${index}`} placeholder="e.g. room-view.jpg" className="h-8 text-xs" value={slot.imageName} onChange={(e) => {
-                                        const newImageSlots = [...imageSlots];
-                                        newImageSlots[index].imageName = e.target.value;
-                                        setImageSlots(newImageSlots);
-                                    }} />
-                                 </div>
-                                 <div className="space-y-1">
-                                    <Label htmlFor={`alt-text-${index}`} className="text-xs">Alt Text</Label>
-                                    <Input id={`alt-text-${index}`} placeholder="e.g. view from balcony" className="h-8 text-xs" value={slot.altText} onChange={(e) => {
-                                        const newImageSlots = [...imageSlots];
-                                        newImageSlots[index].altText = e.target.value;
-                                        setImageSlots(newImageSlots);
-                                    }} />
-                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id={`is-primary-${index}`} checked={slot.isPrimary} onCheckedChange={() => handleSetPrimary(index)} />
-                                    <Label htmlFor={`is-primary-${index}`} className="text-xs font-normal">Primary Image</Label>
-                                </div>
-                             </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-          </CardContent>
+            <CardContent className="p-6 space-y-6">
+                <div className="space-y-2">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
+                        Room Image
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Provide a URL for the main room image.</p>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="imageUrl">Image URL</Label>
+                    <Input id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg" />
+                </div>
+            </CardContent>
         </Card>
       </div>
 
