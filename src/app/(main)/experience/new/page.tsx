@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Bold, Italic, List, UploadCloud, Plus, Clock, Users, CheckCircle2, X, DollarSign, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -95,7 +96,7 @@ export default function AddExperiencePage() {
   const removeImage = () => {
     setImagePreview(null);
     setValue('images_url', undefined);
-    const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
+    const fileInput = document.getElementById('image-upload') as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
     }
@@ -283,50 +284,48 @@ export default function AddExperiencePage() {
 
         <Card>
             <CardContent className="p-6 space-y-6">
-                 <h3 className="text-lg font-semibold">Image Gallery</h3>
-                <p className="text-sm text-muted-foreground">Upload an image for the experience.</p>
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="relative aspect-video max-w-sm mx-auto">
-                  {imagePreview ? (
-                      <div className="group">
-                      <Image
-                          src={imagePreview}
-                          alt="Preview"
-                          fill
-                          className="rounded-lg object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={removeImage}
-                          >
-                          <Trash2 className="h-4 w-4" />
-                          </Button>
-                      </div>
-                      </div>
-                  ) : (
-                      <label
-                      htmlFor="image-upload"
-                      className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                      >
-                      <div className="flex flex-col items-center justify-center text-center">
-                          <Plus className="w-8 h-8 text-muted-foreground" />
-                          <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                      </div>
-                      <Input
-                          id="image-upload"
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                      />
-                      </label>
-                  )}
-                  </div>
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Image Gallery</h3>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline"><Plus className="mr-2 h-4 w-4" /> Add Image</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Upload Image</DialogTitle>
+                                <DialogDescription>
+                                    Select an image file to upload for this experience.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex items-center justify-center w-full">
+                               <label
+                                    htmlFor="image-upload"
+                                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                                >
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                                    <p className="mb-2 text-sm text-muted-foreground">
+                                        <span className="font-semibold text-primary">Drop your image here, or browse</span>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
+                                    </div>
+                                    <Input id="image-upload" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
+                                </label>
+                            </div>
+                             <DialogClose asChild>
+                                <Button type="button" className="mt-4">Done</Button>
+                            </DialogClose>
+                        </DialogContent>
+                    </Dialog>
                 </div>
+                 {imagePreview && (
+                    <div className="relative w-full max-w-sm">
+                        <Image src={imagePreview} alt="Experience preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
+                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                 )}
             </CardContent>
         </Card>
         
