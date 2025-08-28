@@ -821,10 +821,13 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
     const response = await fetch(`${API_BASE_URL}/experiences`, {
         method: 'POST',
-        body: experienceData, // FormData will set the correct headers
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(experienceData),
     });
     return handleResponse<ExperienceFromApi>(response);
 }
@@ -845,10 +848,13 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
     return handleResponse<{ message: string }>(response);
 }
 
-export async function uploadExperienceImage(experienceId: number, formData: FormData): Promise<any> {
+export async function createExperienceImage(imageData: any): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(imageData),
     });
     return handleResponse<any>(response);
 }

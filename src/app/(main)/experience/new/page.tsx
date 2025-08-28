@@ -35,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createExperience, uploadExperienceImage } from '@/lib/services/api';
+import { createExperience, createExperienceImage } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const experienceSchema = z.object({
@@ -69,8 +69,7 @@ export default function AddExperiencePage() {
   const { toast } = useToast();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-
+  
   const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue, watch } = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
@@ -87,7 +86,7 @@ export default function AddExperiencePage() {
       // Step 1: Create the experience without the image URL
       const experienceData = {
         ...data,
-        images_url: '', // We will upload the image separately
+        images_url: '', // Will be handled separately
         advance_booking_required: data.advance_booking_required ? 1 : 0,
         walk_in_available: data.walk_in_available ? 1 : 0,
         is_available: 1, 
@@ -98,19 +97,29 @@ export default function AddExperiencePage() {
       
       const newExperience = await createExperience(experienceData);
 
-      // Step 2: If there's an image, upload it using FormData
-      if (imageFile && newExperience.id) {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('experience_id', String(newExperience.id));
+      // Step 2: If there's an image URL, post its metadata
+      if (imagePreview && newExperience.id) {
+        const imageMetaData = {
+          experience_id: newExperience.id,
+          company_id: 11,
+          image_name: "image.jpg",
+          image_url: imagePreview,
+          file_size: 0,
+          alt_text: data.name,
+          is_primary: 1,
+          display_order: 1,
+          uploaded_by: 5,
+          updated_by: 5,
+          is_active: 1
+        };
 
         try {
-            await uploadExperienceImage(newExperience.id, formData);
+            await createExperienceImage(imageMetaData);
         } catch (imageError: any) {
             toast({
                 variant: "destructive",
-                title: "Experience created, but image upload failed",
-                description: imageError.message || "Could not upload the image."
+                title: "Experience created, but image metadata failed to save",
+                description: imageError.message || "Could not save the image metadata."
             });
         }
       }
@@ -125,13 +134,13 @@ export default function AddExperiencePage() {
     }
   };
   
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
+        setValue('images_url', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -139,7 +148,7 @@ export default function AddExperiencePage() {
 
   const removeImage = () => {
     setImagePreview(null);
-    setImageFile(null);
+    setValue('images_url', '');
     const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
@@ -304,34 +313,45 @@ export default function AddExperiencePage() {
         </Card>
 
         <Card>
-            <CardContent className="p-6 space-y-6">
-                <h3 className="text-lg font-semibold">Image Gallery</h3>
-                 {!imagePreview ? (
-                    <label
-                        htmlFor="dropzone-file"
-                        className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                    >
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                        <p className="mb-2 text-sm text-muted-foreground">
-                            <span className="font-semibold">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
-                        </div>
-                        <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
-                    </label>
-                 ) : (
-                    <div className="relative w-full max-w-sm">
-                        <Image src={imagePreview} alt="Experience preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
-                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                        </Button>
-                    </div>
-                 )}
-            </CardContent>
+          <CardContent className="p-6 space-y-6">
+            <h3 className="text-lg font-semibold">Image Gallery</h3>
+            <p className="text-sm text-muted-foreground">Provide a URL for the main experience image.</p>
+            <div className="space-y-2">
+              <Label htmlFor="images_url">Image URL</Label>
+              <Input
+                id="images_url"
+                placeholder="https://example.com/image.jpg"
+                {...register('images_url')}
+                onChange={(e) => {
+                  register('images_url').onChange(e);
+                  setImagePreview(e.target.value);
+                }}
+              />
+            </div>
+            {imagePreview && (
+              <div className="relative w-full max-w-sm">
+                <Image
+                  src={imagePreview}
+                  alt="Experience preview"
+                  width={400}
+                  height={300}
+                  className="rounded-lg object-cover aspect-[4/3]"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 rounded-full h-8 w-8"
+                  onClick={removeImage}
+                  type="button"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Remove image</span>
+                </Button>
+              </div>
+            )}
+          </CardContent>
         </Card>
-        
+
         <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
               <Link href="/experience">Cancel</Link>
