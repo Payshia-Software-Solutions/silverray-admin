@@ -850,9 +850,12 @@ export async function uploadExperienceImage(experienceId: number, imageFile: Fil
     const formData = new FormData();
     formData.append('experience_id', String(experienceId));
     formData.append('image', imageFile);
-    formData.append('company_id', 'com-001'); // Example value
+    formData.append('company_id', 'com-001');
     formData.append('is_primary', '1');
     formData.append('uploaded_by', 'admin_user');
+    formData.append('alt_text', 'Experience Image');
+    formData.append('display_order', '1');
+
 
     const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
