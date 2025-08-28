@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -34,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createExperience, type ExperienceFromApi } from '@/lib/services/api';
+import { createExperience, type ExperienceFromApi, uploadExperienceImage } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const experienceSchema = z.object({
@@ -67,6 +68,7 @@ export default function AddExperiencePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue } = useForm<ExperienceFormValues>({
@@ -83,19 +85,19 @@ export default function AddExperiencePage() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
         setImagePreview(result);
-        setValue('images_url', result);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = () => {
+    setImageFile(null);
     setImagePreview(null);
-    setValue('images_url', undefined);
     const fileInput = document.getElementById('image-upload') as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
@@ -104,18 +106,40 @@ export default function AddExperiencePage() {
 
 
   const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
-    const dataToSend = {
-      ...data,
-      advance_booking_required: data.advance_booking_required ? 1 : 0,
-      walk_in_available: data.walk_in_available ? 1 : 0,
-      is_available: 1, // Assuming new experiences are available by default
-      company_id: 'com-001', // This should be dynamic in a real app
-      created_by: 'admin@company.com',
-      updated_by: 'admin@company.com',
-    };
-
     try {
-      await createExperience(dataToSend);
+      // Step 1: Create the experience without the image URL
+      const experienceData = {
+        ...data,
+        images_url: '', // Initially empty
+        advance_booking_required: data.advance_booking_required ? 1 : 0,
+        walk_in_available: data.walk_in_available ? 1 : 0,
+        is_available: 1, 
+        company_id: 'com-001',
+        created_by: 'admin@company.com',
+        updated_by: 'admin@company.com',
+      };
+      
+      const newExperience = await createExperience(experienceData);
+
+      // Step 2: If there's an image, upload it
+      if (imageFile && newExperience.id) {
+        try {
+          const imageUploadResponse = await uploadExperienceImage(newExperience.id, imageFile);
+          
+          // Step 3: Update the experience with the new image URL
+          await updateExperience(newExperience.id, { images_url: imageUploadResponse.imageUrl });
+
+        } catch (imageError: any) {
+            // If image upload fails, we might want to inform the user.
+            // The experience is created, but without an image.
+            toast({
+                variant: "destructive",
+                title: "Experience created, but image upload failed",
+                description: imageError.message || "Could not upload the image."
+            });
+        }
+      }
+
       setShowSuccessDialog(true);
     } catch (error: any) {
       toast({
@@ -286,44 +310,29 @@ export default function AddExperiencePage() {
             <CardContent className="p-6 space-y-6">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Image Gallery</h3>
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="outline"><Plus className="mr-2 h-4 w-4" /> Add Image</Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Upload Image</DialogTitle>
-                                <DialogDescription>
-                                    Select an image file to upload for this experience.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="flex items-center justify-center w-full">
-                               <label
-                                    htmlFor="image-upload"
-                                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                                >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
-                                    <p className="mb-2 text-sm text-muted-foreground">
-                                        <span className="font-semibold text-primary">Drop your image here, or browse</span>
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
-                                    </div>
-                                    <Input id="image-upload" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
-                                </label>
-                            </div>
-                             <DialogClose asChild>
-                                <Button type="button" className="mt-4">Done</Button>
-                            </DialogClose>
-                        </DialogContent>
-                    </Dialog>
                 </div>
-                 {imagePreview && (
+                 {imagePreview ? (
                     <div className="relative w-full max-w-sm">
                         <Image src={imagePreview} alt="Experience preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
                         <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
                             <X className="h-4 w-4" />
                         </Button>
+                    </div>
+                 ) : (
+                    <div className="flex items-center justify-center w-full">
+                        <label
+                            htmlFor="image-upload"
+                            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                        >
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground">
+                                <span className="font-semibold text-primary">Drop your image here, or browse</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
+                            </div>
+                            <Input id="image-upload" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
+                        </label>
                     </div>
                  )}
             </CardContent>
@@ -361,3 +370,4 @@ export default function AddExperiencePage() {
     </div>
   );
 }
+

@@ -846,6 +846,17 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
     return handleResponse<{ message: string }>(response);
 }
 
+export async function uploadExperienceImage(experienceId: number, imageFile: File): Promise<{ imageUrl: string }> {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await fetch(`${API_BASE_URL}/experience-images/${experienceId}`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<{ imageUrl: string }>(response);
+}
+
 // Hall API Functions
 export async function getHalls(): Promise<HallFromApi[]> {
   const response = await fetch(`${API_BASE_URL}/hallbookings`);

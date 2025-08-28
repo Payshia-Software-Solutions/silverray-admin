@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -128,10 +129,10 @@ export default function EditExperiencePage() {
     }, [id, reset, toast]);
     
     const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
-        // In a real app, you'd handle image uploads here, e.g., to a cloud storage.
-        // For now, we'll just use the preview URL if it's new, or the existing one.
-        const primaryImageSlot = imageSlots.find(slot => slot.isPrimary && slot.preview);
-        const imageUrl = primaryImageSlot ? primaryImageSlot.preview : null;
+        const imageUrls = imageSlots
+            .map(slot => slot.preview)
+            .filter(preview => !!preview)
+            .join(',');
 
         try {
             const dataToSubmit = {
@@ -139,7 +140,7 @@ export default function EditExperiencePage() {
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
-                images_url: imageUrl,
+                images_url: imageUrls,
             };
             await updateExperience(id, dataToSubmit);
             setShowSaveConfirmDialog(false);
@@ -178,10 +179,6 @@ export default function EditExperiencePage() {
                 const newImageSlots = [...imageSlots];
                 newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
                 setImageSlots(newImageSlots);
-                // If this is the primary slot, update the form value
-                if (newImageSlots[index].isPrimary) {
-                    setValue('images_url', reader.result as string);
-                }
             };
             reader.readAsDataURL(file);
         }
@@ -189,21 +186,17 @@ export default function EditExperiencePage() {
 
     const removeImage = (indexToRemove: number) => {
         const newImageSlots = [...imageSlots];
+        const wasPrimary = newImageSlots[indexToRemove].isPrimary;
         newImageSlots[indexToRemove] = { file: null, preview: null, isPrimary: false };
 
-        // If we removed the primary, make the first available image primary
-        if (imageSlots[indexToRemove].isPrimary) {
+        if (wasPrimary) {
             let foundNewPrimary = false;
             for (let i = 0; i < newImageSlots.length; i++) {
                 if (newImageSlots[i].preview) {
                     newImageSlots[i].isPrimary = true;
-                    setValue('images_url', newImageSlots[i].preview);
                     foundNewPrimary = true;
                     break;
                 }
-            }
-            if (!foundNewPrimary) {
-                 setValue('images_url', '');
             }
         }
         setImageSlots(newImageSlots);
@@ -215,7 +208,6 @@ export default function EditExperiencePage() {
             isPrimary: index === selectedIndex,
         }));
         setImageSlots(newImageSlots);
-        setValue('images_url', newImageSlots[selectedIndex].preview);
     };
 
 
