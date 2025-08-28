@@ -345,19 +345,13 @@ export default function AddExperiencePage() {
             <DialogTitle>Success</DialogTitle>
             <DialogDescription>A new experience has been successfully created.</DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-            {imagePreview && (
-              <div className="mb-4 rounded-lg overflow-hidden w-full aspect-video relative">
-                <Image src={imagePreview} alt="Created Experience" layout="fill" objectFit="cover" />
-              </div>
-            )}
+          <div className="flex flex-col items-center justify-center text-center p-8 pt-12">
             <div className="p-4 bg-blue-100 rounded-full mb-4">
               <div className="p-2 bg-blue-200 rounded-full">
                 <CheckCircle2 className="h-8 w-8 text-blue-600" />
               </div>
             </div>
             <h2 className="text-xl font-bold mb-2">Successfully Created New Experience !</h2>
-            <p className="text-muted-foreground">The new experience is now available for booking.</p>
             <DialogClose asChild>
               <Button className="mt-6 w-full" onClick={() => router.push('/experience')}>Done</Button>
             </DialogClose>
