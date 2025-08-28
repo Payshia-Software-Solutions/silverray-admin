@@ -35,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createExperience, createExperienceImage } from '@/lib/services/api';
+import { createExperience, uploadExperienceImage, type ExperienceFromApi } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const experienceSchema = z.object({
@@ -54,7 +54,6 @@ const experienceSchema = z.object({
   time_slot: z.string().min(1, 'Time slot is required'),
   schedule_note: z.string().optional(),
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
-  images_url: z.string().optional(),
 });
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
@@ -67,10 +66,13 @@ interface ImageSlot {
 export default function AddExperiencePage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showImageUploadDialog, setShowImageUploadDialog] = useState(false);
+  const [newExperience, setNewExperience] = useState<ExperienceFromApi | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   
-  const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue, watch } = useForm<ExperienceFormValues>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
     defaultValues: {
       status: 'Active',
@@ -83,10 +85,9 @@ export default function AddExperiencePage() {
 
   const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
     try {
-      // Step 1: Create the experience without the image URL
       const experienceData = {
         ...data,
-        images_url: '', // Will be handled separately
+        images_url: '', // Image handled in second step
         advance_booking_required: data.advance_booking_required ? 1 : 0,
         walk_in_available: data.walk_in_available ? 1 : 0,
         is_available: 1, 
@@ -95,36 +96,10 @@ export default function AddExperiencePage() {
         updated_by: 'admin@company.com',
       };
       
-      const newExperience = await createExperience(experienceData);
+      const createdExperience = await createExperience(experienceData);
+      setNewExperience(createdExperience);
+      setShowImageUploadDialog(true); // Open dialog for step 2
 
-      // Step 2: If there's an image URL, post its metadata
-      if (imagePreview && newExperience.id) {
-        const imageMetaData = {
-          experience_id: newExperience.id,
-          company_id: 11,
-          image_name: "image.jpg",
-          image_url: imagePreview,
-          file_size: 0,
-          alt_text: data.name,
-          is_primary: 1,
-          display_order: 1,
-          uploaded_by: 5,
-          updated_by: 5,
-          is_active: 1
-        };
-
-        try {
-            await createExperienceImage(imageMetaData);
-        } catch (imageError: any) {
-            toast({
-                variant: "destructive",
-                title: "Experience created, but image metadata failed to save",
-                description: imageError.message || "Could not save the image metadata."
-            });
-        }
-      }
-
-      setShowSuccessDialog(true);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -137,23 +112,41 @@ export default function AddExperiencePage() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setValue('images_url', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = () => {
+    setImageFile(null);
     setImagePreview(null);
-    setValue('images_url', '');
     const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
     }
   };
+
+  const handleImageUpload = async () => {
+    if (!imageFile || !newExperience) {
+        toast({ title: "No image selected", description: "Please select an image file to upload.", variant: "destructive" });
+        return;
+    }
+    setIsUploading(true);
+    try {
+        await uploadExperienceImage(newExperience.id, imageFile);
+        toast({ title: "Success", description: "Image uploaded and experience created successfully!" });
+        setShowImageUploadDialog(false);
+        router.push('/experience');
+    } catch(error: any) {
+        toast({ title: "Image Upload Failed", description: error.message, variant: "destructive" });
+    } finally {
+        setIsUploading(false);
+    }
+  }
 
 
   return (
@@ -312,46 +305,6 @@ export default function AddExperiencePage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold">Image Gallery</h3>
-            <p className="text-sm text-muted-foreground">Provide a URL for the main experience image.</p>
-            <div className="space-y-2">
-              <Label htmlFor="images_url">Image URL</Label>
-              <Input
-                id="images_url"
-                placeholder="https://example.com/image.jpg"
-                {...register('images_url')}
-                onChange={(e) => {
-                  register('images_url').onChange(e);
-                  setImagePreview(e.target.value);
-                }}
-              />
-            </div>
-            {imagePreview && (
-              <div className="relative w-full max-w-sm">
-                <Image
-                  src={imagePreview}
-                  alt="Experience preview"
-                  width={400}
-                  height={300}
-                  className="rounded-lg object-cover aspect-[4/3]"
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 rounded-full h-8 w-8"
-                  onClick={removeImage}
-                  type="button"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Remove image</span>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" asChild>
               <Link href="/experience">Cancel</Link>
@@ -362,23 +315,47 @@ export default function AddExperiencePage() {
         </div>
       </form>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Success</DialogTitle>
-            <DialogDescription>A new experience has been successfully created.</DialogDescription>
+      <Dialog open={showImageUploadDialog} onOpenChange={setShowImageUploadDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Step 2: Upload Image</DialogTitle>
+            <DialogDescription>
+              Your experience "{newExperience?.name}" has been created. Now, upload a primary image for it.
+            </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center justify-center text-center p-8 pt-12">
-            <div className="p-4 bg-blue-100 rounded-full mb-4">
-              <div className="p-2 bg-blue-200 rounded-full">
-                <CheckCircle2 className="h-8 w-8 text-blue-600" />
+          <div className="space-y-4 py-4">
+            {!imagePreview ? (
+              <label
+                htmlFor="dropzone-file"
+                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG (MAX. 5MB)</p>
+                </div>
+                <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
+              </label>
+            ) : (
+              <div className="relative w-full max-w-sm mx-auto">
+                <Image src={imagePreview} alt="Experience preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
+                <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage} type="button">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Remove image</span>
+                </Button>
               </div>
-            </div>
-            <h2 className="text-xl font-bold mb-2">Successfully Created New Experience !</h2>
-            <DialogClose asChild>
-              <Button className="mt-6 w-full" onClick={() => router.push('/experience')}>Done</Button>
-            </DialogClose>
+            )}
           </div>
+          <DialogClose asChild>
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => router.push('/experience')}>Skip for now</Button>
+                <Button onClick={handleImageUpload} disabled={isUploading || !imageFile}>
+                    {isUploading ? 'Uploading...' : 'Upload & Finish'}
+                </Button>
+            </div>
+          </DialogClose>
         </DialogContent>
       </Dialog>
     </div>
