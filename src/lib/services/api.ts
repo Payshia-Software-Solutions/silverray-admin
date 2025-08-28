@@ -821,7 +821,7 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: Omit<ExperienceFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
     const response = await fetch(`${API_BASE_URL}/experiences`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -846,15 +846,13 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
     return handleResponse<{ message: string }>(response);
 }
 
-export async function uploadExperienceImage(experienceId: number, imageFile: File): Promise<{ imageUrl: string }> {
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
-    const response = await fetch(`${API_BASE_URL}/experience-images/${experienceId}`, {
+export async function createExperienceImage(imageData: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(imageData),
     });
-    return handleResponse<{ imageUrl: string }>(response);
+    return handleResponse<any>(response);
 }
 
 // Hall API Functions
@@ -1135,3 +1133,4 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
+
