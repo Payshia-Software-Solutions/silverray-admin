@@ -848,9 +848,13 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
 
 export async function uploadExperienceImage(experienceId: number, imageFile: File): Promise<any> {
     const formData = new FormData();
+    formData.append('experience_id', String(experienceId));
     formData.append('image', imageFile);
+    formData.append('company_id', 'com-001'); // Example value
+    formData.append('is_primary', '1');
+    formData.append('uploaded_by', 'admin_user');
 
-    const response = await fetch(`${API_BASE_URL}/experience-images/${experienceId}`, {
+    const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
         body: formData,
     });
