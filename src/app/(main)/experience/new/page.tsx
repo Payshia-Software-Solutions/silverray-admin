@@ -66,7 +66,7 @@ export default function AddExperiencePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null }));
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue } = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
@@ -79,31 +79,25 @@ export default function AddExperiencePage() {
     }
   });
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const newImageSlots = [...imageSlots];
-        newImageSlots[index] = { file, preview: reader.result as string };
-        setImageSlots(newImageSlots);
-        if (index === 0) { // Set the first image as the main one
-            setValue('images_url', reader.result as string);
-        }
+        const result = reader.result as string;
+        setImagePreview(result);
+        setValue('images_url', result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImageSlots = [...imageSlots];
-    const wasPrimary = index === 0 && newImageSlots[index].preview;
-    newImageSlots[index] = { file: null, preview: null };
-    setImageSlots(newImageSlots);
-
-    // If the primary image was removed, clear the form value
-    if (wasPrimary) {
-        setValue('images_url', undefined);
+  const removeImage = () => {
+    setImagePreview(null);
+    setValue('images_url', undefined);
+    const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
     }
   };
 
@@ -290,50 +284,48 @@ export default function AddExperiencePage() {
         <Card>
             <CardContent className="p-6 space-y-6">
                  <h3 className="text-lg font-semibold">Image Gallery</h3>
-                <p className="text-sm text-muted-foreground">Upload up to 5 images. The first image will be the primary one.</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {imageSlots.map((slot, index) => (
-                      <div key={index} className="relative aspect-video">
-                      {slot.preview ? (
-                          <div className="group">
-                          <Image
-                              src={slot.preview}
-                              alt={`Preview ${index + 1}`}
-                              fill
-                              className="rounded-lg object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => removeImage(index)}
-                              >
-                              <Trash2 className="h-4 w-4" />
-                              </Button>
-                          </div>
-                          </div>
-                      ) : (
-                          <label
-                          htmlFor={`image-upload-${index}`}
-                          className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                <p className="text-sm text-muted-foreground">Upload an image for the experience.</p>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="relative aspect-video max-w-sm mx-auto">
+                  {imagePreview ? (
+                      <div className="group">
+                      <Image
+                          src={imagePreview}
+                          alt="Preview"
+                          fill
+                          className="rounded-lg object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={removeImage}
                           >
-                          <div className="flex flex-col items-center justify-center text-center">
-                              <Plus className="w-8 h-8 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                          </div>
-                          <Input
-                              id={`image-upload-${index}`}
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              onChange={(e) => handleImageChange(e, index)}
-                          />
-                          </label>
-                      )}
+                          <Trash2 className="h-4 w-4" />
+                          </Button>
                       </div>
-                  ))}
+                      </div>
+                  ) : (
+                      <label
+                      htmlFor="image-upload"
+                      className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                      >
+                      <div className="flex flex-col items-center justify-center text-center">
+                          <Plus className="w-8 h-8 text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                      </div>
+                      <Input
+                          id="image-upload"
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                      />
+                      </label>
+                  )}
+                  </div>
                 </div>
             </CardContent>
         </Card>
@@ -349,25 +341,30 @@ export default function AddExperiencePage() {
       </form>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="sr-only">
-                    <DialogTitle>Success</DialogTitle>
-                    <DialogDescription>A new experience has been successfully created.</DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-                    <div className="p-4 bg-blue-100 rounded-full mb-4">
-                        <div className="p-2 bg-blue-200 rounded-full">
-                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Created New Experience !</h2>
-                    <p className="text-muted-foreground">The new experience is now available for booking.</p>
-                    <DialogClose asChild>
-                        <Button className="mt-6 w-full" onClick={() => router.push('/experience')}>Done</Button>
-                    </DialogClose>
-                </div>
-            </DialogContent>
-        </Dialog>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Success</DialogTitle>
+            <DialogDescription>A new experience has been successfully created.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
+            {imagePreview && (
+              <div className="mb-4 rounded-lg overflow-hidden w-full aspect-video relative">
+                <Image src={imagePreview} alt="Created Experience" layout="fill" objectFit="cover" />
+              </div>
+            )}
+            <div className="p-4 bg-blue-100 rounded-full mb-4">
+              <div className="p-2 bg-blue-200 rounded-full">
+                <CheckCircle2 className="h-8 w-8 text-blue-600" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold mb-2">Successfully Created New Experience !</h2>
+            <p className="text-muted-foreground">The new experience is now available for booking.</p>
+            <DialogClose asChild>
+              <Button className="mt-6 w-full" onClick={() => router.push('/experience')}>Done</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
