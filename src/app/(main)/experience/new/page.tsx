@@ -35,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createExperience, updateExperience, createExperienceImage } from '@/lib/services/api';
+import { createExperience, uploadExperienceImage } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const experienceSchema = z.object({
@@ -69,6 +69,7 @@ export default function AddExperiencePage() {
   const { toast } = useToast();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, control, setValue, watch } = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
@@ -81,19 +82,12 @@ export default function AddExperiencePage() {
     }
   });
 
-  const imageUrlValue = watch("images_url");
-
-  useEffect(() => {
-    setImagePreview(imageUrlValue || null);
-  }, [imageUrlValue]);
-
-
   const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
     try {
-      // Step 1: Create the experience
+      // Step 1: Create the experience without the image URL
       const experienceData = {
         ...data,
-        images_url: '', // Initially empty, will be updated via relationship
+        images_url: '', // We will upload the image separately
         advance_booking_required: data.advance_booking_required ? 1 : 0,
         walk_in_available: data.walk_in_available ? 1 : 0,
         is_available: 1, 
@@ -104,31 +98,19 @@ export default function AddExperiencePage() {
       
       const newExperience = await createExperience(experienceData);
 
-      // Step 2: If there's an image URL, create the image record
-      if (data.images_url && newExperience.id) {
+      // Step 2: If there's an image, upload it using FormData
+      if (imageFile && newExperience.id) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('experience_id', String(newExperience.id));
+
         try {
-            const imageName = data.images_url.split('/').pop() || 'experience_image.jpg';
-            
-            const imageData = {
-                experience_id: newExperience.id,
-                company_id: 11, // Example static company ID
-                image_name: imageName,
-                image_url: data.images_url,
-                alt_text: `Image for ${data.name}`,
-                is_primary: 1,
-                display_order: 1,
-                uploaded_by: 5, // Example static user ID
-                updated_by: 5, // Example static user ID
-                is_active: 1,
-            };
-
-          await createExperienceImage(imageData);
-
+            await uploadExperienceImage(newExperience.id, formData);
         } catch (imageError: any) {
             toast({
                 variant: "destructive",
-                title: "Experience created, but image record failed",
-                description: imageError.message || "Could not save the image information."
+                title: "Experience created, but image upload failed",
+                description: imageError.message || "Could not upload the image."
             });
         }
       }
@@ -146,10 +128,10 @@ export default function AddExperiencePage() {
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setValue('images_url', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -157,7 +139,7 @@ export default function AddExperiencePage() {
 
   const removeImage = () => {
     setImagePreview(null);
-    setValue('images_url', '');
+    setImageFile(null);
     const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
     if (fileInput) {
         fileInput.value = '';
@@ -382,7 +364,3 @@ export default function AddExperiencePage() {
     </div>
   );
 }
-
-
-
-

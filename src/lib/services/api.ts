@@ -821,10 +821,12 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: Omit<ExperienceFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<ExperienceFromApi> {
     const response = await fetch(`${API_BASE_URL}/experiences`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify(experienceData),
     });
     return handleResponse<ExperienceFromApi>(response);
@@ -846,14 +848,14 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
     return handleResponse<{ message: string }>(response);
 }
 
-export async function createExperienceImage(imageData: any): Promise<any> {
+export async function uploadExperienceImage(experienceId: number, formData: FormData): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(imageData),
+        body: formData,
     });
     return handleResponse<any>(response);
 }
+
 
 // Hall API Functions
 export async function getHalls(): Promise<HallFromApi[]> {
@@ -1133,4 +1135,3 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
-
