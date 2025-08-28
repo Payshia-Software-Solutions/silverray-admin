@@ -821,7 +821,7 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: Omit<ExperienceFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<ExperienceFromApi> {
     const response = await fetch(`${API_BASE_URL}/experiences`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

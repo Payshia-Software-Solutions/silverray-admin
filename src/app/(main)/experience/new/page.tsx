@@ -35,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createExperience, type ExperienceFromApi, uploadExperienceImage } from '@/lib/services/api';
+import { createExperience, updateExperience, type ExperienceFromApi, uploadExperienceImage } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 
 const experienceSchema = z.object({
@@ -370,4 +370,5 @@ export default function AddExperiencePage() {
     </div>
   );
 }
+
 
