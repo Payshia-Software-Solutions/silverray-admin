@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { createRoom, getRoomTypes, getAmenities, type RoomTypeFromApi, type AmenityFromApi } from '@/lib/services/api';
@@ -47,6 +48,7 @@ export default function AddNewRoomPage() {
   const [amenities, setAmenities] = useState<AmenityFromApi[]>([]);
   const [loadingAmenities, setLoadingAmenities] = useState(true);
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null }));
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function AddNewRoomPage() {
     
     const imageUrls = imageSlots
         .map(slot => slot.preview)
-        .filter(preview => !!preview) // Filter out null or empty previews
+        .filter(preview => !!preview)
         .join(',');
 
     const roomDataFromForm = {
@@ -127,7 +129,7 @@ export default function AddNewRoomPage() {
         price_per_night: formData.get('pricePerNight'),
         current_status: formData.get('status'),
         amenities: selectedAmenities,
-        image_url: imageUrls,
+        room_images: imageUrls,
     };
 
     const roomDataForApi = {
@@ -144,17 +146,13 @@ export default function AddNewRoomPage() {
         price_per_night: (roomDataFromForm.price_per_night),
         currency: 'LKR',
         current_status: roomDataFromForm.current_status,
-        room_images: roomDataFromForm.image_url,
+        room_images: roomDataFromForm.room_images,
         created_by: 'admin',
     };
 
     try {
       const result = await createRoom(roomDataForApi);
-      toast({
-        title: "Success!",
-        description: `Room ${result.room_number} has been created.`,
-      });
-      router.push(`/rooms/${result.id}`);
+      setShowSuccessDialog(true);
     } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
@@ -323,25 +321,32 @@ export default function AddNewRoomPage() {
                   {imageSlots.map((slot, index) => (
                       <div key={index} className="relative aspect-video">
                       {slot.preview ? (
-                          <div className="group">
-                          <Image
-                              src={slot.preview}
-                              alt={`Preview ${index + 1}`}
-                              fill
-                              className="rounded-lg object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => removeImage(index)}
-                              >
-                              <Trash2 className="h-4 w-4" />
-                              </Button>
-                          </div>
-                          </div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <div className="group cursor-pointer">
+                                <Image
+                                    src={slot.preview}
+                                    alt={`Preview ${index + 1}`}
+                                    fill
+                                    className="rounded-lg object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={(e) => { e.stopPropagation(); removeImage(index); }}
+                                    >
+                                    <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                              </div>
+                            </DialogTrigger>
+                             <DialogContent className="max-w-2xl">
+                                <Image src={slot.preview} alt={`Preview ${index + 1}`} width={800} height={600} className="rounded-lg object-contain w-full" />
+                              </DialogContent>
+                          </Dialog>
                       ) : (
                           <label
                           htmlFor={`image-upload-${index}`}
@@ -368,7 +373,7 @@ export default function AddNewRoomPage() {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild type="button">
           <Link href="/rooms">Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
@@ -376,8 +381,27 @@ export default function AddNewRoomPage() {
         </Button>
       </div>
     </form>
+     <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader className="sr-only">
+                <DialogTitle>Success</DialogTitle>
+                <DialogDescription>A new room has been successfully created.</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
+                <div className="p-4 bg-blue-100 rounded-full mb-4">
+                    <div className="p-2 bg-blue-200 rounded-full">
+                        <CheckCircle2 className="h-8 w-8 text-blue-600" />
+                    </div>
+                </div>
+                <h2 className="text-xl font-bold mb-2">Successfully Created New Room!</h2>
+                <p className="text-muted-foreground">The new room is now available for booking.</p>
+                <DialogClose asChild>
+                    <Button className="mt-6 w-full" onClick={() => router.push('/rooms')}>Done</Button>
+                </DialogClose>
+            </div>
+        </DialogContent>
+    </Dialog>
     </>
   );
 }
 
-    
