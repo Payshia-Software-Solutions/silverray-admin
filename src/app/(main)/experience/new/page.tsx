@@ -142,6 +142,28 @@ export default function AddExperiencePage() {
       });
     }
   };
+  
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue('images_url', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setValue('images_url', '');
+    const fileInput = document.getElementById('dropzone-file') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -302,19 +324,29 @@ export default function AddExperiencePage() {
         <Card>
             <CardContent className="p-6 space-y-6">
                 <h3 className="text-lg font-semibold">Image Gallery</h3>
-                <p className="text-sm text-muted-foreground">Provide a URL for the main experience image.</p>
-                <div className="space-y-2">
-                  <Label htmlFor="image_urls">Image URL</Label>
-                  <Input id="image_urls" placeholder="https://example.com/image.jpg" {...register('images_url')} />
-                </div>
-                {imagePreview && (
-                  <div className="mt-4">
-                    <Label>Image Preview</Label>
-                    <div className="relative w-full max-w-sm mt-2">
+                 {!imagePreview ? (
+                    <label
+                        htmlFor="dropzone-file"
+                        className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                    >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <UploadCloud className="w-8 h-8 mb-4 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                        </div>
+                        <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                    </label>
+                 ) : (
+                    <div className="relative w-full max-w-sm">
                         <Image src={imagePreview} alt="Experience preview" width={400} height={300} className="rounded-lg object-cover aspect-[4/3]" />
+                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 rounded-full h-8 w-8" onClick={removeImage}>
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove image</span>
+                        </Button>
                     </div>
-                  </div>
-                )}
+                 )}
             </CardContent>
         </Card>
         
@@ -350,6 +382,7 @@ export default function AddExperiencePage() {
     </div>
   );
 }
+
 
 
 
