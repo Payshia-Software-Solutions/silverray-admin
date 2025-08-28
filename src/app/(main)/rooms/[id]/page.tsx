@@ -31,7 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { useParams, useRouter } from 'next/navigation';
 import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
@@ -323,26 +323,40 @@ export default function EditRoomPage() {
                     Room Images
                 </h3>
             </div>
-             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {roomImages.map((image, i) => (
-                     <div key={i} className="relative">
-                        <Image src={image.src} alt={`Room image ${i+1}`} width={200} height={150} className="rounded-lg object-cover aspect-[4/3]" data-ai-hint={image.hint} />
-                        {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
-                     </div>
-                ))}
-                 <div className="flex items-center justify-center w-full">
-                  <label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                  >
-                    <div className="flex flex-col items-center justify-center">
-                      <Plus className="w-8 h-8 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Add Image</p>
+            <Dialog>
+                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {roomImages.map((image, i) => (
+                        <div key={i} className="relative">
+                            <DialogTrigger asChild>
+                                <Image 
+                                    src={image.src} 
+                                    alt={`Room image ${i+1}`} 
+                                    width={200} 
+                                    height={150} 
+                                    className="rounded-lg object-cover aspect-[4/3] cursor-pointer" 
+                                    data-ai-hint={image.hint} 
+                                />
+                            </DialogTrigger>
+                            {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                        </div>
+                    ))}
+                    <div className="flex items-center justify-center w-full">
+                    <label
+                        htmlFor="image-upload"
+                        className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                    >
+                        <div className="flex flex-col items-center justify-center">
+                        <Plus className="w-8 h-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Add Image</p>
+                        </div>
+                        <Input id="image-upload" type="file" className="hidden" />
+                    </label>
                     </div>
-                    <Input id="image-upload" type="file" className="hidden" />
-                  </label>
                 </div>
-            </div>
+                 <DialogContent className="max-w-2xl">
+                    <Image src={roomImages[0].src} alt="Room image enlarged" width={800} height={600} className="rounded-lg object-contain w-full" />
+                </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>
