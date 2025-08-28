@@ -45,7 +45,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getExperienceById, updateExperience, type ExperienceFromApi, deleteExperience } from '@/lib/services/api';
+import { 
+    getExperienceById, 
+    updateExperience, 
+    type ExperienceFromApi, 
+    deleteExperience,
+    getExperienceImages,
+    ExperienceImageFromApi,
+    CONTENT_PROVIDER_BASE_URL
+} from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const experienceSchema = z.object({
@@ -73,14 +81,8 @@ interface ImageSlot {
   file: File | null;
   preview: string | null;
   isPrimary: boolean;
+  id?: number;
 }
-
-const initialImageSlots: ImageSlot[] = Array(5).fill(null).map((_, i) => ({
-    file: null,
-    preview: null,
-    isPrimary: i === 0,
-}));
-
 
 export default function EditExperiencePage() {
     const router = useRouter();
@@ -88,12 +90,13 @@ export default function EditExperiencePage() {
     const id = Number(params?.id);
     const { toast } = useToast();
 
-    const [imageSlots, setImageSlots] = useState<ImageSlot[]>(initialImageSlots);
+    const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
     const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
     const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
     const [deletedExperienceTitle, setDeletedExperienceTitle] = useState('');
+    const [experienceData, setExperienceData] = useState<ExperienceFromApi | null>(null);
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset, watch, setValue } = useForm<ExperienceFormValues>({
         resolver: zodResolver(experienceSchema),
@@ -106,16 +109,22 @@ export default function EditExperiencePage() {
             async function fetchExperience() {
                 try {
                     const experience = await getExperienceById(id);
+                    setExperienceData(experience);
                     reset({
                         ...experience,
                         advance_booking_required: experience.advance_booking_required === 1,
                         walk_in_available: experience.walk_in_available === 1,
                     });
-                     if (experience.images_url) {
-                        const newImageSlots = [...initialImageSlots];
-                        newImageSlots[0] = { ...newImageSlots[0], preview: experience.images_url };
-                        setImageSlots(newImageSlots);
-                    }
+                     
+                    const images = await getExperienceImages(experience.company_id, id);
+                    const formattedImages = images.map(img => ({
+                        id: img.id,
+                        file: null,
+                        preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
+                        isPrimary: img.is_primary === 1,
+                    }));
+                    setImageSlots(formattedImages);
+
                 } catch (error: any) {
                     toast({
                         variant: 'destructive',
@@ -129,18 +138,13 @@ export default function EditExperiencePage() {
     }, [id, reset, toast]);
     
     const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
-        const imageUrls = imageSlots
-            .map(slot => slot.preview)
-            .filter(preview => !!preview)
-            .join(',');
-
         try {
             const dataToSubmit = {
                 ...data,
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
-                images_url: imageUrls,
+                images_url: imageSlots.find(slot => slot.isPrimary)?.preview || '',
             };
             await updateExperience(id, dataToSubmit);
             setShowSaveConfirmDialog(false);
@@ -185,20 +189,7 @@ export default function EditExperiencePage() {
     };
 
     const removeImage = (indexToRemove: number) => {
-        const newImageSlots = [...imageSlots];
-        const wasPrimary = newImageSlots[indexToRemove].isPrimary;
-        newImageSlots[indexToRemove] = { file: null, preview: null, isPrimary: false };
-
-        if (wasPrimary) {
-            let foundNewPrimary = false;
-            for (let i = 0; i < newImageSlots.length; i++) {
-                if (newImageSlots[i].preview) {
-                    newImageSlots[i].isPrimary = true;
-                    foundNewPrimary = true;
-                    break;
-                }
-            }
-        }
+        const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
         setImageSlots(newImageSlots);
     };
 
@@ -401,49 +392,49 @@ export default function EditExperiencePage() {
                 <h3 className="text-lg font-semibold">Image Gallery</h3>
                 <p className="text-sm text-muted-foreground">Upload up to 5 images. Click the star to set as primary thumbnail.</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {imageSlots.map((slot, index) => (
-                    <div key={index} className="relative aspect-video group">
-                      {slot.preview ? (
-                        <>
-                          <Image
-                            src={slot.preview}
-                            alt={`Experience image ${index + 1}`}
-                            fill
-                            className="rounded-lg object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => removeImage(index)}
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={index} className="relative aspect-video group">
+                        {imageSlots[index]?.preview ? (
+                            <>
+                            <Image
+                                src={imageSlots[index].preview!}
+                                alt={`Experience image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => removeImage(index)}
+                                >
+                                <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                            </>
+                        ) : (
+                            <label
+                            htmlFor={`image-upload-${index}`}
+                            className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                           {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
-                        </>
-                      ) : (
-                        <label
-                          htmlFor={`image-upload-${index}`}
-                          className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                        >
-                          <div className="flex flex-col items-center justify-center text-center">
-                            <Upload className="w-8 h-8 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                          </div>
-                          <Input
-                            id={`image-upload-${index}`}
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={(e) => handleImageChange(e, index)}
-                          />
-                        </label>
-                      )}
-                    </div>
-                  ))}
+                            <div className="flex flex-col items-center justify-center text-center">
+                                <Upload className="w-8 h-8 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                            </div>
+                            <Input
+                                id={`image-upload-${index}`}
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(e, index)}
+                            />
+                            </label>
+                        )}
+                        </div>
+                    ))}
                 </div>
               </CardContent>
             </Card>

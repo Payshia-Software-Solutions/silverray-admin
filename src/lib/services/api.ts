@@ -7,6 +7,8 @@
 
 // The base URL of your PHP server's router script
 const API_BASE_URL = 'https://silverray-server.payshia.com';
+export const CONTENT_PROVIDER_BASE_URL = 'https://content-provider.payshia.com/silver-ray/';
+
 
 /**
  * Defines the structure of a Room object as returned by the API.
@@ -174,6 +176,24 @@ export interface ExperienceFromApi {
   created_by: string;
   updated_by: string;
 }
+
+export interface ExperienceImageFromApi {
+    id: number;
+    experience_id: number;
+    company_id: number;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: number;
+    updated_by: number;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
 
 export interface HallFromApi {
   id: number;
@@ -600,14 +620,11 @@ export async function getReservations(): Promise<ReservationFromApi[]> {
  * @param roomData The data for the new room.
  * @returns A promise that resolves with the newly created room data.
  */
-export async function createRoom(roomData: any): Promise<any> {
+export async function createRoom(roomData: FormData): Promise<any> {
     try {
         const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(roomData),
+            body: roomData,
         });
         return handleResponse<any>(response);
     } catch (error) {
@@ -856,13 +873,18 @@ export async function uploadExperienceImage(experienceId: number, imageFile: Fil
     formData.append('alt_text', 'Experience Image');
     formData.append('display_order', '1');
 
-
     const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
         body: formData,
     });
     return handleResponse<any>(response);
 }
+
+export async function getExperienceImages(companyId: string, experienceId: number): Promise<ExperienceImageFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/experience-images/company/${companyId}/experience/${experienceId}`);
+  return handleResponse<ExperienceImageFromApi[]>(response);
+}
+
 
 
 // Hall API Functions
