@@ -6,7 +6,7 @@
  */
 
 // The base URL of your PHP server's router script
-const API_BASE_URL = 'http://localhost/Silver_server';
+const API_BASE_URL = 'https://silverray-server.payshia.com';
 
 /**
  * Defines the structure of a Room object as returned by the API.
@@ -821,13 +821,10 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: Omit<ExperienceFromApi, 'id' | 'created_at' | 'updated_at'>): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
     const response = await fetch(`${API_BASE_URL}/experiences`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(experienceData),
+        body: experienceData, // FormData will set the correct headers
     });
     return handleResponse<ExperienceFromApi>(response);
 }
