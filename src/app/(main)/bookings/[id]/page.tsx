@@ -44,7 +44,7 @@ type BookingFormValues = z.infer<typeof bookingSchema>;
 export default function EditBookingPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const [customers, setCustomers] = useState<CustomerFromApi[]>([]);
     const [roomTypes, setRoomTypes] = useState<RoomTypeFromApi[]>([]);

@@ -29,7 +29,7 @@ type HallFormValues = z.infer<typeof hallSchema>;
 export default function EditHallPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<HallFormValues>({
         resolver: zodResolver(hallSchema),

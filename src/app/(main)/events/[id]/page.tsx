@@ -48,7 +48,7 @@ type EventFormValues = z.infer<typeof eventSchema>;
 export default function EditEventPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [halls, setHalls] = useState<HallFromApi[]>([]);

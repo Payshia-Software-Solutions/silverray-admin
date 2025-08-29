@@ -27,7 +27,7 @@ type RoomTypeFormValues = z.infer<typeof roomTypeSchema>;
 export default function EditRoomTypePage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, setValue } = useForm<RoomTypeFormValues>({
         resolver: zodResolver(roomTypeSchema),

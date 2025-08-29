@@ -34,7 +34,7 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 export default function EditCustomerPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors, isSubmitting }, control, reset } = useForm<CustomerFormValues>({
         resolver: zodResolver(customerSchema),

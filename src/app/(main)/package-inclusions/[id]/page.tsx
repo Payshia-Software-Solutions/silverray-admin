@@ -27,7 +27,7 @@ type InclusionFormValues = z.infer<typeof inclusionSchema>;
 export default function EditInclusionPage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<InclusionFormValues>({
         resolver: zodResolver(inclusionSchema),

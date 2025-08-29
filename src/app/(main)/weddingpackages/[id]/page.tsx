@@ -53,7 +53,7 @@ type PackageFormValues = z.infer<typeof packageSchema>;
 export default function EditWeddingPackagePage() {
   const router = useRouter();
   const params = useParams();
-  const id = Number(params?.id);
+  const id = Number(params.id);
   const { toast } = useToast();
 
   const [inclusions, setInclusions] = useState<PackageInclusionFromApi[]>([]);

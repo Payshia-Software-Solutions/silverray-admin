@@ -87,7 +87,7 @@ interface ImageSlot {
 export default function EditExperiencePage() {
     const router = useRouter();
     const params = useParams();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
 
     const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);

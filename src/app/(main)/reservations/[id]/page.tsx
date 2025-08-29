@@ -79,7 +79,7 @@ type BookingFormValues = z.infer<typeof bookingSchema>;
 export default function BookingDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const id = Number(params?.id);
+    const id = Number(params.id);
     const { toast } = useToast();
 
     const [customers, setCustomers] = useState<CustomerFromApi[]>([]);
