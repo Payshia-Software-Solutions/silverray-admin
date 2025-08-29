@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -620,17 +619,43 @@ export async function getReservations(): Promise<ReservationFromApi[]> {
  * @param roomData The data for the new room.
  * @returns A promise that resolves with the newly created room data.
  */
-export async function createRoom(roomData: FormData): Promise<any> {
+export async function createRoom(roomData: any): Promise<RoomFromApi> {
     try {
         const response = await fetch(`${API_BASE_URL}/rooms`, {
             method: 'POST',
-            body: roomData,
+             headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(roomData),
         });
-        return handleResponse<any>(response);
+        return handleResponse<RoomFromApi>(response);
     } catch (error) {
         console.error('Failed to create room:', error);
         throw error;
     }
+}
+
+/**
+ * Uploads an image for a specific room.
+ * @param roomId The ID of the room to associate the image with.
+ * @param imageFile The image file to upload.
+ * @param isPrimary Whether this image should be the primary one.
+ * @returns A promise that resolves with the API response.
+ */
+export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary: boolean): Promise<any> {
+    const formData = new FormData();
+    formData.append('room_id', String(roomId));
+    formData.append('image', imageFile);
+    formData.append('is_primary', isPrimary ? '1' : '0');
+    // Add other optional fields your backend might expect
+    formData.append('company_id', 'com-001');
+    formData.append('alt_text', 'Room image');
+    
+    const response = await fetch(`${API_BASE_URL}/room-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
 }
 
 /**

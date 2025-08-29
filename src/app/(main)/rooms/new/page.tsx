@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User, X, Trash2 } from 'lucide-react';
+import { Bed, Minus, Plus, Award, Image as ImageIcon, CheckCircle2, DollarSign, User, X, Trash2, MoreVertical, Star } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -26,10 +26,15 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Image from 'next/image';
-import { createRoom, getRoomTypes, getAmenities, type RoomTypeFromApi, type AmenityFromApi } from '@/lib/services/api';
+import { createRoom, getRoomTypes, getAmenities, uploadRoomImage, type RoomTypeFromApi, type AmenityFromApi, RoomFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { useRouter } from 'next/navigation';
@@ -37,6 +42,7 @@ import { useRouter } from 'next/navigation';
 interface ImageSlot {
   file: File | null;
   preview: string | null;
+  isPrimary: boolean;
 }
 
 export default function AddNewRoomPage() {
@@ -47,8 +53,9 @@ export default function AddNewRoomPage() {
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
   const [amenities, setAmenities] = useState<AmenityFromApi[]>([]);
   const [loadingAmenities, setLoadingAmenities] = useState(true);
-  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null }));
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [newlyCreatedRoom, setNewlyCreatedRoom] = useState<RoomFromApi | null>(null);
 
 
   useEffect(() => {
@@ -92,7 +99,9 @@ export default function AddNewRoomPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newImageSlots = [...imageSlots];
-        newImageSlots[index] = { file, preview: reader.result as string };
+        // Set first uploaded image as primary by default
+        const isFirstImage = !imageSlots.some(slot => slot.preview);
+        newImageSlots[index] = { file, preview: reader.result as string, isPrimary: isFirstImage };
         setImageSlots(newImageSlots);
       };
       reader.readAsDataURL(file);
@@ -101,9 +110,27 @@ export default function AddNewRoomPage() {
 
   const removeImage = (index: number) => {
     const newImageSlots = [...imageSlots];
-    newImageSlots[index] = { file: null, preview: null };
+    const wasPrimary = newImageSlots[index].isPrimary;
+    newImageSlots[index] = { file: null, preview: null, isPrimary: false };
+    
+    // If the removed image was primary, make the new first image primary
+    if (wasPrimary) {
+        const firstImageIndex = newImageSlots.findIndex(slot => slot.file);
+        if (firstImageIndex !== -1) {
+            newImageSlots[firstImageIndex].isPrimary = true;
+        }
+    }
     setImageSlots(newImageSlots);
   };
+  
+  const setPrimaryImage = (indexToSet: number) => {
+      setImageSlots(currentSlots => 
+          currentSlots.map((slot, index) => ({
+              ...slot,
+              isPrimary: index === indexToSet
+          }))
+      );
+  }
 
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -112,47 +139,28 @@ export default function AddNewRoomPage() {
     const formData = new FormData(event.currentTarget);
     const selectedAmenities = formData.getAll('amenities');
     
-    const imageUrls = imageSlots
-        .map(slot => slot.preview)
-        .filter(preview => !!preview)
-        .join(',');
-
-    const roomDataFromForm = {
+    const roomDataForApi = {
         room_number: formData.get('id'),
-        room_type_id: formData.get('roomTypeId'),
+        amenities_id: selectedAmenities.join(','),
+        room_type_id: Number(formData.get('roomTypeId')),
+        company_id: 'com-001',
         descriptive_title: formData.get('descriptiveTitle'),
         short_description: formData.get('shortDescription'),
-        adults_capacity: formData.get('adults'),
-        children_capacity: formData.get('children'),
-        room_width: formData.get('roomWidth'),
-        room_height: formData.get('roomHeight'),
-        price_per_night: formData.get('pricePerNight'),
-        current_status: formData.get('status'),
-        amenities: selectedAmenities,
-        room_images: imageUrls,
-    };
-
-    const roomDataForApi = {
-        room_number: roomDataFromForm.room_number,
-        amenities_id: roomDataFromForm.amenities.join(','),
-        room_type_id: Number(roomDataFromForm.room_type_id),
-        company_id: 'com-001',
-        descriptive_title: roomDataFromForm.descriptive_title,
-        short_description: roomDataFromForm.short_description,
-        adults_capacity: Number(roomDataFromForm.adults_capacity),
-        children_capacity: Number(roomDataFromForm.children_capacity),
-        room_width: (roomDataFromForm.room_width || '0'),
-        room_height: (roomDataFromForm.room_height || '0'),
-        price_per_night: (roomDataFromForm.price_per_night),
+        adults_capacity: Number(formData.get('adults')),
+        children_capacity: Number(formData.get('children')),
+        room_width: (formData.get('roomWidth') || '0'),
+        room_height: (formData.get('roomHeight') || '0'),
+        price_per_night: (formData.get('pricePerNight')),
         currency: 'LKR',
-        current_status: roomDataFromForm.current_status,
-        room_images: roomDataFromForm.room_images,
+        current_status: formData.get('status'),
+        image_url: '', // Will be updated after upload
         created_by: 'admin',
     };
 
     try {
       const result = await createRoom(roomDataForApi);
-      setShowSuccessDialog(true);
+      setNewlyCreatedRoom(result);
+      setShowImageDialog(true);
     } catch (error: any) {
       console.error('Error creating room:', error);
       toast({
@@ -164,6 +172,40 @@ export default function AddNewRoomPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleImageUploads = async () => {
+    if (!newlyCreatedRoom) return;
+
+    setIsSubmitting(true);
+    const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+
+    if (imagesToUpload.length === 0) {
+        toast({ title: "No images to upload", description: "You can upload images later by editing the room."});
+        setShowImageDialog(false);
+        router.push('/rooms');
+        return;
+    }
+
+    try {
+        for (const slot of imagesToUpload) {
+            if (slot.file) {
+                await uploadRoomImage(newlyCreatedRoom.id, slot.file, slot.isPrimary);
+            }
+        }
+        toast({ title: "Success!", description: "Room and images uploaded successfully."});
+        setShowImageDialog(false);
+        router.push('/rooms');
+
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Image Upload Failed",
+            description: error.message || "An unexpected error occurred during image upload.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
   
   return (
     <>
@@ -311,65 +353,6 @@ export default function AddNewRoomPage() {
           </CardContent>
         </Card>
 
-        <Card>
-            <CardContent className="p-6 space-y-6">
-                <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Image Gallery</h3>
-                    <p className="text-sm text-muted-foreground">Upload up to 5 images. The first image will be the primary one.</p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {imageSlots.map((slot, index) => (
-                      <div key={index} className="relative aspect-video">
-                      {slot.preview ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <div className="group cursor-pointer">
-                                <Image
-                                    src={slot.preview}
-                                    alt={`Preview ${index + 1}`}
-                                    fill
-                                    className="rounded-lg object-cover"
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={(e) => { e.stopPropagation(); removeImage(index); }}
-                                    >
-                                    <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                              </div>
-                            </DialogTrigger>
-                             <DialogContent className="max-w-2xl">
-                                <Image src={slot.preview} alt={`Preview ${index + 1}`} width={800} height={600} className="rounded-lg object-contain w-full" />
-                              </DialogContent>
-                          </Dialog>
-                      ) : (
-                          <label
-                          htmlFor={`image-upload-${index}`}
-                          className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                          >
-                          <div className="flex flex-col items-center justify-center text-center">
-                              <Plus className="w-8 h-8 text-muted-foreground" />
-                              <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                          </div>
-                          <Input
-                              id={`image-upload-${index}`}
-                              type="file"
-                              className="hidden"
-                              accept="image/*"
-                              onChange={(e) => handleImageChange(e, index)}
-                          />
-                          </label>
-                      )}
-                      </div>
-                  ))}
-                </div>
-            </CardContent>
-        </Card>
       </div>
 
       <div className="flex justify-end gap-2">
@@ -377,31 +360,82 @@ export default function AddNewRoomPage() {
           <Link href="/rooms">Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : '+ Create New Room'}
+            {isSubmitting ? 'Creating...' : 'Next: Add Images'}
         </Button>
       </div>
     </form>
-     <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
-            <DialogHeader className="sr-only">
-                <DialogTitle>Success</DialogTitle>
-                <DialogDescription>A new room has been successfully created.</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-                <div className="p-4 bg-blue-100 rounded-full mb-4">
-                    <div className="p-2 bg-blue-200 rounded-full">
-                        <CheckCircle2 className="h-8 w-8 text-blue-600" />
+    
+    <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Step 2: Upload Room Images</DialogTitle>
+            <DialogDescription>
+              Add up to 5 images for Room <span className="font-bold">{newlyCreatedRoom?.room_number}</span>. The primary image will be shown first.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 py-4">
+            {imageSlots.map((slot, index) => (
+                <div key={index} className="relative aspect-video group">
+                {slot.preview ? (
+                    <>
+                    <Image
+                        src={slot.preview}
+                        alt={`Preview ${index + 1}`}
+                        fill
+                        className="rounded-lg object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="secondary" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                    <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
+                    {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                    </>
+                ) : (
+                    <label
+                    htmlFor={`image-upload-${index}`}
+                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                    >
+                    <div className="flex flex-col items-center justify-center text-center">
+                        <Plus className="w-8 h-8 text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                    </div>
+                    <Input
+                        id={`image-upload-${index}`}
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageChange(e, index)}
+                    />
+                    </label>
+                )}
                 </div>
-                <h2 className="text-xl font-bold mb-2">Successfully Created New Room!</h2>
-                <p className="text-muted-foreground">The new room is now available for booking.</p>
-                <DialogClose asChild>
-                    <Button className="mt-6 w-full" onClick={() => router.push('/rooms')}>Done</Button>
-                </DialogClose>
+            ))}
             </div>
+
+          <DialogClose asChild>
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => router.push('/rooms')}>Skip for now</Button>
+                <Button onClick={handleImageUploads} disabled={isSubmitting}>
+                    {isSubmitting ? 'Uploading...' : 'Upload & Finish'}
+                </Button>
+            </div>
+          </DialogClose>
         </DialogContent>
     </Dialog>
     </>
   );
 }
-
