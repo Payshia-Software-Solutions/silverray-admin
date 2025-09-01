@@ -648,9 +648,9 @@ export async function createRoom(roomData: any): Promise<RoomFromApi> {
 export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('room_id', String(roomId));
-    formData.append('image', imageFile);
     formData.append('company_id', 'com-001'); // Example static company_id
     formData.append('image_name', imageFile.name);
+    formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
     formData.append('alt_text', 'Room image');
     formData.append('is_primary', isPrimary ? '1' : '0');
@@ -1013,9 +1013,9 @@ export async function createWeddingPackage(data: any): Promise<WeddingPackageFro
 export async function uploadWeddingPackageImage(weddingId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('wedding_id', String(weddingId));
-    formData.append('image', imageFile);
     formData.append('company_id', '201'); // Example static company_id
     formData.append('image_name', imageFile.name);
+    formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
     formData.append('alt_text', 'Wedding package image');
     formData.append('is_primary', isPrimary ? '1' : '0');
@@ -1279,6 +1279,7 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     
 
     
+
 
 
 

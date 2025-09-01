@@ -37,7 +37,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const userSchema = z.object({
-  id: z.string().min(1, "User ID is required"),
   full_name: z.string().min(1, "Full Name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -95,8 +94,14 @@ export default function AddNewAdminPage() {
 
   const handleCreateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
-        const { confirmPassword, ...userData } = data;
-        const createdUser = await createUser({ ...userData, avatar_url: null });
+        const { confirmPassword, password, ...rest } = data;
+        const userData = {
+            ...rest,
+            password_hash: password,
+            avatar_url: null,
+            last_login: null,
+        }
+        const createdUser = await createUser(userData);
         setNewlyCreatedUser(createdUser as any);
         setShowImageDialog(true);
     } catch(error: any) {
@@ -187,11 +192,6 @@ export default function AddNewAdminPage() {
                         <p className="text-xs text-muted-foreground">You can upload a picture in the next step.</p>
                     </div>
                     <div className="col-span-2 space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="user-id">User ID *</Label>
-                            <Input id="user-id" placeholder="e.g., user_010" {...register('id')} />
-                            {errors.id && <p className="text-red-500 text-sm">{errors.id.message}</p>}
-                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="full-name">Full Name *</Label>
                             <Input id="full-name" placeholder="Saman Edirimuni" {...register('full_name')} />
