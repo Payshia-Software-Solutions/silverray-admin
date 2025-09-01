@@ -10,10 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2, CheckCircle2, MoreVertical, Star, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,13 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, getEventById, updateEvent } from '@/lib/services/api';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getHalls, type HallFromApi, getEventById, updateEvent, uploadEventImage } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,6 +51,11 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+}
 
 export default function EditEventPage() {
     const router = useRouter();
@@ -53,6 +65,8 @@ export default function EditEventPage() {
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [halls, setHalls] = useState<HallFromApi[]>([]);
     const [loadingHalls, setLoadingHalls] = useState(true);
+    const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
+
 
      const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<EventFormValues>({
         resolver: zodResolver(eventSchema),
@@ -73,6 +87,23 @@ export default function EditEventPage() {
                     hall_ids: eventData.hall_id.split(','),
                 });
                 setHalls(hallData);
+                
+                // Placeholder for fetching and setting existing images
+                if (eventData.images_url) {
+                    const existingImages = eventData.images_url.split(',').map((url, index) => ({
+                        file: null,
+                        preview: url,
+                        isPrimary: index === 0, // Assume first is primary
+                    }));
+                    const newImageSlots = [...imageSlots];
+                    existingImages.forEach((img, index) => {
+                        if(index < newImageSlots.length) {
+                            newImageSlots[index] = img;
+                        }
+                    });
+                    setImageSlots(newImageSlots);
+                }
+
 
             } catch (err) {
                 console.error("Failed to fetch data:", err);
@@ -94,10 +125,19 @@ export default function EditEventPage() {
             event_date: format(data.event_date, 'yyyy-MM-dd'),
             hall_id: data.hall_ids.join(','),
             updated_by: 'admin@silverray.com',
+            images_url: imageSlots.map(s => s.preview).filter(Boolean).join(','),
         };
         
         try {
             await updateEvent(id, dataToSend);
+
+            const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+            for (const slot of imagesToUpload) {
+                if (slot.file) {
+                    await uploadEventImage(id, slot.file, slot.isPrimary);
+                }
+            }
+
             setShowSuccessDialog(true);
         } catch (error: any) {
              toast({
@@ -107,6 +147,43 @@ export default function EditEventPage() {
             });
         }
     };
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const newImageSlots = [...imageSlots];
+            const isFirstImage = !imageSlots.some(slot => slot.preview);
+            newImageSlots[index] = { file, preview: reader.result as string, isPrimary: isFirstImage };
+            setImageSlots(newImageSlots);
+        };
+        reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        const newImageSlots = [...imageSlots];
+        const wasPrimary = newImageSlots[index].isPrimary;
+        newImageSlots[index] = { file: null, preview: null, isPrimary: false };
+        
+        if (wasPrimary) {
+            const firstImageIndex = newImageSlots.findIndex(slot => slot.file || slot.preview);
+            if (firstImageIndex !== -1) {
+                newImageSlots[firstImageIndex].isPrimary = true;
+            }
+        }
+        setImageSlots(newImageSlots);
+    };
+    
+    const setPrimaryImage = (indexToSet: number) => {
+        setImageSlots(currentSlots => 
+            currentSlots.map((slot, index) => ({
+                ...slot,
+                isPrimary: index === indexToSet
+            }))
+        );
+    }
   
     return (
         <>
@@ -227,6 +304,65 @@ export default function EditEventPage() {
                              {errors.guest_count && <p className="text-red-500 text-sm">{errors.guest_count.message}</p>}
                         </div>
                     </div>
+                    
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <UploadCloud className="h-5 w-5 text-primary"/>
+                            Event Images
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {imageSlots.map((slot, index) => (
+                                <div key={index} className="relative aspect-video group">
+                                {slot.preview ? (
+                                    <>
+                                    <Image
+                                        src={slot.preview}
+                                        alt={`Preview ${index + 1}`}
+                                        fill
+                                        className="rounded-lg object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="secondary" size="icon" className="h-8 w-8">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                                    <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                    {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                                    </>
+                                ) : (
+                                    <label
+                                    htmlFor={`image-upload-${index}`}
+                                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                                    >
+                                    <div className="flex flex-col items-center justify-center text-center">
+                                        <Plus className="w-8 h-8 text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                                    </div>
+                                    <Input
+                                        id={`image-upload-${index}`}
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageChange(e, index)}
+                                    />
+                                    </label>
+                                )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
 
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold flex items-center gap-2">
