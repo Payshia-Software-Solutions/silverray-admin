@@ -4,9 +4,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Trash2, X } from 'lucide-react';
+import { Plus, Eye, Trash2, X, Calendar, Users, Building } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getEvents, deleteEvent, type EventFromApi, getHalls, type HallFromApi } from '@/lib/services/api';
@@ -15,11 +14,13 @@ import { Toaster } from '@/components/ui/toaster';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader as DialogHeaderComponent, DialogTitle as DialogTitleComponent, DialogClose } from '@/components/ui/dialog';
 import { format } from 'date-fns';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const statusColors: { [key: string]: string } = {
-    Confirmed: 'bg-green-100 text-green-700',
-    Pending: 'bg-yellow-100 text-yellow-700',
-    Cancelled: 'bg-red-100 text-red-700',
+    Confirmed: 'bg-green-500',
+    Pending: 'bg-yellow-500',
+    Cancelled: 'bg-red-500',
 };
 
 export default function EventManagementPage() {
@@ -93,69 +94,66 @@ export default function EventManagementPage() {
             </Button>
         </div>
         <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-            <Card>
-                <CardHeader>
-                    <CardTitle>All Events</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                {loading && <p className="p-4 text-center">Loading events...</p>}
-                {error && <p className="p-4 text-center text-red-500">{error}</p>}
-                {!loading && !error && (
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead>Event Name</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Hall(s)</TableHead>
-                            <TableHead>Guests</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {events.map((event) => (
-                            <TableRow key={event.id}>
-                            <TableCell className="font-medium">{event.event_name}</TableCell>
-                            <TableCell>
-                                <Badge variant="outline">{event.event_type}</Badge>
-                            </TableCell>
-                            <TableCell>{format(new Date(event.event_date), 'MMM dd, yyyy')}</TableCell>
-                            <TableCell>{getHallNames(event.hall_id)}</TableCell>
-                            <TableCell>{event.guest_count}</TableCell>
-                            <TableCell>
-                                <Badge variant='outline' className={statusColors[event.booking_status]}>
+            {loading && <p className="p-4 text-center">Loading events...</p>}
+            {error && <p className="p-4 text-center text-red-500">{error}</p>}
+            {!loading && !error && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {events.map((event) => (
+                        <Card key={event.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+                             <div className="relative w-full h-48">
+                                <Image
+                                    src={event.images_url || `https://picsum.photos/600/400?random=${event.id}`}
+                                    alt={event.event_name}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint="event photo"
+                                />
+                                <Badge className={cn(
+                                    'absolute top-3 right-3 text-sm text-white',
+                                    statusColors[event.booking_status] || 'bg-gray-500'
+                                )}>
                                     {event.booking_status}
                                 </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <div className="flex justify-end items-center gap-2">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
-                                        <Link href={`/events/${event.id}`}>
-                                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                            <span className="sr-only">View/Edit</span>
-                                        </Link>
-                                    </Button>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(event)}>
-                                            <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
-                                            <span className="sr-only">Delete</span>
-                                        </Button>
-                                    </AlertDialogTrigger>
+                             </div>
+                            <CardContent className="p-4 flex flex-col flex-grow">
+                                <h3 className="text-xl font-bold mb-2 text-primary">{event.event_name}</h3>
+                                <p className="text-sm text-muted-foreground mb-4">{event.event_type}</p>
+
+                                <div className="space-y-2 text-sm text-muted-foreground flex-grow">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>{format(new Date(event.event_date), 'MMM dd, yyyy')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4" />
+                                        <span>{event.guest_count} Guests</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Building className="h-4 w-4" />
+                                        <span>{getHallNames(event.hall_id)}</span>
+                                    </div>
                                 </div>
-                            </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                )}
-                </CardContent>
-                <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-                    <div className="text-sm text-muted-foreground">
-                        Showing 1 to {events.length} of {events.length} events
-                    </div>
-                </CardFooter>
-            </Card>
+
+                            </CardContent>
+                             <CardFooter className="flex justify-end items-center pt-2 gap-2 p-4 bg-muted/50 mt-auto">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                    <Link href={`/events/${event.id}`}>
+                                        <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                        <span className="sr-only">View/Edit</span>
+                                    </Link>
+                                </Button>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(event)}>
+                                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                        <span className="sr-only">Delete</span>
+                                    </Button>
+                                </AlertDialogTrigger>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            )}
+            
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-center text-2xl font-bold">Delete Event?</AlertDialogTitle>
@@ -193,3 +191,5 @@ export default function EventManagementPage() {
     </>
   );
 }
+
+    
