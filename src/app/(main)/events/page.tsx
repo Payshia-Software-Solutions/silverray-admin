@@ -116,7 +116,7 @@ export default function EventManagementPage() {
                                 </Badge>
                              </div>
                             <CardContent className="p-4 flex flex-col flex-grow">
-                                <h3 className="text-xl font-bold mb-2 text-primary">{event.event_name}</h3>
+                                <h3 className="text-xl font-bold mb-2 text-foreground">{event.event_name}</h3>
                                 <p className="text-sm text-muted-foreground mb-4">{event.event_type}</p>
 
                                 <div className="space-y-2 text-sm text-muted-foreground flex-grow">
