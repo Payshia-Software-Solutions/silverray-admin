@@ -1027,7 +1027,8 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 // Restaurant Venues API
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
   const response = await fetch(`${API_BASE_URL}/restaurant`);
-  return handleResponse<RestaurantFromApi[]>(response);
+  const data = await handleResponse<RestaurantFromApi[]>(response);
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
