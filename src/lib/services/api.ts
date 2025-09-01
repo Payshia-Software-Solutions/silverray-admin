@@ -1047,7 +1047,7 @@ export async function createRestaurant(restaurantData: any): Promise<RestaurantF
 
 export async function uploadRestaurantImage(restaurantId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
-    formData.append('restaurant_id', String(restaurantId));
+    formData.append('room_id', String(restaurantId));
     formData.append('company_id', '101');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
@@ -1216,4 +1216,5 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
+
 
