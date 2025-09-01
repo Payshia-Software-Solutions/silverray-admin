@@ -324,6 +324,7 @@ export interface EventFromApi {
   updated_by: string | null;
   created_at: string;
   updated_at: string;
+  images_url: string | null;
 }
 
 
@@ -1234,9 +1235,29 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     });
     return handleResponse<{ message: string }>(response);
 }
+
+export async function uploadEventImage(eventId: number, imageFile: File, isPrimary: boolean): Promise<any> {
+    const formData = new FormData();
+    formData.append('event_id', String(eventId));
+    formData.append('image', imageFile);
+    formData.append('company_id', 'com-001');
+    formData.append('is_primary', isPrimary ? '1' : '0');
+    formData.append('uploaded_by', 'admin_user');
+    formData.append('alt_text', 'Event Image');
+    formData.append('display_order', '1');
+    formData.append('image_name', imageFile.name);
+    formData.append('file_size', String(imageFile.size));
+
+    const response = await fetch(`${API_BASE_URL}/event-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
+}
     
 
     
+
 
 
 

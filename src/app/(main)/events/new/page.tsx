@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,10 +11,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, Clock, Gift, Building, Plus, Wallet, Tag, Check, Trash2, CheckCircle2, UploadCloud, MoreVertical, Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +24,13 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, createEvent } from '@/lib/services/api';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getHalls, type HallFromApi, createEvent, uploadEventImage, EventFromApi } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,13 +52,21 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+}
 
 export default function NewEventPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [halls, setHalls] = useState<HallFromApi[]>([]);
     const [loadingHalls, setLoadingHalls] = useState(true);
+
+    const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
+    const [showImageDialog, setShowImageDialog] = useState(false);
+    const [newlyCreatedEvent, setNewlyCreatedEvent] = useState<EventFromApi | null>(null);
 
      const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<EventFormValues>({
         resolver: zodResolver(eventSchema),
@@ -88,11 +104,13 @@ export default function NewEventPage() {
             hall_id: data.hall_ids.join(','),
             created_by: 'admin@silverray.com',
             company_id: 'com-001',
+            images_url: '',
         };
         
         try {
-            await createEvent(dataToSend);
-            setShowSuccessDialog(true);
+            const createdEvent = await createEvent(dataToSend);
+            setNewlyCreatedEvent(createdEvent);
+            setShowImageDialog(true);
         } catch (error: any) {
              toast({
                 variant: 'destructive',
@@ -101,6 +119,74 @@ export default function NewEventPage() {
             });
         }
     };
+  
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const newImageSlots = [...imageSlots];
+            const isFirstImage = !imageSlots.some(slot => slot.preview);
+            newImageSlots[index] = { file, preview: reader.result as string, isPrimary: isFirstImage };
+            setImageSlots(newImageSlots);
+        };
+        reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        const newImageSlots = [...imageSlots];
+        const wasPrimary = newImageSlots[index].isPrimary;
+        newImageSlots[index] = { file: null, preview: null, isPrimary: false };
+        
+        if (wasPrimary) {
+            const firstImageIndex = newImageSlots.findIndex(slot => slot.file);
+            if (firstImageIndex !== -1) {
+                newImageSlots[firstImageIndex].isPrimary = true;
+            }
+        }
+        setImageSlots(newImageSlots);
+    };
+    
+    const setPrimaryImage = (indexToSet: number) => {
+        setImageSlots(currentSlots => 
+            currentSlots.map((slot, index) => ({
+                ...slot,
+                isPrimary: index === indexToSet
+            }))
+        );
+    }
+
+    const handleImageUploads = async () => {
+        if (!newlyCreatedEvent) return;
+
+        const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+
+        if (imagesToUpload.length === 0) {
+            toast({ title: "No images to upload", description: "You can upload images later by editing the event."});
+            setShowImageDialog(false);
+            router.push('/events');
+            return;
+        }
+
+        try {
+            for (const slot of imagesToUpload) {
+                if (slot.file) {
+                    await uploadEventImage(newlyCreatedEvent.id, slot.file, slot.isPrimary);
+                }
+            }
+            toast({ title: "Success!", description: "Event and images uploaded successfully."});
+            setShowImageDialog(false);
+            router.push('/events');
+
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Image Upload Failed",
+                description: error.message || "An unexpected error occurred during image upload.",
+            });
+        }
+    }
   
     return (
         <>
@@ -257,27 +343,79 @@ export default function NewEventPage() {
                   {isSubmitting ? 'Creating...' : '+ Create Event'}
                 </Button>
             </div>
-
-            <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader className="sr-only">
-                        <DialogTitle>Success</DialogTitle>
-                        <DialogDescription>A new event has been successfully created.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col items-center justify-center text-center p-8">
-                        <div className="p-3 bg-blue-100 rounded-full mb-4">
-                            <div className="p-2 bg-blue-200 rounded-full">
-                            <CheckCircle2 className="h-6 w-6 text-blue-600" />
-                            </div>
-                        </div>
-                        <h2 className="text-xl font-bold mb-2">Successfully Created Event!</h2>
-                        <DialogClose asChild>
-                            <Button className="mt-6 w-full" onClick={() => router.push('/events')}>Done</Button>
-                        </DialogClose>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </form>
+
+        <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+            <DialogContent className="max-w-4xl">
+            <DialogHeader>
+                <DialogTitle>Step 2: Upload Event Images</DialogTitle>
+                <DialogDescription>
+                Event "{newlyCreatedEvent?.event_name}" has been created. Add up to 5 images. The primary image will be shown first.
+                </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 py-4">
+                {imageSlots.map((slot, index) => (
+                    <div key={index} className="relative aspect-video group">
+                    {slot.preview ? (
+                        <>
+                        <Image
+                            src={slot.preview}
+                            alt={`Preview ${index + 1}`}
+                            fill
+                            className="rounded-lg object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" size="icon" className="h-8 w-8">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                        <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                        <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                        </>
+                    ) : (
+                        <label
+                        htmlFor={`image-upload-${index}`}
+                        className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                        >
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <Plus className="w-8 h-8 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                        </div>
+                        <Input
+                            id={`image-upload-${index}`}
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, index)}
+                        />
+                        </label>
+                    )}
+                    </div>
+                ))}
+                </div>
+
+            <DialogClose asChild>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => router.push('/events')}>Skip for now</Button>
+                    <Button onClick={handleImageUploads} disabled={isSubmitting}>
+                        {isSubmitting ? 'Uploading...' : 'Upload & Finish'}
+                    </Button>
+                </div>
+            </DialogClose>
+            </DialogContent>
+        </Dialog>
         </>
     );
 }
