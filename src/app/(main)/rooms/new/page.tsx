@@ -360,7 +360,7 @@ export default function AddNewRoomPage() {
           <Link href="/rooms">Cancel</Link>
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Next: Add Images'}
+            {isSubmitting ? 'Creating...' : 'Add New Room'}
         </Button>
       </div>
     </form>
