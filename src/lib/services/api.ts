@@ -647,10 +647,13 @@ export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary
     const formData = new FormData();
     formData.append('room_id', String(roomId));
     formData.append('image', imageFile);
-    formData.append('is_primary', isPrimary ? '1' : '0');
-    // Add other optional fields your backend might expect
-    formData.append('company_id', 'com-001');
+    formData.append('company_id', 'com-001'); // Example static company_id
+    formData.append('image_name', imageFile.name);
+    formData.append('file_size', String(imageFile.size));
     formData.append('alt_text', 'Room image');
+    formData.append('is_primary', isPrimary ? '1' : '0');
+    formData.append('display_order', '1');
+    formData.append('uploaded_by', '1001'); // Example static user ID
     
     const response = await fetch(`${API_BASE_URL}/room-images`, {
         method: 'POST',

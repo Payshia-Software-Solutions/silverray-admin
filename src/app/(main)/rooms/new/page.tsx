@@ -153,8 +153,9 @@ export default function AddNewRoomPage() {
         price_per_night: (formData.get('pricePerNight') || '0'),
         currency: 'LKR',
         current_status: formData.get('status'),
-        image_url: '', // Will be updated after upload
+        image_url: '', // This will be set by the first uploaded primary image
         created_by: 'admin',
+        is_active: 1, // Add is_active flag
     };
 
     try {
@@ -352,69 +353,6 @@ export default function AddNewRoomPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
-                    Room Images
-                </h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {imageSlots.map((slot, index) => (
-                <div key={index} className="relative aspect-video group">
-                {slot.preview ? (
-                    <>
-                    <Image
-                        src={slot.preview}
-                        alt={`Preview ${index + 1}`}
-                        fill
-                        className="rounded-lg object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="secondary" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
-                                    <Star className="mr-2 h-4 w-4" /> Set as Primary
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
-                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                    {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
-                    </>
-                ) : (
-                    <label
-                    htmlFor={`image-upload-${index}`}
-                    className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                    >
-                    <div className="flex flex-col items-center justify-center text-center">
-                        <Plus className="w-8 h-8 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground mt-1">Add Image</p>
-                    </div>
-                    <Input
-                        id={`image-upload-${index}`}
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => handleImageChange(e, index)}
-                    />
-                    </label>
-                )}
-                </div>
-            ))}
-            </div>
-          </CardContent>
-        </Card>
-
       </div>
 
       <div className="flex justify-end gap-2">
