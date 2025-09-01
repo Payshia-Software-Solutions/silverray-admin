@@ -134,7 +134,7 @@ export default function EditRoomPage() {
         price_per_night: (formData.get('pricePerNight') as string),
         currency: room.currency || 'USD',
         current_status: formData.get('status') as RoomFromApi['current_status'],
-        image_url: room.image_url || '/images/rooms/default.jpg',
+        image_url: formData.get('imageUrl') as string || '/images/rooms/default.jpg',
         created_by: room.created_by || 'admin',
         updated_by: 'admin'
     };
@@ -465,3 +465,5 @@ export default function EditRoomPage() {
     </form>
   );
 }
+
+    
