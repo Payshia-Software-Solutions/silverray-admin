@@ -1124,6 +1124,28 @@ export async function createUser(userData: any): Promise<any> {
     return handleResponse<any>(response);
 }
 
+export async function uploadUserImage(userId: string, imageFile: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('company_id', '1'); // Example static company_id
+    formData.append('image', imageFile);
+    formData.append('image_name', imageFile.name);
+    formData.append('file_size', String(imageFile.size));
+    formData.append('alt_text', 'User profile picture');
+    formData.append('is_primary', '1');
+    formData.append('display_order', '1');
+    formData.append('uploaded_by', 'admin_user'); // Or dynamically set
+    formData.append('updated_by', 'admin_user');
+    formData.append('is_active', '1');
+
+    const response = await fetch(`${API_BASE_URL}/user-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
+}
+
+
 export async function updateUser(id: string, userData: Partial<UserFromApi>): Promise<UserFromApi> {
     const response = await fetch(`${API_BASE_URL}/user/${id}`, {
         method: 'PUT',
@@ -1257,6 +1279,7 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     
 
     
+
 
 
 

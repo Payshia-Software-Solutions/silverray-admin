@@ -32,7 +32,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createUser, getRoles, type RoleFromApi } from '@/lib/services/api';
+import { createUser, getRoles, type RoleFromApi, uploadUserImage, type UserFromApi } from '@/lib/services/api';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -58,9 +58,12 @@ export default function AddNewAdminPage() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [roles, setRoles] = useState<RoleFromApi[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
+
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [newlyCreatedUser, setNewlyCreatedUser] = useState<UserFromApi | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   const { register, handleSubmit, control, setValue, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
@@ -93,8 +96,9 @@ export default function AddNewAdminPage() {
   const handleCreateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
         const { confirmPassword, ...userData } = data;
-        await createUser({ ...userData, avatar_url: imagePreview });
-        setShowSuccessDialog(true);
+        const createdUser = await createUser({ ...userData, avatar_url: null });
+        setNewlyCreatedUser(createdUser as any);
+        setShowImageDialog(true);
     } catch(error: any) {
         toast({
             variant: 'destructive',
@@ -103,27 +107,48 @@ export default function AddNewAdminPage() {
         });
     }
   };
-
+  
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setValue('avatar_url', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = () => {
+      setImageFile(null);
       setImagePreview(null);
-      setValue('avatar_url', null);
       const fileInput = document.getElementById('profile-picture-upload') as HTMLInputElement;
       if (fileInput) {
           fileInput.value = '';
       }
   };
+
+  const handleImageUpload = async () => {
+    if (!imageFile || !newlyCreatedUser) {
+        toast({ title: "No image selected", description: "You can skip this step or upload an image.", variant: "default" });
+        return;
+    }
+
+    try {
+        await uploadUserImage(newlyCreatedUser.id, imageFile);
+        toast({ title: "Success!", description: "User account and image uploaded successfully."});
+        setShowImageDialog(false);
+        router.push('/user-management');
+
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Image Upload Failed",
+            description: error.message || "An unexpected error occurred during image upload.",
+        });
+    }
+  }
 
 
   return (
@@ -157,25 +182,9 @@ export default function AddNewAdminPage() {
                     <div className="col-span-1 flex flex-col items-center text-center gap-4">
                         <Label htmlFor="profile-picture">Profile Picture (Optional)</Label>
                         <div className="relative h-32 w-32 rounded-full border-2 border-dashed bg-muted/50 flex items-center justify-center">
-                            {imagePreview ? (
-                                <>
-                                    <Image src={imagePreview} alt="Profile Preview" layout="fill" className="rounded-full object-cover" />
-                                     <Button variant="destructive" size="icon" className="absolute top-0 right-0 h-7 w-7 rounded-full" onClick={removeImage} type="button">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </>
-                            ) : (
-                                <UserPlus className="h-12 w-12 text-muted-foreground" />
-                            )}
+                           <UserPlus className="h-12 w-12 text-muted-foreground" />
                         </div>
-                        <Button variant="outline" size="sm" asChild type="button">
-                            <label htmlFor="profile-picture-upload">
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload Photo
-                            </label>
-                        </Button>
-                        <Input id="profile-picture-upload" type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                        <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
+                        <p className="text-xs text-muted-foreground">You can upload a picture in the next step.</p>
                     </div>
                     <div className="col-span-2 space-y-6">
                         <div className="space-y-2">
@@ -280,24 +289,47 @@ export default function AddNewAdminPage() {
         </div>
       </form>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-          <DialogContent className="sm:max-w-md">
-             <DialogHeader className="sr-only">
-                <DialogTitle>Account Created</DialogTitle>
-                <DialogDescription>The new admin account has been successfully created.</DialogDescription>
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+          <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                  <DialogTitle>Step 2: Upload Profile Picture (Optional)</DialogTitle>
+                  <DialogDescription>
+                      Admin account for "{newlyCreatedUser?.full_name}" has been created. You can now upload a profile picture.
+                  </DialogDescription>
               </DialogHeader>
-              <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-                  <div className="p-4 bg-blue-100 rounded-full mb-4">
-                      <div className="p-2 bg-blue-200 rounded-full">
-                         <CheckCircle2 className="h-8 w-8 text-blue-600" />
+              <div className="space-y-4 py-4">
+                  {!imagePreview ? (
+                      <label
+                          htmlFor="profile-picture-upload-dialog"
+                          className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                      >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                              <p className="mb-2 text-sm text-muted-foreground">
+                                  <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+                              </p>
+                              <p className="text-xs text-muted-foreground">PNG, JPG (MAX. 5MB)</p>
+                          </div>
+                          <Input id="profile-picture-upload-dialog" type="file" className="hidden" onChange={handleImageChange} accept="image/png, image/jpeg" />
+                      </label>
+                  ) : (
+                      <div className="relative w-40 h-40 mx-auto">
+                          <Image src={imagePreview} alt="Profile preview" layout="fill" className="rounded-full object-cover" />
+                          <Button variant="destructive" size="icon" className="absolute top-0 right-0 rounded-full h-8 w-8" onClick={removeImage} type="button">
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                          </Button>
                       </div>
-                  </div>
-                  <h2 className="text-xl font-bold mb-2">Successfully Admin Account Created !</h2>
-                  <p className="text-muted-foreground">The new admin account is ready to be used.</p>
-                  <DialogClose asChild>
-                      <Button className="mt-6 w-full" onClick={() => router.push('/user-management')}>Done</Button>
-                  </DialogClose>
+                  )}
               </div>
+              <DialogClose asChild>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => router.push('/user-management')}>Skip for now</Button>
+                    <Button onClick={handleImageUpload} disabled={isSubmitting}>
+                        {isSubmitting ? 'Uploading...' : 'Upload & Finish'}
+                    </Button>
+                </div>
+              </DialogClose>
           </DialogContent>
       </Dialog>
     </div>
