@@ -1047,7 +1047,7 @@ export async function createRestaurant(restaurantData: any): Promise<RestaurantF
 
 export async function uploadRestaurantImage(restaurantId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
-    formData.append('room_id', String(restaurantId));
+    formData.append('restaurant_id', String(restaurantId));
     formData.append('company_id', '101');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
@@ -1059,7 +1059,7 @@ export async function uploadRestaurantImage(restaurantId: number, imageFile: Fil
     formData.append('updated_by', '5');
     formData.append('is_active', '1');
     
-    const response = await fetch(`${API_BASE_URL}/room-images`, {
+    const response = await fetch(`${API_BASE_URL}/restaurant-images`, {
         method: 'POST',
         body: formData,
     });
@@ -1216,5 +1216,6 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
+
 
 
