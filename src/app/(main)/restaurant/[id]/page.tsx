@@ -56,8 +56,8 @@ type RestaurantFormValues = z.infer<typeof restaurantSchema>;
 
 export default function EditRestaurantVenuePage() {
   const router = useRouter();
-  const params = useParams();
-  const id = Number(params?.id);
+  const { id: idParam } = useParams<{ id: string }>();
+  const id = Number(idParam);
   const { toast } = useToast();
 
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
