@@ -1134,12 +1134,12 @@ export async function deleteRole(id: string): Promise<{ message: string }> {
 
 // Operating Hours API Functions
 export async function getOperatingHoursById(id: string): Promise<OperatingHoursFromApi> {
-  const response = await fetch(`${API_BASE_URL}/operating_hours/${id}`);
+  const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`);
   return handleResponse<OperatingHoursFromApi>(response);
 }
 
 export async function createOperatingHours(hoursData: any): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/operating_hours`, {
+    const response = await fetch(`${API_BASE_URL}/operating-hours`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(hoursData),
@@ -1148,7 +1148,7 @@ export async function createOperatingHours(hoursData: any): Promise<any> {
 }
 
 export async function updateOperatingHours(id: string, hoursData: any): Promise<OperatingHoursFromApi> {
-    const response = await fetch(`${API_BASE_URL}/operating_hours/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(hoursData),

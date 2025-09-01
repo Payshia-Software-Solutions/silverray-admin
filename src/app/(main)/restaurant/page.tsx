@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import RestaurantFeaturesPage from './features/page';
-import { getRestaurants, deleteRestaurant, type RestaurantFromApi } from '@/lib/services/api';
+import { getRestaurants, deleteRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
@@ -119,13 +119,14 @@ const reservations = [
   },
 ];
 
+type VenueWithHours = RestaurantFromApi & { operatingHours?: OperatingHoursFromApi };
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('dining-venues');
   
-  const [venues, setVenues] = useState<RestaurantFromApi[]>([]);
+  const [venues, setVenues] = useState<VenueWithHours[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -140,11 +141,24 @@ export default function RestaurantDiningPage() {
     async function fetchVenues() {
       try {
         setLoading(true);
-        const data = await getRestaurants();
-        setVenues(Array.isArray(data) ? data : []);
+        const venueData = await getRestaurants();
+        const venuesWithHours = await Promise.all(
+            venueData.map(async (venue) => {
+                if(venue.operating_hours_id) {
+                    try {
+                        const hours = await getOperatingHoursById(venue.operating_hours_id);
+                        return { ...venue, operatingHours: hours };
+                    } catch (e) {
+                         console.error(`Failed to fetch hours for venue ${venue.id}`, e);
+                        return venue; // Return venue without hours if fetch fails
+                    }
+                }
+                return venue;
+            })
+        );
+        setVenues(venuesWithHours);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
-        setVenues([]);
       } finally {
         setLoading(false);
       }
@@ -202,20 +216,17 @@ export default function RestaurantDiningPage() {
     return `${formattedHour}:${m} ${ampm}`;
   };
 
-  const getOperatingHours = (hours: any): string => {
+  const getOperatingHours = (hours?: OperatingHoursFromApi): string => {
     if (!hours) return 'N/A';
-    try {
-        // The data is already an object from the joined query, no need to parse
-        if (typeof hours !== 'object' || hours === null) return 'N/A';
-        const firstOpenDay = Object.values(hours).find((day: any) => day.isOpen) as { open: string, close: string };
-        if (firstOpenDay) {
-            return `${formatTime(firstOpenDay.open)} - ${formatTime(firstOpenDay.close)}`;
-        }
-        return 'Closed';
-    } catch (e) {
-        console.error("Error parsing operating hours:", e, "Raw data:", hours);
-        return 'N/A';
+    // Simplified logic: find the first open day and display its hours
+    const firstOpenDayKey = Object.keys(hours).find(key => key.endsWith('_open') && (hours as any)[key] === 1);
+    if (firstOpenDayKey) {
+        const day = firstOpenDayKey.replace('_open', '');
+        const openTime = (hours as any)[`${day}_open_time`];
+        const closeTime = (hours as any)[`${day}_close_time`];
+        return `${formatTime(openTime)} - ${formatTime(closeTime)}`;
     }
+    return 'Closed';
   };
 
 
@@ -292,7 +303,7 @@ export default function RestaurantDiningPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4"/>
-                                <span>{getOperatingHours(venue.operating_hours_id)}</span>
+                                <span>{getOperatingHours(venue.operatingHours)}</span>
                             </div>
                         </div>
                     </CardContent>
