@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -61,7 +61,7 @@ export default function EditRoomPage() {
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
   
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
    useEffect(() => {
     async function fetchData() {
