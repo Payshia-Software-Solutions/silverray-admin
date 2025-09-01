@@ -6,7 +6,7 @@
  */
 
 // The base URL of your PHP server's router script
-const API_BASE_URL = '/Silver_server';
+const API_BASE_URL = 'http://localhost/Silver_server';
 export const CONTENT_PROVIDER_BASE_URL = 'https://content-provider.payshia.com/silver-ray';
 
 
