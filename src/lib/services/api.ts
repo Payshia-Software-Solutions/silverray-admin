@@ -883,7 +883,7 @@ export async function updateExperience(id: number, experienceData: Partial<Exper
 }
 
 export async function deleteExperience(id: number): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/experiences/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/experiences/${id}?cascade=true`, {
         method: 'DELETE',
     });
     return handleResponse<{ message: string }>(response);
