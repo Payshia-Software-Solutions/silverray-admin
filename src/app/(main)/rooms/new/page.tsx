@@ -150,7 +150,7 @@ export default function AddNewRoomPage() {
         children_capacity: Number(formData.get('children')),
         room_width: (formData.get('roomWidth') || '0'),
         room_height: (formData.get('roomHeight') || '0'),
-        price_per_night: (formData.get('pricePerNight')),
+        price_per_night: (formData.get('pricePerNight') || '0'),
         currency: 'LKR',
         current_status: formData.get('status'),
         image_url: '', // Will be updated after upload
