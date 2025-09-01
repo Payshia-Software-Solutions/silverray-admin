@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, X } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, X, MoreVertical, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -27,7 +27,13 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, createWeddingPackage, type WeddingPackageFromApi } from '@/lib/services/api';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, createWeddingPackage, uploadWeddingPackageImage, type WeddingPackageFromApi } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,14 +56,23 @@ const packageSchema = z.object({
 
 type PackageFormValues = z.infer<typeof packageSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+}
+
 export default function NewWeddingPackagePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [inclusions, setInclusions] = useState<PackageInclusionFromApi[]>([]);
   const [loadingInclusions, setLoadingInclusions] = useState(true);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [halls, setHalls] = useState<HallFromApi[]>([]);
   const [loadingHalls, setLoadingHalls] = useState(true);
+
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [newlyCreatedPackage, setNewlyCreatedPackage] = useState<WeddingPackageFromApi | null>(null);
   
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
@@ -108,12 +123,13 @@ export default function NewWeddingPackagePage() {
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
-      image_urls: data.image_urls,
+      image_urls: '', // Image handled in second step
     };
 
     try {
-      await createWeddingPackage(dataToSend as any);
-      setShowSuccessDialog(true);
+      const createdPackage = await createWeddingPackage(dataToSend as any);
+      setNewlyCreatedPackage(createdPackage);
+      setShowImageDialog(true);
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -122,6 +138,75 @@ export default function NewWeddingPackagePage() {
         });
     }
   };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImageSlots = [...imageSlots];
+        const isFirstImage = !imageSlots.some(slot => slot.preview);
+        newImageSlots[index] = { file, preview: reader.result as string, isPrimary: isFirstImage };
+        setImageSlots(newImageSlots);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImageSlots = [...imageSlots];
+    const wasPrimary = newImageSlots[index].isPrimary;
+    newImageSlots[index] = { file: null, preview: null, isPrimary: false };
+    
+    if (wasPrimary) {
+        const firstImageIndex = newImageSlots.findIndex(slot => slot.file);
+        if (firstImageIndex !== -1) {
+            newImageSlots[firstImageIndex].isPrimary = true;
+        }
+    }
+    setImageSlots(newImageSlots);
+  };
+  
+  const setPrimaryImage = (indexToSet: number) => {
+      setImageSlots(currentSlots => 
+          currentSlots.map((slot, index) => ({
+              ...slot,
+              isPrimary: index === indexToSet
+          }))
+      );
+  }
+
+  const handleImageUploads = async () => {
+    if (!newlyCreatedPackage) return;
+
+    const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+
+    if (imagesToUpload.length === 0) {
+        toast({ title: "No images to upload", description: "You can upload images later by editing the package."});
+        setShowImageDialog(false);
+        router.push('/weddingpackages');
+        return;
+    }
+
+    try {
+        for (const slot of imagesToUpload) {
+            if (slot.file) {
+                await uploadWeddingPackageImage(newlyCreatedPackage.id, slot.file, slot.isPrimary);
+            }
+        }
+        toast({ title: "Success!", description: "Package and images uploaded successfully."});
+        setShowImageDialog(false);
+        router.push('/weddingpackages');
+
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Image Upload Failed",
+            description: error.message || "An unexpected error occurred during image upload.",
+        });
+    }
+  }
+
 
   return (
     <div className="space-y-6">
@@ -274,20 +359,9 @@ export default function NewWeddingPackagePage() {
             {errors.hall_id && <p className="text-red-500 text-sm">{errors.hall_id.message}</p>}
           </CardContent>
         </Card>
-        
-        <Card>
-            <CardContent className="p-6 space-y-6">
-                <h3 className="text-lg font-semibold">Package Image</h3>
-                <p className="text-sm text-muted-foreground">Provide a URL for the main package image.</p>
-                <div className="space-y-2">
-                    <Label htmlFor="image_urls">Image URL</Label>
-                    <Input id="image_urls" placeholder="https://example.com/image.jpg" {...register('image_urls')} />
-                </div>
-            </CardContent>
-        </Card>
       
         <div className="flex justify-end gap-2">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild type="button">
             <Link href="/weddingpackages">Cancel</Link>
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -296,26 +370,77 @@ export default function NewWeddingPackagePage() {
         </div>
       </form>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="sr-only">
-                    <DialogTitle>Success</DialogTitle>
-                    <DialogDescription>A new wedding package has been successfully created.</DialogDescription>
-                </DialogHeader>
-                <div className="flex flex-col items-center justify-center text-center p-8 pt-0">
-                    <div className="p-4 bg-blue-100 rounded-full mb-4">
-                        <div className="p-2 bg-blue-200 rounded-full">
-                           <CheckCircle2 className="h-8 w-8 text-blue-600" />
+        <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+            <DialogContent className="max-w-4xl">
+            <DialogHeader>
+                <DialogTitle>Step 2: Upload Package Images</DialogTitle>
+                <DialogDescription>
+                Package "{newlyCreatedPackage?.package_name}" has been created. Add up to 5 images. The primary image will be shown first.
+                </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 py-4">
+                {imageSlots.map((slot, index) => (
+                    <div key={index} className="relative aspect-video group">
+                    {slot.preview ? (
+                        <>
+                        <Image
+                            src={slot.preview}
+                            alt={`Preview ${index + 1}`}
+                            fill
+                            className="rounded-lg object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" size="icon" className="h-8 w-8">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                        <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                        <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
+                        {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                        </>
+                    ) : (
+                        <label
+                        htmlFor={`image-upload-${index}`}
+                        className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                        >
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <Plus className="w-8 h-8 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                        </div>
+                        <Input
+                            id={`image-upload-${index}`}
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e, index)}
+                        />
+                        </label>
+                    )}
                     </div>
-                    <h2 className="text-xl font-bold mb-2">Successfully Created New Wedding Package !</h2>
-                    <p className="text-muted-foreground">The new package is now available for booking.</p>
-                    <DialogClose asChild>
-                        <Button className="mt-6 w-full" onClick={() => router.push('/weddingpackages')}>Done</Button>
-                    </DialogClose>
+                ))}
                 </div>
+
+            <DialogClose asChild>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => router.push('/weddingpackages')}>Skip for now</Button>
+                    <Button onClick={handleImageUploads} disabled={isSubmitting}>
+                        {isSubmitting ? 'Uploading...' : 'Upload & Finish'}
+                    </Button>
+                </div>
+            </DialogClose>
             </DialogContent>
-        </Dialog>
+      </Dialog>
     </div>
   );
 }

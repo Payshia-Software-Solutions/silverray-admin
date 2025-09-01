@@ -31,6 +31,7 @@ export interface RoomFromApi {
   company_id: string;
   created_by: string;
   updated_by: string | null;
+  is_active: number;
 }
 
 /**
@@ -1008,6 +1009,26 @@ export async function createWeddingPackage(data: any): Promise<WeddingPackageFro
     return handleResponse<WeddingPackageFromApi>(response);
 }
 
+export async function uploadWeddingPackageImage(weddingId: number, imageFile: File, isPrimary: boolean): Promise<any> {
+    const formData = new FormData();
+    formData.append('wedding_id', String(weddingId));
+    formData.append('image', imageFile);
+    formData.append('company_id', '201'); // Example static company_id
+    formData.append('image_name', imageFile.name);
+    formData.append('file_size', String(imageFile.size));
+    formData.append('alt_text', 'Wedding package image');
+    formData.append('is_primary', isPrimary ? '1' : '0');
+    formData.append('display_order', '1');
+    formData.append('uploaded_by', '3'); // Example static user ID
+    
+    const response = await fetch(`${API_BASE_URL}/wedding-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
+}
+
+
 export async function updateWeddingPackage(id: number, data: any): Promise<WeddingPackageFromApi> {
     const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
         method: 'PUT',
@@ -1216,6 +1237,7 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
+
 
 
 
