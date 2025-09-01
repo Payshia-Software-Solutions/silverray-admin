@@ -1045,6 +1045,27 @@ export async function createRestaurant(restaurantData: any): Promise<RestaurantF
     return handleResponse<RestaurantFromApi>(response);
 }
 
+export async function uploadRestaurantImage(restaurantId: number, imageFile: File, isPrimary: boolean): Promise<any> {
+    const formData = new FormData();
+    formData.append('restaurant_id', String(restaurantId));
+    formData.append('company_id', '101');
+    formData.append('image_name', imageFile.name);
+    formData.append('image', imageFile);
+    formData.append('file_size', String(imageFile.size));
+    formData.append('alt_text', 'Restaurant view');
+    formData.append('is_primary', isPrimary ? '1' : '0');
+    formData.append('display_order', '1');
+    formData.append('uploaded_by', '5');
+    formData.append('updated_by', '5');
+    formData.append('is_active', '1');
+    
+    const response = await fetch(`${API_BASE_URL}/room-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
+}
+
 export async function updateRestaurant(id: number, restaurantData: Partial<RestaurantFromApi>): Promise<RestaurantFromApi> {
     const response = await fetch(`${API_BASE_URL}/restaurant/${id}`, {
         method: 'PUT',
@@ -1195,3 +1216,4 @@ export async function deleteEvent(id: number): Promise<{ message: string }> {
     
 
     
+

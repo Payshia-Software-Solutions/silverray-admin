@@ -309,7 +309,7 @@ export default function RestaurantDiningPage() {
                     </CardContent>
                     <CardFooter className="flex justify-between items-center pt-2 gap-2 p-4 bg-muted/50">
                         <Button className="w-full" variant="default" asChild>
-                            <Link href={`/restaurant/${venue.id}`}>
+                            <Link href={`/restaurant/edit/${venue.id}`}>
                                 <Pencil className="mr-2 h-4 w-4"/>
                                 Edit
                             </Link>

@@ -58,6 +58,9 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'halls' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Hall', description: `Updating details for a hall.` };
     }
+    if (pathSegments[0] === 'events' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'Edit Event', description: `Updating details for an event.` };
+    }
      if (pathSegments[0] === 'package-inclusions' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Package Inclusion', description: `Updating details for an inclusion.` };
     }
@@ -94,7 +97,7 @@ const getDynamicPageInfo = (pathname: string) => {
          if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
              return { title: 'Edit Restaurant Feature', description: `Updating details for a restaurant feature.` };
         }
-        if(pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'features' && pathSegments[1] !== 'menu' && pathSegments[1] !== 'reservations'){
+        if(pathSegments[1] === 'edit' && pathSegments.length === 3){
             return { title: 'Edit Restaurant Venue', description: `Updating details for a restaurant venue.` };
         }
     }
