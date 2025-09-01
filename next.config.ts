@@ -40,6 +40,12 @@ const nextConfig: NextConfig = {
         hostname: 'content-provider.payshia.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
