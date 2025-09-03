@@ -239,6 +239,23 @@ export interface WeddingPackageFromApi {
     updated_by: string;
 }
 
+export interface WeddingPackageImageFromApi {
+    id: number;
+    wedding_id: number;
+    company_id: number;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: string;
+    updated_by: string;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
 export interface RestaurantFromApi {
   id: number;
   venue_name: string;
@@ -1051,6 +1068,11 @@ export async function uploadWeddingPackageImage(weddingId: number, imageFile: Fi
     return handleResponse<any>(response);
 }
 
+export async function getWeddingPackageImages(companyId: string, weddingId: number): Promise<WeddingPackageImageFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/wedding-images/company/${companyId}/wedding/${weddingId}`);
+  return handleResponse<WeddingPackageImageFromApi[]>(response);
+}
+
 
 export async function updateWeddingPackage(id: number, data: any): Promise<WeddingPackageFromApi> {
     const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
@@ -1301,6 +1323,7 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     
 
     
+
 
 
 

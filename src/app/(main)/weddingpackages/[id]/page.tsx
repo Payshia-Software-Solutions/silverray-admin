@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Pencil } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Pencil, Star, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -27,7 +27,13 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi } from '@/lib/services/api';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi, getWeddingPackageImages, type WeddingPackageImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,6 +56,13 @@ const packageSchema = z.object({
 
 type PackageFormValues = z.infer<typeof packageSchema>;
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+  id?: number;
+}
+
 export default function EditWeddingPackagePage() {
   const router = useRouter();
   const params = useParams();
@@ -61,6 +74,7 @@ export default function EditWeddingPackagePage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [halls, setHalls] = useState<HallFromApi[]>([]);
   const [loadingHalls, setLoadingHalls] = useState(true);
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
   
   const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<PackageFormValues>({
     resolver: zodResolver(packageSchema),
@@ -109,6 +123,17 @@ export default function EditWeddingPackagePage() {
                 price: parseFloat(pkg.price),
                 inclusions: pkg.inclusions ? pkg.inclusions.split(',').filter(id => id) : [],
             });
+
+            // Fetch images
+            const images = await getWeddingPackageImages(pkg.company_id, id);
+            const formattedImages = images.map(img => ({
+                id: img.id,
+                file: null,
+                preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
+                isPrimary: img.is_primary === 1,
+            }));
+            setImageSlots(formattedImages);
+
         } catch (error: any) {
             toast({ variant: 'destructive', title: "Error", description: `Failed to fetch package data: ${error.message}` });
         }
@@ -119,10 +144,11 @@ export default function EditWeddingPackagePage() {
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
     const dataToSend = {
       ...data,
-      company_id: '3900', // This was missing
+      company_id: '3900',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
+      image_urls: imageSlots.find(slot => slot.isPrimary)?.preview || '',
     };
 
     try {
@@ -135,6 +161,32 @@ export default function EditWeddingPackagePage() {
             description: error.message || "An unexpected error occurred."
         });
     }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImageSlots = [...imageSlots];
+        newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
+        setImageSlots(newImageSlots);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+    setImageSlots(newImageSlots);
+  };
+
+  const setPrimaryImage = (selectedIndex: number) => {
+    const newImageSlots = imageSlots.map((slot, index) => ({
+      ...slot,
+      isPrimary: index === selectedIndex,
+    }));
+    setImageSlots(newImageSlots);
   };
 
   return (
@@ -297,21 +349,60 @@ export default function EditWeddingPackagePage() {
         </Card>
         
         <Card>
-          <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold">Package Images</h3>
-            <div className="flex gap-4 items-center flex-wrap">
-              <label
-                htmlFor="image-upload"
-                className="flex items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-              >
-                <div className="flex flex-col items-center justify-center">
-                  <Plus className="w-8 h-8 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Add Image</span>
+            <CardContent className="p-6 space-y-6">
+                <h3 className="text-lg font-semibold">Package Images</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={index} className="relative aspect-video group">
+                        {imageSlots[index]?.preview ? (
+                            <>
+                            <Image
+                                src={imageSlots[index].preview!}
+                                alt={`Package image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="secondary" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                            <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                            </>
+                        ) : (
+                            <label
+                            htmlFor={`image-upload-${index}`}
+                            className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                            >
+                            <div className="flex flex-col items-center justify-center text-center">
+                                <Plus className="w-8 h-8 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                            </div>
+                            <Input
+                                id={`image-upload-${index}`}
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(e, index)}
+                            />
+                            </label>
+                        )}
+                        </div>
+                    ))}
                 </div>
-                <Input id="image-upload" type="file" className="hidden" accept="image/*" />
-              </label>
-            </div>
-          </CardContent>
+            </CardContent>
         </Card>
       
         <div className="flex justify-end gap-2">
