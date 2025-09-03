@@ -344,6 +344,24 @@ export interface EventFromApi {
   images_url: string | null;
 }
 
+export interface EventImageFromApi {
+    id: number;
+    event_id: number;
+    company_id: number;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: string;
+    updated_by: string;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
+
 export interface RoomImageFromApi {
     id: number;
     room_id: number;
@@ -1320,9 +1338,15 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     });
     return handleResponse<any>(response);
 }
+
+export async function getEventImages(companyId: string, eventId: number): Promise<EventImageFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/event-images/company/${companyId}/event/${eventId}`);
+    return handleResponse<EventImageFromApi[]>(response);
+}
     
 
     
+
 
 
 

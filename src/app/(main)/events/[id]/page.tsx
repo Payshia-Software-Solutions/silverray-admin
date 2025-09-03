@@ -29,7 +29,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getHalls, type HallFromApi, getEventById, updateEvent, uploadEventImage } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getEventById, updateEvent, uploadEventImage, getEventImages, EventImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -55,6 +55,7 @@ interface ImageSlot {
   file: File | null;
   preview: string | null;
   isPrimary: boolean;
+  id?: number;
 }
 
 export default function EditEventPage() {
@@ -65,7 +66,7 @@ export default function EditEventPage() {
     const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [halls, setHalls] = useState<HallFromApi[]>([]);
     const [loadingHalls, setLoadingHalls] = useState(true);
-    const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
+    const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
 
 
      const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<EventFormValues>({
@@ -88,22 +89,14 @@ export default function EditEventPage() {
                 });
                 setHalls(hallData);
                 
-                // Placeholder for fetching and setting existing images
-                if (eventData.images_url) {
-                    const existingImages = eventData.images_url.split(',').map((url, index) => ({
-                        file: null,
-                        preview: url,
-                        isPrimary: index === 0, // Assume first is primary
-                    }));
-                    const newImageSlots = [...imageSlots];
-                    existingImages.forEach((img, index) => {
-                        if(index < newImageSlots.length) {
-                            newImageSlots[index] = img;
-                        }
-                    });
-                    setImageSlots(newImageSlots);
-                }
-
+                const images = await getEventImages(eventData.company_id || 'com-001', id);
+                const formattedImages = images.map(img => ({
+                    id: img.id,
+                    file: null,
+                    preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
+                    isPrimary: img.is_primary === 1,
+                }));
+                setImageSlots(formattedImages);
 
             } catch (err) {
                 console.error("Failed to fetch data:", err);
@@ -125,7 +118,7 @@ export default function EditEventPage() {
             event_date: format(data.event_date, 'yyyy-MM-dd'),
             hall_id: data.hall_ids.join(','),
             updated_by: 'admin@silverray.com',
-            images_url: imageSlots.map(s => s.preview).filter(Boolean).join(','),
+            images_url: imageSlots.find(s => s.isPrimary)?.preview || imageSlots[0]?.preview || '',
         };
         
         try {
@@ -311,12 +304,12 @@ export default function EditEventPage() {
                             Event Images
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            {imageSlots.map((slot, index) => (
+                            {Array.from({ length: 5 }).map((_, index) => (
                                 <div key={index} className="relative aspect-video group">
-                                {slot.preview ? (
+                                {imageSlots[index]?.preview ? (
                                     <>
                                     <Image
-                                        src={slot.preview}
+                                        src={imageSlots[index].preview!}
                                         alt={`Preview ${index + 1}`}
                                         fill
                                         className="rounded-lg object-cover"
@@ -338,7 +331,7 @@ export default function EditEventPage() {
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </div>
-                                    {slot.isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                                    {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
                                     </>
                                 ) : (
                                     <label
