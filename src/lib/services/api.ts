@@ -1341,11 +1341,15 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
 
 export async function getEventImages(companyId: string, eventId: number): Promise<EventImageFromApi[]> {
     const response = await fetch(`${API_BASE_URL}/event-images/company/${companyId}/event/${eventId}`);
+    if (response.status === 404) {
+        return []; // Return empty array if no images are found
+    }
     return handleResponse<EventImageFromApi[]>(response);
 }
     
 
     
+
 
 
 
