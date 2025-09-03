@@ -23,7 +23,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi, getUserImage, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi, getUserImage, CONTENT_PROVIDER_BASE_URL, uploadUserImage } from '@/lib/services/api';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -46,6 +46,8 @@ export default function EditAdminPage() {
     const [roles, setRoles] = useState<RoleFromApi[]>([]);
     const [loadingRoles, setLoadingRoles] = useState(true);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+
 
     const { register, handleSubmit, control, reset, setValue, formState: { errors, isSubmitting } } = useForm<UserFormValues>({
         resolver: zodResolver(userSchema),
@@ -85,11 +87,13 @@ export default function EditAdminPage() {
 
   const handleUpdateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
-        const dataToSend = {
-            ...data,
-            avatar_url: imagePreview,
-        };
-        await updateUser(id, dataToSend);
+        const { avatar_url, ...userData } = data; // Exclude avatar_url from the main update
+        await updateUser(id, userData);
+
+        if (imageFile) {
+            await uploadUserImage(id, imageFile);
+        }
+
         toast({
             title: 'Success!',
             description: 'User updated successfully.',
@@ -107,16 +111,17 @@ export default function EditAdminPage() {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setValue('avatar_url', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = () => {
+      setImageFile(null);
       setImagePreview(null);
       setValue('avatar_url', null);
       const fileInput = document.getElementById('profile-picture-upload') as HTMLInputElement;
