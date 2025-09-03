@@ -23,7 +23,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi } from '@/lib/services/api';
+import { getUserById, updateUser, type UserFromApi, getRoles, type RoleFromApi, getUserImage, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -60,9 +60,12 @@ export default function EditAdminPage() {
                     getRoles()
                 ]);
                 reset(userData);
-                if (userData.avatar_url) {
-                    setImagePreview(userData.avatar_url);
+                
+                const userImage = await getUserImage(userData.company_id, userData.id);
+                if (userImage && userImage.image_url) {
+                    setImagePreview(CONTENT_PROVIDER_BASE_URL + userImage.image_url);
                 }
+                
                 setRoles(rolesData);
             } catch (error: any) {
                  toast({

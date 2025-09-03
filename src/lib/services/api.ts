@@ -379,6 +379,24 @@ export interface RoomImageFromApi {
     is_active: number;
 }
 
+export interface UserImageFromApi {
+    id: number;
+    user_id: number;
+    company_id: string;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: string;
+    updated_by: string;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -1207,6 +1225,15 @@ export async function uploadUserImage(userId: string, imageFile: File): Promise<
     return handleResponse<any>(response);
 }
 
+export async function getUserImage(companyId: string, userId: string): Promise<UserImageFromApi | null> {
+    const response = await fetch(`${API_BASE_URL}/user-images/company/${companyId}/user/${userId}`);
+    if (response.status === 404) {
+        return null;
+    }
+    const images = await handleResponse<UserImageFromApi[]>(response);
+    return images.find(img => img.is_primary === 1) || images[0] || null;
+}
+
 
 export async function updateUser(id: string, userData: Partial<UserFromApi>): Promise<UserFromApi> {
     const response = await fetch(`${API_BASE_URL}/user/${id}`, {
@@ -1349,6 +1376,7 @@ export async function getEventImages(companyId: string, eventId: number): Promis
     
 
     
+
 
 
 
