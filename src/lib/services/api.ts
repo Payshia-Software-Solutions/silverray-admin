@@ -327,6 +327,23 @@ export interface EventFromApi {
   images_url: string | null;
 }
 
+export interface RoomImageFromApi {
+    id: number;
+    room_id: number;
+    company_id: string;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: number;
+    updated_by: number | null;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -662,6 +679,11 @@ export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary
         body: formData,
     });
     return handleResponse<any>(response);
+}
+
+export async function getRoomImages(companyId: string, roomId: number): Promise<RoomImageFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/room-images/company/${companyId}/room/${roomId}`);
+  return handleResponse<RoomImageFromApi[]>(response);
 }
 
 /**
@@ -1279,6 +1301,7 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     
 
     
+
 
 
 

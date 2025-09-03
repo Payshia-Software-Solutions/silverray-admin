@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2, X, CheckCircle2 } from 'lucide-react';
+import { Bed, Minus, Plus, Award, ImageIcon, DollarSign, User, Trash2, X, CheckCircle2, MoreVertical, Star } from 'lucide-react';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -32,17 +32,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle as DialogTitleComponent, DialogDescription as DialogDescriptionComponent, DialogClose, DialogTrigger } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useParams, useRouter } from 'next/navigation';
-import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi } from '@/lib/services/api';
+import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi, getRoomImages, RoomImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
-const roomImages = [
-    { src: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070&auto=format&fit=crop', hint: 'hotel room interior', primary: true },
-    { src: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070&auto=format&fit=crop', hint: 'modern hotel room', primary: false },
-    { src: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070&auto=format&fit=crop', hint: 'hotel bathroom marble', primary: false },
-    { src: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop', hint: 'hotel room view', primary: false },
-]
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+  id?: number;
+}
 
 export default function EditRoomPage() {
   const params = useParams();
@@ -56,6 +62,7 @@ export default function EditRoomPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
@@ -67,10 +74,11 @@ export default function EditRoomPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [roomData, amenitiesData, roomTypesData] = await Promise.all([
+        const [roomData, amenitiesData, roomTypesData, imagesData] = await Promise.all([
           getRoomById(roomId),
           getAmenities(),
           getRoomTypes(),
+          getRoomImages('com-001', roomId)
         ]);
         setRoom(roomData);
         setAllAmenities(amenitiesData);
@@ -80,6 +88,14 @@ export default function EditRoomPage() {
           const amenityIds = new Set(roomData.amenities_id.split(',').filter(id => id));
           setSelectedAmenities(amenityIds);
         }
+        
+        const formattedImages = imagesData.map(img => ({
+            id: img.id,
+            file: null,
+            preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
+            isPrimary: img.is_primary === 1,
+        }));
+        setImageSlots(formattedImages);
 
       } catch (error: any) {
         toast({
@@ -108,6 +124,32 @@ export default function EditRoomPage() {
     });
   };
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const file = event.target.files?.[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              const newImageSlots = [...imageSlots];
+              newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
+              setImageSlots(newImageSlots);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+      const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+      setImageSlots(newImageSlots);
+  };
+
+  const setPrimaryImage = (selectedIndex: number) => {
+      const newImageSlots = imageSlots.map((slot, index) => ({
+          ...slot,
+          isPrimary: index === selectedIndex,
+      }));
+      setImageSlots(newImageSlots);
+  };
+
   const handleDelete = () => {
     setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
@@ -134,7 +176,7 @@ export default function EditRoomPage() {
         price_per_night: (formData.get('pricePerNight') as string),
         currency: room.currency || 'USD',
         current_status: formData.get('status') as RoomFromApi['current_status'],
-        image_url: formData.get('imageUrl') as string || '/images/rooms/default.jpg',
+        image_url: imageSlots.find(slot => slot.isPrimary)?.preview || '/images/rooms/default.jpg',
         created_by: room.created_by || 'admin',
         updated_by: 'admin'
     };
@@ -316,48 +358,65 @@ export default function EditRoomPage() {
         </Card>
 
         <Card>
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
-                    Room Images
-                </h3>
-            </div>
-            <Dialog>
-                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {roomImages.map((image, i) => (
-                        <div key={i} className="relative">
-                            <DialogTrigger asChild>
-                                <Image 
-                                    src={image.src} 
-                                    alt={`Room image ${i+1}`} 
-                                    width={200} 
-                                    height={150} 
-                                    className="rounded-lg object-cover aspect-[4/3] cursor-pointer" 
-                                    data-ai-hint={image.hint} 
-                                />
-                            </DialogTrigger>
-                            {image.primary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+            <CardContent className="p-6 space-y-6">
+                <div className="space-y-2">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <span className="bg-primary/10 p-2 rounded-full"><ImageIcon className="h-5 w-5 text-primary"/></span>
+                        Room Images
+                    </h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={index} className="relative aspect-video group">
+                        {imageSlots[index]?.preview ? (
+                            <>
+                            <Image
+                                src={imageSlots[index].preview!}
+                                alt={`Room image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="secondary" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                            <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                            </>
+                        ) : (
+                            <label
+                            htmlFor={`image-upload-${index}`}
+                            className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                            >
+                            <div className="flex flex-col items-center justify-center text-center">
+                                <Plus className="w-8 h-8 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                            </div>
+                            <Input
+                                id={`image-upload-${index}`}
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(e, index)}
+                            />
+                            </label>
+                        )}
                         </div>
                     ))}
-                    <div className="flex items-center justify-center w-full">
-                    <label
-                        htmlFor="image-upload"
-                        className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                    >
-                        <div className="flex flex-col items-center justify-center">
-                        <Plus className="w-8 h-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Add Image</p>
-                        </div>
-                        <Input id="image-upload" type="file" className="hidden" />
-                    </label>
-                    </div>
                 </div>
-                 <DialogContent className="max-w-2xl">
-                    <Image src={roomImages[0].src} alt="Room image enlarged" width={800} height={600} className="rounded-lg object-contain w-full" />
-                </DialogContent>
-            </Dialog>
-          </CardContent>
+            </CardContent>
         </Card>
       </div>
 
@@ -465,5 +524,3 @@ export default function EditRoomPage() {
     </form>
   );
 }
-
-    
