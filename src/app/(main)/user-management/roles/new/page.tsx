@@ -118,11 +118,7 @@ export default function AddNewRolePage() {
                         {errors.permissions && <p className="text-red-500 text-sm">{errors.permissions.message}</p>}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="company_id">Company ID *</Label>
-                            <Input id="company_id" {...register('company_id')} />
-                            {errors.company_id && <p className="text-red-500 text-sm">{errors.company_id.message}</p>}
-                        </div>
+                        
                         <div className="space-y-2">
                             <Label>Status</Label>
                             <Controller
