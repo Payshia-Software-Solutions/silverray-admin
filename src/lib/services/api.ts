@@ -1088,14 +1088,14 @@ export async function createWeddingPackage(data: any): Promise<WeddingPackageFro
 export async function uploadWeddingPackageImage(weddingId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('wedding_id', String(weddingId));
-    formData.append('company_id', '201'); // Example static company_id
+    formData.append('company_id', '201');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
     formData.append('alt_text', 'Wedding package image');
     formData.append('is_primary', isPrimary ? '1' : '0');
     formData.append('display_order', '1');
-    formData.append('uploaded_by', '3'); // Example static user ID
+    formData.append('uploaded_by', '3');
     
     const response = await fetch(`${API_BASE_URL}/wedding-images`, {
         method: 'POST',
@@ -1204,10 +1204,10 @@ export async function createUser(userData: any): Promise<any> {
     return handleResponse<any>(response);
 }
 
-export async function uploadUserImage(userId: string, imageFile: File): Promise<any> {
+export async function uploadUserImage(userId: string, companyId: string, imageFile: File): Promise<any> {
     const formData = new FormData();
     formData.append('user_id', userId);
-    formData.append('company_id', '1'); // Example static company_id
+    formData.append('company_id', companyId);
     formData.append('image', imageFile);
     formData.append('image_name', imageFile.name);
     formData.append('file_size', String(imageFile.size));
@@ -1376,6 +1376,7 @@ export async function getEventImages(companyId: string, eventId: number): Promis
     
 
     
+
 
 
 

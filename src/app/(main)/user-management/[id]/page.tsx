@@ -88,11 +88,11 @@ export default function EditAdminPage() {
 
   const handleUpdateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
-        const { avatar_url, ...userData } = data; // Exclude avatar_url from the main update
+        const { avatar_url, ...userData } = data;
         await updateUser(id, userData);
 
         if (imageFile) {
-            await uploadUserImage(id, imageFile);
+            await uploadUserImage(id, '1', imageFile);
         }
 
         toast({

@@ -69,7 +69,7 @@ export default function AddNewAdminPage() {
       resolver: zodResolver(userSchema),
       defaultValues: {
           status: 'Active',
-          company_id: 'comp_001', // Default value
+          company_id: '1',
       }
   });
 
@@ -141,7 +141,7 @@ export default function AddNewAdminPage() {
     }
 
     try {
-        await uploadUserImage(newlyCreatedUser.id, imageFile);
+        await uploadUserImage(newlyCreatedUser.id, '1', imageFile);
         toast({ title: "Success!", description: "User account and image uploaded successfully."});
         setShowImageDialog(false);
         router.push('/user-management');
