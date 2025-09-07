@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -39,7 +40,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useParams, useRouter } from 'next/navigation';
-import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi, getRoomImages, RoomImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi, getRoomImages, RoomImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadRoomImage } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -130,7 +131,8 @@ export default function EditRoomPage() {
           const reader = new FileReader();
           reader.onloadend = () => {
               const newImageSlots = [...imageSlots];
-              newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
+              const isFirstImage = !imageSlots.some(slot => slot.preview);
+              newImageSlots[index] = { file, preview: reader.result as string, isPrimary: newImageSlots[index]?.isPrimary || isFirstImage, id: newImageSlots[index]?.id };
               setImageSlots(newImageSlots);
           };
           reader.readAsDataURL(file);
@@ -183,6 +185,16 @@ export default function EditRoomPage() {
     
     try {
         await updateRoom(room.id, roomDataForApi);
+
+        const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+        for (const slot of imagesToUpload) {
+            if (slot.file) {
+                // If it's a new image, it won't have an ID.
+                // The backend should handle creating a new image record.
+                await uploadRoomImage(room.id, slot.file, slot.isPrimary);
+            }
+        }
+
         setShowSaveConfirmDialog(false);
         setShowSaveSuccessDialog(true);
     } catch (error: any) {
@@ -524,3 +536,4 @@ export default function EditRoomPage() {
     </form>
   );
 }
+
