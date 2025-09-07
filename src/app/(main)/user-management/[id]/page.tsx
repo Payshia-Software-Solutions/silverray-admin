@@ -32,7 +32,7 @@ const userSchema = z.object({
   full_name: z.string().min(1, "Full Name is required"),
   email: z.string().email("Invalid email address"),
   role: z.string().min(1, "Role is required"),
-  company_id: z.string().min(1, "Company ID is required"),
+  company_id: z.string(),
   status: z.enum(['Active', 'Inactive']),
   avatar_url: z.string().optional().nullable(),
 });
@@ -231,11 +231,6 @@ export default function EditAdminPage() {
                         )}
                     />
                     {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="company_id">Company ID *</Label>
-                    <Input id="company_id" {...register('company_id')} />
-                    {errors.company_id && <p className="text-red-500 text-sm">{errors.company_id.message}</p>}
                 </div>
                 <div className="space-y-2">
                     <Label>Account Status</Label>

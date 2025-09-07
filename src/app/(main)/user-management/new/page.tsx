@@ -42,7 +42,7 @@ const userSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   role: z.string().min(1, "Role is required"),
-  company_id: z.string().min(1, "Company ID is required"),
+  company_id: z.string(),
   status: z.enum(['Active', 'Inactive']),
   avatar_url: z.string().optional().nullable(),
 }).refine(data => data.password === data.confirmPassword, {
@@ -254,11 +254,6 @@ export default function AddNewAdminPage() {
                         )}
                     />
                     {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="company_id">Company ID *</Label>
-                    <Input id="company_id" {...register('company_id')} />
-                    {errors.company_id && <p className="text-red-500 text-sm">{errors.company_id.message}</p>}
                 </div>
                 <div className="space-y-2">
                     <Label>Account Status</Label>
