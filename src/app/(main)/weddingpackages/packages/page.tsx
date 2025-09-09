@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -36,6 +37,7 @@ import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi, g
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 
 export default function WeddingPackagesPage() {
@@ -144,7 +146,16 @@ export default function WeddingPackagesPage() {
                         className="object-cover"
                         data-ai-hint="wedding hall"
                     />
-                    <Badge className="absolute top-2 right-2 bg-green-500 text-white">{pkg.status}</Badge>
+                     {pkg.status && (
+                        <Badge className={cn(
+                            'absolute top-3 right-3 text-sm text-white',
+                            pkg.status === 'Active' && 'bg-green-500',
+                            pkg.status === 'Seasonal' && 'bg-orange-500',
+                            pkg.status === 'Inactive' && 'bg-gray-500'
+                        )}>
+                            {pkg.status}
+                        </Badge>
+                     )}
                 </div>
                 <CardContent className="p-4 flex-grow">
                     <h3 className="text-lg font-semibold mb-1">{pkg.package_name}</h3>
