@@ -972,15 +972,17 @@ export async function deleteExperience(id: number): Promise<{ message: string }>
     return handleResponse<{ message: string }>(response);
 }
 
-export async function uploadExperienceImage(experienceId: number, imageFile: File): Promise<any> {
+export async function uploadExperienceImage(experienceId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('experience_id', String(experienceId));
     formData.append('image', imageFile);
     formData.append('company_id', 'com-001');
-    formData.append('is_primary', '1');
+    formData.append('is_primary', isPrimary ? '1' : '0');
     formData.append('uploaded_by', 'admin_user');
     formData.append('alt_text', 'Experience Image');
     formData.append('display_order', '1');
+    formData.append('image_name', imageFile.name);
+    formData.append('file_size', String(imageFile.size));
 
     const response = await fetch(`${API_BASE_URL}/experience-images`, {
         method: 'POST',
@@ -1385,6 +1387,7 @@ export async function getEventImages(companyId: string, eventId: number): Promis
     
 
     
+
 
 
 

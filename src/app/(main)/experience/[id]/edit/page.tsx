@@ -17,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2, Upload } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2, Upload, MoreVertical, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -40,6 +40,12 @@ import {
   DialogHeader as DialogHeaderComponent,
   DialogTitle as DialogTitleComponent
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -51,6 +57,7 @@ import {
     type ExperienceFromApi, 
     deleteExperience,
     getExperienceImages,
+    uploadExperienceImage,
     ExperienceImageFromApi,
     CONTENT_PROVIDER_BASE_URL
 } from '@/lib/services/api';
@@ -138,15 +145,31 @@ export default function EditExperiencePage() {
     }, [id, reset, toast]);
     
     const onSubmit: SubmitHandler<ExperienceFormValues> = async (data) => {
+        if (!experienceData) return;
+
         try {
+            const primaryImage = imageSlots.find(slot => slot.isPrimary);
+            const primaryImageUrl = primaryImage?.file
+                ? (primaryImage.preview || '')
+                : (primaryImage?.preview?.replace(CONTENT_PROVIDER_BASE_URL, '') || '');
+
+
             const dataToSubmit = {
                 ...data,
                 advance_booking_required: data.advance_booking_required ? 1 : 0,
                 walk_in_available: data.walk_in_available ? 1 : 0,
                 updated_by: 'admin@company.com',
-                images_url: imageSlots.find(slot => slot.isPrimary)?.preview || '',
+                images_url: primaryImageUrl,
             };
             await updateExperience(id, dataToSubmit);
+
+            const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+            for (const slot of imagesToUpload) {
+                if (slot.file) {
+                    await uploadExperienceImage(id, slot.file, slot.isPrimary);
+                }
+            }
+
             setShowSaveConfirmDialog(false);
             setShowSaveSuccessDialog(true);
         } catch (error: any) {
@@ -181,7 +204,8 @@ export default function EditExperiencePage() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const newImageSlots = [...imageSlots];
-                newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string };
+                const isFirstImage = !newImageSlots.some(slot => slot.preview);
+                newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string, isPrimary: newImageSlots[index]?.isPrimary || isFirstImage };
                 setImageSlots(newImageSlots);
             };
             reader.readAsDataURL(file);
@@ -189,8 +213,12 @@ export default function EditExperiencePage() {
     };
 
     const removeImage = (indexToRemove: number) => {
-        const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
-        setImageSlots(newImageSlots);
+        const newSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+        // If the primary image was removed, make the new first image primary
+        if (imageSlots[indexToRemove].isPrimary && newSlots.length > 0) {
+            newSlots[0].isPrimary = true;
+        }
+        setImageSlots(newSlots);
     };
 
     const setPrimaryImage = (selectedIndex: number) => {
@@ -402,18 +430,24 @@ export default function EditExperiencePage() {
                                 fill
                                 className="rounded-lg object-cover"
                             />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => removeImage(index)}
-                                >
-                                <Trash2 className="h-4 w-4" />
-                                </Button>
+                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="secondary" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                            <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
-                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">Primary</div>}
+                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
                             </>
                         ) : (
                             <label
@@ -489,3 +523,4 @@ export default function EditExperiencePage() {
 }
 
     
+
