@@ -113,12 +113,18 @@ export default function EditEventPage() {
     }, [id, reset, toast]);
 
     const onSubmit: SubmitHandler<EventFormValues> = async (data) => {
+        const primaryImage = imageSlots.find(slot => slot.isPrimary);
+        // For existing images, strip the base URL. For new files, it will be handled during upload.
+        const primaryImageUrl = primaryImage?.file
+            ? '' // Will be set after upload
+            : (primaryImage?.preview?.replace(CONTENT_PROVIDER_BASE_URL, '') || null);
+
         const dataToSend = {
             ...data,
             event_date: format(data.event_date, 'yyyy-MM-dd'),
             hall_id: data.hall_ids.join(','),
             updated_by: 'admin@silverray.com',
-            images_url: imageSlots.find(s => s.isPrimary)?.preview || imageSlots[0]?.preview || '',
+            images_url: primaryImageUrl,
         };
         
         try {
@@ -148,7 +154,7 @@ export default function EditEventPage() {
         reader.onloadend = () => {
             const newImageSlots = [...imageSlots];
             const isFirstImage = !imageSlots.some(slot => slot.preview);
-            newImageSlots[index] = { file, preview: reader.result as string, isPrimary: isFirstImage };
+            newImageSlots[index] = { file, preview: reader.result as string, isPrimary: newImageSlots[index]?.isPrimary || isFirstImage, id: newImageSlots[index]?.id };
             setImageSlots(newImageSlots);
         };
         reader.readAsDataURL(file);
@@ -158,13 +164,17 @@ export default function EditEventPage() {
     const removeImage = (index: number) => {
         const newImageSlots = [...imageSlots];
         const wasPrimary = newImageSlots[index].isPrimary;
-        newImageSlots[index] = { file: null, preview: null, isPrimary: false };
+        newImageSlots.splice(index, 1);
         
-        if (wasPrimary) {
+        if (wasPrimary && newImageSlots.length > 0) {
             const firstImageIndex = newImageSlots.findIndex(slot => slot.file || slot.preview);
             if (firstImageIndex !== -1) {
                 newImageSlots[firstImageIndex].isPrimary = true;
             }
+        }
+        // Add a placeholder slot if needed to maintain 5 slots
+        while (newImageSlots.length < 5) {
+            newImageSlots.push({ file: null, preview: null, isPrimary: false });
         }
         setImageSlots(newImageSlots);
     };
