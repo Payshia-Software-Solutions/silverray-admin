@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getRooms, deleteRoom, type RoomFromApi } from '@/lib/services/api';
+import { getRooms, deleteRoom, type RoomFromApi, getRoomImages, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -54,13 +54,23 @@ export default function RoomsList() {
     const [deletedRoomNumber, setDeletedRoomNumber] = useState<string | null>(null);
 
     useEffect(() => {
-        async function fetchRooms() {
+        async function fetchRoomsAndImages() {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getRooms();
-                if (Array.isArray(data)) {
-                    setRooms(data);
+                const roomsData = await getRooms();
+                if (Array.isArray(roomsData)) {
+                    const roomsWithImages = await Promise.all(roomsData.map(async (room) => {
+                        try {
+                            const images = await getRoomImages(room.company_id, room.id);
+                            const primaryImage = images.find(img => img.is_primary) || images[0];
+                            return { ...room, image_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : '/placeholder.png' };
+                        } catch (imageError) {
+                            console.error(`Failed to fetch images for room ${room.id}:`, imageError);
+                            return { ...room, image_url: '/placeholder.png' }; // Fallback image
+                        }
+                    }));
+                    setRooms(roomsWithImages);
                 } else {
                     setError('Received unexpected data format from server.');
                     setRooms([]);
@@ -72,7 +82,7 @@ export default function RoomsList() {
                 setLoading(false);
             }
         }
-        fetchRooms();
+        fetchRoomsAndImages();
     }, []);
 
     const handleDeleteClick = (room: RoomFromApi) => {
