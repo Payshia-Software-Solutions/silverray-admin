@@ -29,7 +29,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
-import { getExperiences, deleteExperience, type ExperienceFromApi } from '@/lib/services/api';
+import { getExperiences, deleteExperience, type ExperienceFromApi, getExperienceImages, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -55,7 +55,17 @@ export default function ExperienceManagementPage() {
         setLoading(true);
         setError(null);
         const data = await getExperiences();
-        setExperiences(data);
+        const experiencesWithImages = await Promise.all(data.map(async (exp) => {
+            try {
+                const images = await getExperienceImages(exp.company_id, exp.id);
+                const primaryImage = images.find(img => img.is_primary) || images[0];
+                return { ...exp, images_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
+            } catch (e) {
+                console.error(`Failed to load image for experience ${exp.id}`, e);
+                return { ...exp, images_url: null };
+            }
+        }));
+        setExperiences(experiencesWithImages);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred.');
         toast({
@@ -236,3 +246,5 @@ export default function ExperienceManagementPage() {
     </div>
   );
 }
+
+    
