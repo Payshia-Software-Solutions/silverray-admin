@@ -3,10 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, Trash2, X } from 'lucide-react';
+import { Eye, Trash2, X, Users, DollarSign, BedDouble } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getRooms, deleteRoom, type RoomFromApi } from '@/lib/services/api';
@@ -34,11 +33,13 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import Image from 'next/image';
+
 
 const statusVariant = {
-  Available: 'bg-green-100 text-green-700',
-  Booked: 'bg-red-100 text-red-700',
-  'Under Maintenance': 'bg-yellow-100 text-yellow-700',
+  Available: 'bg-green-500',
+  Booked: 'bg-red-500',
+  'Under Maintenance': 'bg-yellow-500',
 } as const;
 
 
@@ -105,66 +106,67 @@ export default function RoomsList() {
         <>
             <Toaster />
             <AlertDialog open={!!roomToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
-                <Card>
-                    <CardContent className="p-0">
-                        {loading && <p className="p-4 text-center">Loading rooms...</p>}
-                        {error && (
-                            <Alert variant="destructive" className="m-4">
-                                <Terminal className="h-4 w-4" />
-                                <AlertTitle>Error Fetching Data</AlertTitle>
-                                <AlertDescription>{error}</AlertDescription>
-                            </Alert>
-                        )}
-                        {!loading && !error && (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Room Number</TableHead>
-                                        <TableHead>Room Type</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Price/Night</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {rooms.map((room) => (
-                                        <TableRow key={room.id}>
-                                            <TableCell className="font-medium">{room.room_number}</TableCell>
-                                            <TableCell>{room.descriptive_title}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline" className={cn('border-transparent', statusVariant[room.current_status as keyof typeof statusVariant])}>
-                                                    {room.current_status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{`${room.currency} ${room.price_per_night}`}</TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end items-center gap-2">
-                                                    <Button asChild variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10">
-                                                        <Link href={`/rooms/${room.id}`}>
-                                                            <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                                                            <span className="sr-only">View</span>
-                                                        </Link>
-                                                    </Button>
-                                                    <AlertDialogTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-100" onClick={() => handleDeleteClick(room)}>
-                                                            <Trash2 className="h-4 w-4" />
-                                                            <span className="sr-only">Delete</span>
-                                                        </Button>
-                                                    </AlertDialogTrigger>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </CardContent>
-                    <CardFooter className="flex items-center justify-between border-t px-6 py-3">
-                        <div className="text-sm text-muted-foreground">
-                            Showing 1 to {rooms.length} of {rooms.length} rooms
-                        </div>
-                    </CardFooter>
-                </Card>
+                 {loading && <p className="p-4 text-center">Loading rooms...</p>}
+                 {error && (
+                     <Alert variant="destructive" className="m-4">
+                         <Terminal className="h-4 w-4" />
+                         <AlertTitle>Error Fetching Data</AlertTitle>
+                         <AlertDescription>{error}</AlertDescription>
+                     </Alert>
+                 )}
+                {!loading && !error && (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {rooms.map((room) => (
+                        <Card key={room.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+                             <div className="relative w-full h-48">
+                                <Image
+                                    src={room.image_url || `https://picsum.photos/600/400?random=${room.id}`}
+                                    alt={room.descriptive_title}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint="hotel room"
+                                />
+                                <Badge className={cn(
+                                    'absolute top-3 right-3 text-sm text-white border-transparent',
+                                    statusVariant[room.current_status as keyof typeof statusVariant] || 'bg-gray-500'
+                                )}>
+                                    {room.current_status}
+                                </Badge>
+                             </div>
+                            <CardContent className="p-4 flex flex-col flex-grow">
+                                <h3 className="text-xl font-bold mb-2 text-foreground">{room.descriptive_title}</h3>
+                                <p className="text-sm text-muted-foreground mb-4">Room {room.room_number}</p>
+
+                                <div className="space-y-2 text-sm text-muted-foreground flex-grow">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4" />
+                                        <span>{room.adults_capacity} Adults, {room.children_capacity} Children</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="h-4 w-4" />
+                                        <span>{room.currency} {room.price_per_night} / night</span>
+                                    </div>
+                                </div>
+
+                            </CardContent>
+                             <CardFooter className="flex justify-end items-center pt-2 gap-2 p-4 bg-muted/50 mt-auto">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                                    <Link href={`/rooms/${room.id}`}>
+                                        <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                                        <span className="sr-only">View/Edit</span>
+                                    </Link>
+                                </Button>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(room)}>
+                                        <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                        <span className="sr-only">Delete</span>
+                                    </Button>
+                                </AlertDialogTrigger>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                 </div>
+                )}
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Room ?</AlertDialogTitle>
