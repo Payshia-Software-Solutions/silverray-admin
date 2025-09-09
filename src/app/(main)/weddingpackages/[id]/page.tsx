@@ -34,7 +34,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi, getWeddingPackageImages, type WeddingPackageImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi, getWeddingPackageImages, type WeddingPackageImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadWeddingPackageImage } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -143,17 +143,31 @@ export default function EditWeddingPackagePage() {
   }, [id, reset, toast]);
 
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
+    const primaryImage = imageSlots.find(slot => slot.isPrimary);
+    const primaryImageUrl = primaryImage?.file
+        ? (primaryImage.preview || '')
+        : (primaryImage?.preview?.replace(CONTENT_PROVIDER_BASE_URL, '') || '');
+
+
     const dataToSend = {
       ...data,
       company_id: '201',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
-      image_urls: imageSlots.find(slot => slot.isPrimary)?.preview || '',
+      image_urls: primaryImageUrl,
     };
 
     try {
       await updateWeddingPackage(id, dataToSend as any);
+
+      const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+      for (const slot of imagesToUpload) {
+          if (slot.file) {
+              await uploadWeddingPackageImage(id, slot.file, slot.isPrimary);
+          }
+      }
+
       setShowSuccessDialog(true);
     } catch (error: any) {
         toast({
@@ -440,3 +454,4 @@ export default function EditWeddingPackagePage() {
   );
 
     
+
