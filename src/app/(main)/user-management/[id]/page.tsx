@@ -62,11 +62,17 @@ export default function EditAdminPage() {
                     getUserById(id),
                     getRoles()
                 ]);
-                reset(userData);
                 
                 const userImage = await getUserImage(userData.company_id, userData.id);
-                if (userImage && userImage.image_url) {
-                    setImagePreview(CONTENT_PROVIDER_BASE_URL + userImage.image_url);
+                const fullImageUrl = userImage && userImage.image_url ? CONTENT_PROVIDER_BASE_URL + userImage.image_url : null;
+                
+                reset({
+                    ...userData,
+                    avatar_url: fullImageUrl,
+                });
+                
+                if (fullImageUrl) {
+                    setImagePreview(fullImageUrl);
                 }
                 
                 setRoles(rolesData);
@@ -88,12 +94,21 @@ export default function EditAdminPage() {
 
   const handleUpdateAccount: SubmitHandler<UserFormValues> = async (data) => {
     try {
-        const { avatar_url, ...userData } = data;
-        await updateUser(id, userData);
+        let finalAvatarUrl = data.avatar_url;
 
+        // If a new image file is selected, upload it first.
         if (imageFile) {
-            await uploadUserImage(id, '1', imageFile);
+            const uploadResponse = await uploadUserImage(id, '1', imageFile);
+            finalAvatarUrl = CONTENT_PROVIDER_BASE_URL + uploadResponse.imageUrl;
         }
+
+        // Prepare user data for update, including the potentially new avatar URL.
+        const userDataToUpdate = {
+            ...data,
+            avatar_url: finalAvatarUrl,
+        };
+
+        await updateUser(id, userDataToUpdate);
 
         toast({
             title: 'Success!',
@@ -124,7 +139,7 @@ export default function EditAdminPage() {
   const removeImage = () => {
       setImageFile(null);
       setImagePreview(null);
-      setValue('avatar_url', null);
+      setValue('avatar_url', null); // Clear the avatar_url in the form state
       const fileInput = document.getElementById('profile-picture-upload') as HTMLInputElement;
       if (fileInput) {
           fileInput.value = '';

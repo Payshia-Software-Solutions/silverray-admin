@@ -1233,7 +1233,7 @@ export async function uploadUserImage(userId: string, companyId: string, imageFi
         method: 'POST',
         body: formData,
     });
-    return handleResponse<any>(response);
+    return handleResponse<{ imageUrl: string }>(response);
 }
 
 export async function getUserImage(companyId: string, userId: string): Promise<UserImageFromApi | null> {
@@ -1387,6 +1387,7 @@ export async function getEventImages(companyId: string, eventId: number): Promis
     
 
     
+
 
 
 
