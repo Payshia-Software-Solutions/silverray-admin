@@ -32,7 +32,7 @@ import {
 import { Search, Plus, Users, Check, Trash2, X, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi, getPackageInclusions, type PackageInclusionFromApi } from '@/lib/services/api';
+import { getWeddingPackages, deleteWeddingPackage, type WeddingPackageFromApi, getPackageInclusions, type PackageInclusionFromApi, getWeddingPackageImages, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import Link from 'next/link';
@@ -58,7 +58,19 @@ export default function WeddingPackagesPage() {
           getWeddingPackages(),
           getPackageInclusions()
         ]);
-        setPackages(packagesData);
+        
+        const packagesWithImages = await Promise.all(packagesData.map(async (pkg) => {
+            try {
+                const images = await getWeddingPackageImages(pkg.company_id, pkg.id);
+                const primaryImage = images.find(img => img.is_primary) || images[0];
+                return { ...pkg, image_urls: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
+            } catch (e) {
+                console.error(`Failed to load image for package ${pkg.id}`, e);
+                return { ...pkg, image_urls: null };
+            }
+        }));
+
+        setPackages(packagesWithImages);
         
         const inclusionMap = new Map(inclusionsData.map(inc => [String(inc.id), inc.inclusion_type]));
         setAllInclusions(inclusionMap);
