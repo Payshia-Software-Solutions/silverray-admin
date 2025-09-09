@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Eye, Trash2, X, Calendar, Users, Building } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getEvents, deleteEvent, type EventFromApi, getHalls, type HallFromApi } from '@/lib/services/api';
+import { getEvents, deleteEvent, type EventFromApi, getHalls, type HallFromApi, getEventImages, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -43,7 +43,22 @@ export default function EventManagementPage() {
           getEvents(),
           getHalls()
         ]);
-        setEvents(eventData);
+        
+        const eventsWithImages = await Promise.all(eventData.map(async (event) => {
+            try {
+                if (event.company_id) {
+                    const images = await getEventImages(event.company_id, event.id);
+                    const primaryImage = images.find(img => img.is_primary) || images[0];
+                    return { ...event, images_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
+                }
+                return { ...event, images_url: null };
+            } catch (e) {
+                console.error(`Failed to load image for event ${event.id}`, e);
+                return { ...event, images_url: null };
+            }
+        }));
+
+        setEvents(eventsWithImages);
         const hallMap = new Map(hallData.map(h => [String(h.id), h.hall_name]));
         setHalls(hallMap);
       } catch (err: any) {
@@ -191,5 +206,3 @@ export default function EventManagementPage() {
     </>
   );
 }
-
-    
