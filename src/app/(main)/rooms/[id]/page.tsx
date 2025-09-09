@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -164,6 +163,12 @@ export default function EditRoomPage() {
     
     const formData = new FormData(formRef.current);
 
+    const primaryImage = imageSlots.find(slot => slot.isPrimary);
+    const primaryImageUrl = primaryImage?.file 
+        ? (primaryImage.preview || '') // Use preview for new files
+        : (primaryImage?.preview?.replace(CONTENT_PROVIDER_BASE_URL, '') || '/images/rooms/default.jpg'); // Get relative path for existing files
+
+
     const roomDataForApi = {
         room_number: room.room_number,
         amenities_id: Array.from(selectedAmenities).join(','),
@@ -178,7 +183,7 @@ export default function EditRoomPage() {
         price_per_night: (formData.get('pricePerNight') as string),
         currency: room.currency || 'USD',
         current_status: formData.get('status') as RoomFromApi['current_status'],
-        image_url: imageSlots.find(slot => slot.isPrimary)?.preview || '/images/rooms/default.jpg',
+        image_url: primaryImageUrl,
         created_by: room.created_by || 'admin',
         updated_by: 'admin'
     };
@@ -537,3 +542,4 @@ export default function EditRoomPage() {
   );
 }
 
+    
