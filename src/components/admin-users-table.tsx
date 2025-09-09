@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Trash2, Search, Key, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getUsers, deleteUser, type UserFromApi } from "@/lib/services/api";
+import { getUsers, deleteUser, type UserFromApi, getUserImage, CONTENT_PROVIDER_BASE_URL } from "@/lib/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "./ui/toaster";
 import {
@@ -56,7 +56,17 @@ export function AdminUsersTable() {
             try {
                 setLoading(true);
                 const data = await getUsers();
-                setUsers(data);
+                const usersWithImages = await Promise.all(data.map(async (user) => {
+                    try {
+                        const image = await getUserImage(user.company_id, user.id);
+                        return { ...user, avatar_url: image ? CONTENT_PROVIDER_BASE_URL + image.image_url : null };
+                    } catch (e) {
+                        console.error(`Failed to load image for user ${user.id}`, e);
+                        return { ...user, avatar_url: null };
+                    }
+                }));
+
+                setUsers(usersWithImages);
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch users');
                 toast({
@@ -252,3 +262,5 @@ export function AdminUsersTable() {
   );
 }
 export default AdminUsersTable;
+
+    
