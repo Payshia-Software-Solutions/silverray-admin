@@ -396,6 +396,19 @@ export interface UserImageFromApi {
     is_active: number;
 }
 
+export interface GalleryImageFromApi {
+    id: number;
+    company_id: string;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    uploaded_by: string;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
 
 
 /**
@@ -1385,26 +1398,31 @@ export async function getEventImages(companyId: string, eventId: number): Promis
     return handleResponse<EventImageFromApi[]>(response);
 }
     
+// Gallery API Functions
+export async function getGalleryImages(): Promise<GalleryImageFromApi[]> {
+    const response = await fetch(`${API_BASE_URL}/gallery-images`);
+    return handleResponse<GalleryImageFromApi[]>(response);
+}
 
-    
+export async function uploadGalleryImage(imageFile: File, altText: string): Promise<any> {
+    const formData = new FormData();
+    formData.append('company_id', '1');
+    formData.append('image_name', imageFile.name);
+    formData.append('image', imageFile);
+    formData.append('file_size', String(imageFile.size));
+    formData.append('alt_text', altText);
+    formData.append('uploaded_by', 'admin_user');
 
+    const response = await fetch(`${API_BASE_URL}/gallery-images`, {
+        method: 'POST',
+        body: formData,
+    });
+    return handleResponse<any>(response);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export async function deleteGalleryImage(id: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/gallery-images/${id}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}

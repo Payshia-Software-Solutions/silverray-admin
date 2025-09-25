@@ -34,6 +34,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/events/new': { title: 'Add New Event', description: 'Create a new event booking.' },
   '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
   '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
+  '/gallery': { title: 'Gallery Management', description: 'Manage your website\'s image gallery.' },
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'Add New Admin', description: 'Create a new administrative user account.' },
