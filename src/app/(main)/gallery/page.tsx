@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -153,7 +152,7 @@ export default function GalleryPage() {
                       width={150}
                       height={150}
                       className="rounded-md object-cover aspect-square"
-                      onLoad={() => URL.revokeObjectURL(file.preview)}
+                      onLoad={() => URL.createObjectURL(file.preview)}
                     />
                      <Button
                         variant="destructive"
@@ -174,39 +173,39 @@ export default function GalleryPage() {
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Image Gallery</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p>Loading images...</p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {images.map(image => (
-                <div key={image.id} className="relative group">
-                  <Image
-                    src={`${CONTENT_PROVIDER_BASE_URL}${image.image_url}`}
-                    alt={image.alt_text || image.image_name}
-                    width={200}
-                    height={200}
-                    className="rounded-lg object-cover aspect-square"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="icon" onClick={() => setImageToDelete(image)}>
-                            <Trash2 />
-                        </Button>
-                    </AlertDialogTrigger>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
       <AlertDialog open={!!imageToDelete} onOpenChange={(open) => !open && setImageToDelete(null)}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Image Gallery</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <p>Loading images...</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {images.map(image => (
+                  <div key={image.id} className="relative group">
+                    <Image
+                      src={`${CONTENT_PROVIDER_BASE_URL}${image.image_url}`}
+                      alt={image.alt_text || image.image_name}
+                      width={200}
+                      height={200}
+                      className="rounded-lg object-cover aspect-square"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="icon" onClick={() => setImageToDelete(image)}>
+                              <Trash2 />
+                          </Button>
+                      </AlertDialogTrigger>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
         <AlertDialogContent>
             <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
