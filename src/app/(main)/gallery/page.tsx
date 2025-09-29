@@ -152,7 +152,6 @@ export default function GalleryPage() {
                       width={150}
                       height={150}
                       className="rounded-md object-cover aspect-square"
-                      onLoad={() => URL.createObjectURL(file.preview)}
                     />
                      <Button
                         variant="destructive"
