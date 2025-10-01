@@ -731,14 +731,14 @@ export async function createRoom(roomData: any): Promise<RoomFromApi> {
 export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('room_id', String(roomId));
-    formData.append('company_id', '1'); // Example static company_id
+    formData.append('company_id', '1');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
     formData.append('alt_text', 'Room image');
     formData.append('is_primary', isPrimary ? '1' : '0');
     formData.append('display_order', '1');
-    formData.append('uploaded_by', '1001'); // Example static user ID
+    formData.append('uploaded_by', '1001');
     
     const response = await fetch(`${API_BASE_URL}/room-images`, {
         method: 'POST',
@@ -1231,7 +1231,7 @@ export async function createUser(userData: any): Promise<any> {
 export async function uploadUserImage(userId: string, companyId: string, imageFile: File): Promise<any> {
     const formData = new FormData();
     formData.append('user_id', userId);
-    formData.append('company_id', companyId);
+    formData.append('company_id', '1');
     formData.append('image', imageFile);
     formData.append('image_name', imageFile.name);
     formData.append('file_size', String(imageFile.size));
