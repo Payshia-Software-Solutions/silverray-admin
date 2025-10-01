@@ -1,16 +1,17 @@
 
-import { Hotel } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
 
 export function AppLogo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <Card className="bg-primary/80 p-0.5">
-        <CardContent className="p-1">
-          <Hotel className="h-6 w-6 text-primary-foreground" />
-        </CardContent>
-      </Card>
+      <Image 
+        src="https://content-provider.payshia.com/silver-ray/gallery-images/1/logopng-68dd3a98e6243.png" 
+        alt="Grand Silver Ray logo" 
+        width={40} 
+        height={40} 
+        className="rounded-md object-contain"
+      />
       <div className='flex flex-col'>
         <span className="text-lg font-bold tracking-tight text-blue-800">Grand Silver Ray</span>
         <span className="text-xs text-sidebar-foreground/70">Hotel Admin</span>
