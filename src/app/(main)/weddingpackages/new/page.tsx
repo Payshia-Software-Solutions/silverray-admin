@@ -119,7 +119,7 @@ export default function NewWeddingPackagePage() {
   const onSubmit: SubmitHandler<PackageFormValues> = async (data) => {
     const dataToSend = {
       ...data,
-      company_id: '201',
+      company_id: '1',
       created_by: 'admin@weddingvenue.com',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),

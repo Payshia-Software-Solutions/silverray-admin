@@ -143,7 +143,7 @@ export default function AddNewRoomPage() {
         room_number: formData.get('id'),
         amenities_id: selectedAmenities.join(','),
         room_type_id: Number(formData.get('roomTypeId')),
-        company_id: 'com-001',
+        company_id: '1',
         descriptive_title: formData.get('descriptiveTitle'),
         short_description: formData.get('shortDescription'),
         adults_capacity: Number(formData.get('adults')),
@@ -501,5 +501,3 @@ export default function AddNewRoomPage() {
     </>
   );
 }
-
-    

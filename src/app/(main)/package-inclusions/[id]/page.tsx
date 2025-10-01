@@ -59,7 +59,7 @@ export default function EditInclusionPage() {
         try {
              const dataToSubmit = {
                 ...data,
-                company_id: 'comm4',
+                company_id: '1',
                 updated_by: 'admin_user',
             };
             await updatePackageInclusion(id, dataToSubmit);

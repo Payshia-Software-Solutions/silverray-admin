@@ -65,7 +65,7 @@ export default function EditRestaurantFeaturePage() {
                 ...data, 
                 updated_by: 'admin',
                 is_active: data.is_active ? 1 : 0,
-                company_id: 'com-001', // Add company_id to the submission
+                company_id: '1', // Add company_id to the submission
             };
             await updateRestaurantFeature(id, dataToSubmit as any);
             toast({

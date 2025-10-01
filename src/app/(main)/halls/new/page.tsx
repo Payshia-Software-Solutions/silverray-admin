@@ -41,7 +41,7 @@ export default function NewHallPage() {
         const dataToSend = {
             ...data,
             is_active: data.is_active ? 1 : 0,
-            company_id: 'C001',
+            company_id: '1',
         };
 
         try {

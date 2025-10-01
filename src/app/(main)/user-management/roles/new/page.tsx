@@ -45,7 +45,7 @@ export default function AddNewRolePage() {
       resolver: zodResolver(roleSchema),
       defaultValues: {
           is_active: true,
-          company_id: 'company_123', // Default value
+          company_id: '1', // Default value
       }
   });
 

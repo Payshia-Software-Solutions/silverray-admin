@@ -103,7 +103,7 @@ export default function NewEventPage() {
             event_date: format(data.event_date, 'yyyy-MM-dd'),
             hall_id: data.hall_ids.join(','),
             created_by: 'admin@silverray.com',
-            company_id: 'com-001',
+            company_id: '1',
             images_url: '',
         };
         

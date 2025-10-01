@@ -33,7 +33,7 @@ export default function NewInclusionPage() {
     const onSubmit: SubmitHandler<InclusionFormValues> = async (data) => {
         const dataToSend = {
             ...data,
-            company_id: 'comm2', // This should be dynamic in a real app
+            company_id: '1', // This should be dynamic in a real app
             created_by: 'admin_user',
             updated_by: 'admin_user',
         };

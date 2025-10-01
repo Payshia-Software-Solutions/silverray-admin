@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -114,7 +115,7 @@ export default function NewRestaurantVenuePage() {
           images_url: '', // Will be updated after image upload
           status: data.status,
           status_notes: data.status_notes || '',
-          company_id: 'COMP001',
+          company_id: '1',
           created_by: 'admin_user',
           updated_by: null,
           operating_hours_id: 1, // Placeholder as per your JSON structure

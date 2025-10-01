@@ -83,7 +83,7 @@ export default function NewBookingPage() {
             ...data,
             check_in_date: format(data.check_in_date, 'yyyy-MM-dd'),
             check_out_date: format(data.check_out_date, 'yyyy-MM-dd'),
-            company_id: 'com-001',
+            company_id: '1',
             balance_due: (data.total_amount - data.amount_paid).toFixed(2),
             // This would likely be calculated based on dates
             numbers_of_night: 1,
