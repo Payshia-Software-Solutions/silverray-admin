@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,7 +67,7 @@ export default function AddExperiencePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showImageUploadDialog, setShowImageUploadDialog] = useState(false);
-  const [newExperience, setNewExperience] = useState<ExperienceFromApi | null>(null);
+  const [newlyCreatedExperience, setNewlyCreatedExperience] = useState<ExperienceFromApi | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -91,13 +91,13 @@ export default function AddExperiencePage() {
         advance_booking_required: data.advance_booking_required ? 1 : 0,
         walk_in_available: data.walk_in_available ? 1 : 0,
         is_available: 1, 
-        company_id: 'com-001',
+        company_id: '1',
         created_by: 'admin@company.com',
         updated_by: 'admin@company.com',
       };
       
-      const createdExperience = await createExperience(experienceData);
-      setNewExperience(createdExperience);
+      const { experience: createdExperience } = await createExperience(experienceData);
+      setNewlyCreatedExperience(createdExperience);
       setShowImageUploadDialog(true); // Open dialog for step 2
 
     } catch (error: any) {
@@ -131,13 +131,13 @@ export default function AddExperiencePage() {
   };
 
   const handleImageUpload = async () => {
-    if (!imageFile || !newExperience) {
+    if (!imageFile || !newlyCreatedExperience) {
         toast({ title: "No image selected", description: "Please select an image file to upload.", variant: "destructive" });
         return;
     }
     setIsUploading(true);
     try {
-        await uploadExperienceImage(newExperience.id, imageFile);
+        await uploadExperienceImage(newlyCreatedExperience.id, imageFile, true);
         toast({ title: "Success", description: "Image uploaded and experience created successfully!" });
         setShowImageUploadDialog(false);
         router.push('/experience');
@@ -320,7 +320,7 @@ export default function AddExperiencePage() {
           <DialogHeader>
             <DialogTitle>Step 2: Upload Image</DialogTitle>
             <DialogDescription>
-              Your experience "{newExperience?.name}" has been created. Now, upload a primary image for it.
+              Your experience "{newlyCreatedExperience?.name}" has been created. Now, upload a primary image for it.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
