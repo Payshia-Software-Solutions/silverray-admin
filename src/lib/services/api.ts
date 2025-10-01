@@ -1184,6 +1184,22 @@ export async function getWeddingPackageImages(weddingId: number): Promise<Weddin
   return handleResponse<WeddingPackageImageFromApi[]>(response);
 }
 
+export async function updateWeddingPackageImage(imageId: number, imageData: Partial<{ is_primary: number }>): Promise<WeddingPackageImageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/wedding-images/${imageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(imageData),
+    });
+    return handleResponse<WeddingPackageImageFromApi>(response);
+}
+
+export async function deleteWeddingPackageImage(imageId: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/wedding-images/${imageId}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
 
 export async function updateWeddingPackage(id: number, data: any): Promise<WeddingPackageFromApi> {
     const response = await fetch(`${API_BASE_URL}/weddingpackages/${id}`, {
