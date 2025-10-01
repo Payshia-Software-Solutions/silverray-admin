@@ -6,8 +6,8 @@
  */
 
 // The base URL of your PHP server's router script
-const API_BASE_URL = 'https://silverray-server.payshia.com';
-export const CONTENT_PROVIDER_BASE_URL = 'https://content-provider.payshia.com/silver-ray';
+export const API_BASE_URL = 'https://silverray-server.payshia.com';
+export const CONTENT_PROVIDER_BASE_URL = 'https://silverray-server.payshia.com/';
 
 
 /**
@@ -652,7 +652,7 @@ export async function updateAmenity(id: number, amenityData: Partial<Omit<Amenit
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...amenityData, company_id: 'com-001' }),
+      body: JSON.stringify({ ...amenityData, company_id: '1' }),
     });
     return handleResponse<AmenityFromApi>(response);
   } catch (error) {
@@ -731,7 +731,7 @@ export async function createRoom(roomData: any): Promise<RoomFromApi> {
 export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('room_id', String(roomId));
-    formData.append('company_id', 'com-001'); // Example static company_id
+    formData.append('company_id', '1'); // Example static company_id
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
@@ -989,7 +989,7 @@ export async function uploadExperienceImage(experienceId: number, imageFile: Fil
     const formData = new FormData();
     formData.append('experience_id', String(experienceId));
     formData.append('image', imageFile);
-    formData.append('company_id', 'com-001');
+    formData.append('company_id', '1');
     formData.append('is_primary', isPrimary ? '1' : '0');
     formData.append('uploaded_by', 'admin_user');
     formData.append('alt_text', 'Experience Image');
@@ -1109,7 +1109,7 @@ export async function createWeddingPackage(data: any): Promise<WeddingPackageFro
 export async function uploadWeddingPackageImage(weddingId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('wedding_id', String(weddingId));
-    formData.append('company_id', '201');
+    formData.append('company_id', '1');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
@@ -1174,7 +1174,7 @@ export async function createRestaurant(restaurantData: any): Promise<RestaurantF
 export async function uploadRestaurantImage(restaurantId: number, imageFile: File, isPrimary: boolean): Promise<any> {
     const formData = new FormData();
     formData.append('restaurant_id', String(restaurantId));
-    formData.append('company_id', '101');
+    formData.append('company_id', '1');
     formData.append('image_name', imageFile.name);
     formData.append('image', imageFile);
     formData.append('file_size', String(imageFile.size));
@@ -1375,7 +1375,7 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     const formData = new FormData();
     formData.append('event_id', String(eventId));
     formData.append('image', imageFile);
-    formData.append('company_id', 'com-001');
+    formData.append('company_id', '1');
     formData.append('is_primary', isPrimary ? '1' : '0');
     formData.append('uploaded_by', 'admin_user');
     formData.append('alt_text', 'Event Image');
