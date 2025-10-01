@@ -58,6 +58,8 @@ import {
     deleteExperience,
     getExperienceImages,
     uploadExperienceImage,
+    updateExperienceImage,
+    deleteExperienceImage,
     ExperienceImageFromApi,
     CONTENT_PROVIDER_BASE_URL
 } from '@/lib/services/api';
@@ -98,6 +100,7 @@ export default function EditExperiencePage() {
     const { toast } = useToast();
 
     const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
+    const [imageToDelete, setImageToDelete] = useState<ImageSlot | null>(null);
     const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
     const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
     const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
@@ -213,20 +216,51 @@ export default function EditExperiencePage() {
     };
 
     const removeImage = (indexToRemove: number) => {
-        const newSlots = imageSlots.filter((_, index) => index !== indexToRemove);
-        // If the primary image was removed, make the new first image primary
-        if (imageSlots[indexToRemove].isPrimary && newSlots.length > 0) {
-            newSlots[0].isPrimary = true;
+        const image = imageSlots[indexToRemove];
+        if (image.id) {
+            setImageToDelete(image);
+        } else {
+            const newSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+            setImageSlots(newSlots);
         }
-        setImageSlots(newSlots);
     };
 
-    const setPrimaryImage = (selectedIndex: number) => {
-        const newImageSlots = imageSlots.map((slot, index) => ({
-            ...slot,
-            isPrimary: index === selectedIndex,
-        }));
-        setImageSlots(newImageSlots);
+    const handleConfirmDeleteImage = async () => {
+        if (!imageToDelete || !imageToDelete.id) return;
+        try {
+            await deleteExperienceImage(imageToDelete.id);
+            toast({ title: 'Success', description: 'Image deleted successfully.' });
+            setImageSlots(currentSlots => currentSlots.filter(slot => slot.id !== imageToDelete.id));
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete image.' });
+        } finally {
+            setImageToDelete(null);
+        }
+    }
+
+    const setPrimaryImage = async (selectedIndex: number) => {
+        const newPrimaryImage = imageSlots[selectedIndex];
+        if (!newPrimaryImage || newPrimaryImage.isPrimary) return;
+
+        const oldPrimaryImage = imageSlots.find(slot => slot.isPrimary);
+
+        try {
+            if (newPrimaryImage.id) {
+                await updateExperienceImage(newPrimaryImage.id, { is_primary: 1 });
+            }
+            if (oldPrimaryImage && oldPrimaryImage.id) {
+                await updateExperienceImage(oldPrimaryImage.id, { is_primary: 0 });
+            }
+
+            const newImageSlots = imageSlots.map((slot, index) => ({
+                ...slot,
+                isPrimary: index === selectedIndex,
+            }));
+            setImageSlots(newImageSlots);
+            toast({ title: 'Success', description: 'Primary image updated.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update primary image.' });
+        }
     };
 
 
@@ -518,6 +552,20 @@ export default function EditExperiencePage() {
             </DialogClose>
         </DialogContent>
       </Dialog>
+    <AlertDialog open={!!imageToDelete} onOpenChange={setImageToDelete.bind(null, null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Are you sure you want to permanently delete this image? This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeleteImage}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
