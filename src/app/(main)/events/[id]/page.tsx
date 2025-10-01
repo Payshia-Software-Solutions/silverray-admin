@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,12 +25,22 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getHalls, type HallFromApi, getEventById, updateEvent, uploadEventImage, getEventImages, EventImageFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { getHalls, type HallFromApi, getEventById, updateEvent, uploadEventImage, getEventImages, EventImageFromApi, CONTENT_PROVIDER_BASE_URL, updateEventImage, deleteEventImage } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,6 +78,7 @@ export default function EditEventPage() {
     const [halls, setHalls] = useState<HallFromApi[]>([]);
     const [loadingHalls, setLoadingHalls] = useState(true);
     const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
+    const [imageToDelete, setImageToDelete] = useState<ImageSlot | null>(null);
 
 
      const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<EventFormValues>({
@@ -162,31 +174,52 @@ export default function EditEventPage() {
     };
 
     const removeImage = (index: number) => {
-        const newImageSlots = [...imageSlots];
-        const wasPrimary = newImageSlots[index].isPrimary;
-        newImageSlots.splice(index, 1);
-        
-        if (wasPrimary && newImageSlots.length > 0) {
-            const firstImageIndex = newImageSlots.findIndex(slot => slot.file || slot.preview);
-            if (firstImageIndex !== -1) {
-                newImageSlots[firstImageIndex].isPrimary = true;
-            }
+        const image = imageSlots[index];
+        if (image.id) {
+            setImageToDelete(image);
+        } else {
+            const newSlots = imageSlots.filter((_, i) => i !== index);
+            setImageSlots(newSlots);
         }
-        // Add a placeholder slot if needed to maintain 5 slots
-        while (newImageSlots.length < 5) {
-            newImageSlots.push({ file: null, preview: null, isPrimary: false });
-        }
-        setImageSlots(newImageSlots);
     };
     
-    const setPrimaryImage = (indexToSet: number) => {
-        setImageSlots(currentSlots => 
-            currentSlots.map((slot, index) => ({
+    const handleConfirmDeleteImage = async () => {
+        if (!imageToDelete || !imageToDelete.id) return;
+        try {
+            await deleteEventImage(imageToDelete.id);
+            toast({ title: 'Success', description: 'Image deleted successfully.' });
+            setImageSlots(currentSlots => currentSlots.filter(slot => slot.id !== imageToDelete.id));
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete image.' });
+        } finally {
+            setImageToDelete(null);
+        }
+    };
+
+    const setPrimaryImage = async (indexToSet: number) => {
+        const newPrimaryImage = imageSlots[indexToSet];
+        if (!newPrimaryImage || newPrimaryImage.isPrimary) return;
+
+        const oldPrimaryImage = imageSlots.find(slot => slot.isPrimary);
+
+        try {
+            if (newPrimaryImage.id) {
+                await updateEventImage(newPrimaryImage.id, { is_primary: 1 });
+            }
+            if (oldPrimaryImage && oldPrimaryImage.id) {
+                await updateEventImage(oldPrimaryImage.id, { is_primary: 0 });
+            }
+
+            const newImageSlots = imageSlots.map((slot, index) => ({
                 ...slot,
-                isPrimary: index === indexToSet
-            }))
-        );
-    }
+                isPrimary: index === indexToSet,
+            }));
+            setImageSlots(newImageSlots);
+            toast({ title: 'Success', description: 'Primary image updated.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update primary image.' });
+        }
+    };
   
     return (
         <>
@@ -423,6 +456,20 @@ export default function EditEventPage() {
                 </DialogContent>
             </Dialog>
         </form>
+         <AlertDialog open={!!imageToDelete} onOpenChange={setImageToDelete.bind(null, null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to permanently delete this image? This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmDeleteImage}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
         </>
     );
 }

@@ -983,13 +983,13 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<{ id: number }> {
+export async function createExperience(experienceData: any): Promise<{ experience: ExperienceFromApi }> {
   const response = await fetch(`${API_BASE_URL}/experiences`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(experienceData),
   });
-  return handleResponse<{ id: number }>(response);
+  return handleResponse<{ experience: ExperienceFromApi }>(response);
 }
 
 export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
@@ -1449,6 +1449,22 @@ export async function getEventImages(eventId: number): Promise<EventImageFromApi
         return []; // Return empty array if no images are found
     }
     return handleResponse<EventImageFromApi[]>(response);
+}
+
+export async function updateEventImage(imageId: number, imageData: Partial<{ is_primary: number }>): Promise<EventImageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/event-images/${imageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(imageData),
+    });
+    return handleResponse<EventImageFromApi>(response);
+}
+
+export async function deleteEventImage(imageId: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/event-images/${imageId}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
 }
     
 // Gallery API Functions
