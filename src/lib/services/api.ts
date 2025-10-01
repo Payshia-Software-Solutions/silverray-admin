@@ -7,7 +7,7 @@
 
 // The base URL of your PHP server's router script
 export const API_BASE_URL = 'https://silverray-server.payshia.com';
-export const CONTENT_PROVIDER_BASE_URL = 'https://silverray-server.payshia.com/';
+export const CONTENT_PROVIDER_BASE_URL = 'https://silverray-server.payshia.com';
 
 
 /**

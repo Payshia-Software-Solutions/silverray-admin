@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'silverray-server.payshia.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
