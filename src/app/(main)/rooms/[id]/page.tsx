@@ -40,7 +40,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useParams, useRouter } from 'next/navigation';
-import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi, getRoomImages, RoomImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadRoomImage } from '@/lib/services/api';
+import { getRoomById, getAmenities, AmenityFromApi, RoomFromApi, updateRoom, getRoomTypes, RoomTypeFromApi, getRoomImages, RoomImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadRoomImage, deleteRoomImage, updateRoomImage } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -64,7 +64,7 @@ export default function EditRoomPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<ImageSlot | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showSaveConfirmDialog, setShowSaveConfirmDialog] = useState(false);
   const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
@@ -139,21 +139,61 @@ export default function EditRoomPage() {
       }
   };
 
-  const removeImage = (indexToRemove: number) => {
-      const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
-      setImageSlots(newImageSlots);
+  const removeImage = async (indexToRemove: number) => {
+    const image = imageSlots[indexToRemove];
+    if (image.id) { // If it's an existing image, ask for confirmation
+        setImageToDelete(image);
+    } else { // If it's a new, unsaved image, just remove it from the state
+        const newImageSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+        setImageSlots(newImageSlots);
+    }
   };
 
-  const setPrimaryImage = (selectedIndex: number) => {
-      const newImageSlots = imageSlots.map((slot, index) => ({
-          ...slot,
-          isPrimary: index === selectedIndex,
-      }));
-      setImageSlots(newImageSlots);
+  const handleConfirmDeleteImage = async () => {
+    if (!imageToDelete || !imageToDelete.id) return;
+    try {
+        await deleteRoomImage(imageToDelete.id);
+        toast({ title: 'Success', description: 'Image deleted successfully.' });
+        setImageSlots(currentSlots => currentSlots.filter(slot => slot.id !== imageToDelete.id));
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete image.' });
+    } finally {
+        setImageToDelete(null);
+    }
+  }
+
+
+  const setPrimaryImage = async (selectedIndex: number) => {
+      const newPrimaryImage = imageSlots[selectedIndex];
+      if (!newPrimaryImage || newPrimaryImage.isPrimary) return;
+
+      const oldPrimaryImage = imageSlots.find(slot => slot.isPrimary);
+
+      try {
+        // Update the new primary image on the backend
+        if (newPrimaryImage.id) {
+          await updateRoomImage(newPrimaryImage.id, { is_primary: 1 });
+        }
+        
+        // If there was an old primary image, unset it on the backend
+        if (oldPrimaryImage && oldPrimaryImage.id) {
+          await updateRoomImage(oldPrimaryImage.id, { is_primary: 0 });
+        }
+
+        // Update the local state
+        const newImageSlots = imageSlots.map((slot, index) => ({
+            ...slot,
+            isPrimary: index === selectedIndex,
+        }));
+        setImageSlots(newImageSlots);
+        toast({ title: 'Success', description: 'Primary image updated.' });
+
+      } catch (error) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to update primary image.' });
+      }
   };
 
   const handleDelete = () => {
-    setShowDeleteDialog(false);
     setShowDeleteSuccessDialog(true);
   }
   
@@ -439,7 +479,7 @@ export default function EditRoomPage() {
       </div>
 
       <div className="flex justify-between items-center">
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button type="button" variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
@@ -459,7 +499,7 @@ export default function EditRoomPage() {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction className="bg-red-500 hover:bg-red-600" onClick={handleDelete}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
-                 <button onClick={() => setShowDeleteDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
+                 <button onClick={() => setShowDeleteSuccessDialog(false)} className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
                     <X className="h-5 w-5" />
                 </button>
             </AlertDialogContent>
@@ -539,8 +579,24 @@ export default function EditRoomPage() {
             </div>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!imageToDelete} onOpenChange={setImageToDelete.bind(null, null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Are you sure you want to permanently delete this image? This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeleteImage}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }
 
     
+
+  

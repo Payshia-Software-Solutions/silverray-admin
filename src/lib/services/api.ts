@@ -744,6 +744,44 @@ export async function getRoomImages(roomId: number): Promise<RoomImageFromApi[]>
 }
 
 /**
+ * Updates an existing room image, e.g., to set it as primary.
+ * @param imageId The ID of the image to update.
+ * @param imageData The data to update.
+ * @returns A promise that resolves with the updated image data.
+ */
+export async function updateRoomImage(imageId: number, imageData: Partial<{ is_primary: number }>): Promise<RoomImageFromApi> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-images/${imageId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(imageData),
+        });
+        return handleResponse<RoomImageFromApi>(response);
+    } catch (error) {
+        console.error(`Failed to update room image ${imageId}:`, error);
+        throw error;
+    }
+}
+
+
+/**
+ * Deletes a room image by its ID.
+ * @param imageId The ID of the image to delete.
+ * @returns A promise that resolves with a success message.
+ */
+export async function deleteRoomImage(imageId: number): Promise<{ message: string }> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/room-images/${imageId}`, {
+            method: 'DELETE',
+        });
+        return handleResponse<{ message: string }>(response);
+    } catch (error) {
+        console.error(`Failed to delete room image ${imageId}:`, error);
+        throw error;
+    }
+}
+
+/**
  * Fetches a single room by its ID.
  * @param roomId The ID of the room to fetch.
  * @returns A promise that resolves to a RoomFromApi object.
@@ -945,13 +983,13 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<{experience: ExperienceFromApi}> {
+export async function createExperience(experienceData: any): Promise<{id: number}> {
   const response = await fetch(`${API_BASE_URL}/experiences`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(experienceData),
   });
-  return handleResponse<{experience: ExperienceFromApi}>(response);
+  return handleResponse<{id: number}>(response);
 }
 
 export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
@@ -1415,3 +1453,6 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
     });
     return handleResponse<{ message: string }>(response);
 }
+
+
+  
