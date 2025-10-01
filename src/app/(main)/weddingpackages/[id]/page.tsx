@@ -126,7 +126,7 @@ export default function EditWeddingPackagePage() {
             });
 
             // Fetch images
-            const images = await getWeddingPackageImages(pkg.company_id, id);
+            const images = await getWeddingPackageImages(id);
             const formattedImages = images.map(img => ({
                 id: img.id,
                 file: null,
@@ -151,7 +151,7 @@ export default function EditWeddingPackagePage() {
 
     const dataToSend = {
       ...data,
-      company_id: '201',
+      company_id: '1',
       updated_by: 'admin@weddingvenue.com',
       price: String(data.price),
       inclusions: data.inclusions?.join(',') || '',
@@ -454,4 +454,5 @@ export default function EditWeddingPackagePage() {
   );
 
     
+
 

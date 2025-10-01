@@ -747,7 +747,8 @@ export async function uploadRoomImage(roomId: number, imageFile: File, isPrimary
     return handleResponse<any>(response);
 }
 
-export async function getRoomImages(companyId: string, roomId: number): Promise<RoomImageFromApi[]> {
+export async function getRoomImages(roomId: number): Promise<RoomImageFromApi[]> {
+  const companyId = '1';
   const response = await fetch(`${API_BASE_URL}/room-images/company/${companyId}/room/${roomId}`);
   if (response.status === 404) {
     return []; // Return empty array if no images are found
@@ -1004,7 +1005,8 @@ export async function uploadExperienceImage(experienceId: number, imageFile: Fil
     return handleResponse<any>(response);
 }
 
-export async function getExperienceImages(companyId: string, experienceId: number): Promise<ExperienceImageFromApi[]> {
+export async function getExperienceImages(experienceId: number): Promise<ExperienceImageFromApi[]> {
+  const companyId = '1';
   const response = await fetch(`${API_BASE_URL}/experience-images/company/${companyId}/experience/${experienceId}`);
   if (response.status === 404) {
     return []; // Return empty array if no images are found
@@ -1125,7 +1127,8 @@ export async function uploadWeddingPackageImage(weddingId: number, imageFile: Fi
     return handleResponse<any>(response);
 }
 
-export async function getWeddingPackageImages(companyId: string, weddingId: number): Promise<WeddingPackageImageFromApi[]> {
+export async function getWeddingPackageImages(weddingId: number): Promise<WeddingPackageImageFromApi[]> {
+  const companyId = '1';
   const response = await fetch(`${API_BASE_URL}/wedding-images/company/${companyId}/wedding/${weddingId}`);
   if (response.status === 404) {
     return [];
@@ -1249,7 +1252,8 @@ export async function uploadUserImage(userId: string, companyId: string, imageFi
     return handleResponse<{ imageUrl: string }>(response);
 }
 
-export async function getUserImage(companyId: string, userId: string): Promise<UserImageFromApi | null> {
+export async function getUserImage(userId: string): Promise<UserImageFromApi | null> {
+    const companyId = '1';
     const response = await fetch(`${API_BASE_URL}/user-images/company/${companyId}/user/${userId}`);
     if (response.status === 404) {
         return null;
@@ -1390,7 +1394,8 @@ export async function uploadEventImage(eventId: number, imageFile: File, isPrima
     return handleResponse<any>(response);
 }
 
-export async function getEventImages(companyId: string, eventId: number): Promise<EventImageFromApi[]> {
+export async function getEventImages(eventId: number): Promise<EventImageFromApi[]> {
+    const companyId = '1';
     const response = await fetch(`${API_BASE_URL}/event-images/company/${companyId}/event/${eventId}`);
     if (response.status === 404) {
         return []; // Return empty array if no images are found

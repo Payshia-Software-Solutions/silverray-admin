@@ -58,7 +58,7 @@ export function AdminUsersTable() {
                 const data = await getUsers();
                 const usersWithImages = await Promise.all(data.map(async (user) => {
                     try {
-                        const image = await getUserImage(user.company_id, user.id);
+                        const image = await getUserImage(user.id);
                         return { ...user, avatar_url: image ? CONTENT_PROVIDER_BASE_URL + image.image_url : null };
                     } catch (e) {
                         console.error(`Failed to load image for user ${user.id}`, e);

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -78,7 +79,7 @@ export default function EditRoomPage() {
           getRoomById(roomId),
           getAmenities(),
           getRoomTypes(),
-          getRoomImages('com-001', roomId)
+          getRoomImages(roomId)
         ]);
         setRoom(roomData);
         setAllAmenities(amenitiesData);

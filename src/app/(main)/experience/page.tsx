@@ -57,7 +57,7 @@ export default function ExperienceManagementPage() {
         const data = await getExperiences();
         const experiencesWithImages = await Promise.all(data.map(async (exp) => {
             try {
-                const images = await getExperienceImages(exp.company_id, exp.id);
+                const images = await getExperienceImages(exp.id);
                 const primaryImage = images.find(img => img.is_primary) || images[0];
                 return { ...exp, images_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
             } catch (e) {

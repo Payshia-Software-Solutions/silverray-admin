@@ -63,7 +63,7 @@ export default function WeddingPackagesPage() {
         
         const packagesWithImages = await Promise.all(packagesData.map(async (pkg) => {
             try {
-                const images = await getWeddingPackageImages(pkg.company_id, pkg.id);
+                const images = await getWeddingPackageImages(pkg.id);
                 const primaryImage = images.find(img => img.is_primary) || images[0];
                 return { ...pkg, image_urls: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
             } catch (e) {

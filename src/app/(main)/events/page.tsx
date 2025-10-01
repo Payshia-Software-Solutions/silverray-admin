@@ -47,7 +47,7 @@ export default function EventManagementPage() {
         const eventsWithImages = await Promise.all(eventData.map(async (event) => {
             try {
                 if (event.company_id) {
-                    const images = await getEventImages(event.company_id, event.id);
+                    const images = await getEventImages(event.id);
                     const primaryImage = images.find(img => img.is_primary) || images[0];
                     return { ...event, images_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
                 }

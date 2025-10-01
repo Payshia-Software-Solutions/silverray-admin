@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -62,7 +63,7 @@ export default function RoomsList() {
                 if (Array.isArray(roomsData)) {
                     const roomsWithImages = await Promise.all(roomsData.map(async (room) => {
                         try {
-                            const images = await getRoomImages(room.company_id, room.id);
+                            const images = await getRoomImages(room.id);
                             const primaryImage = images.find(img => img.is_primary) || images[0];
                             return { ...room, image_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : '/placeholder.png' };
                         } catch (imageError) {

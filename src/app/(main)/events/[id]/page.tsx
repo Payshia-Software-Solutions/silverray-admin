@@ -89,7 +89,7 @@ export default function EditEventPage() {
                 });
                 setHalls(hallData);
                 
-                const images = await getEventImages(eventData.company_id || 'com-001', id);
+                const images = await getEventImages(id);
                 const formattedImages = images.map(img => ({
                     id: img.id,
                     file: null,

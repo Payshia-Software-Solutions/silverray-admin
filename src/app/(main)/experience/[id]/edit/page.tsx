@@ -123,7 +123,7 @@ export default function EditExperiencePage() {
                         walk_in_available: experience.walk_in_available === 1,
                     });
                      
-                    const images = await getExperienceImages(experience.company_id, id);
+                    const images = await getExperienceImages(id);
                     const formattedImages = images.map(img => ({
                         id: img.id,
                         file: null,
@@ -523,4 +523,3 @@ export default function EditExperiencePage() {
 }
 
     
-

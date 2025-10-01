@@ -63,7 +63,7 @@ export default function EditAdminPage() {
                     getRoles()
                 ]);
                 
-                const userImage = await getUserImage(userData.company_id, userData.id);
+                const userImage = await getUserImage(id);
                 const fullImageUrl = userImage && userImage.image_url ? CONTENT_PROVIDER_BASE_URL + userImage.image_url : null;
                 
                 reset({
