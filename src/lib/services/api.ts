@@ -7,7 +7,7 @@
 
 // The base URL of your PHP server's router script
 export const API_BASE_URL = 'https://silverray-server.payshia.com';
-export const CONTENT_PROVIDER_BASE_URL = 'https://content-provider.payshia.com/silver-ray/';
+export const CONTENT_PROVIDER_BASE_URL = 'https://content-provider.payshia.com/silver-ray';
 
 
 /**
@@ -585,12 +585,7 @@ export async function deleteRoomType(id: number): Promise<{ message: string }> {
  */
 export async function getAmenities(): Promise<AmenityFromApi[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/amenities`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(`${API_BASE_URL}/amenities`);
     return handleResponse<AmenityFromApi[]>(response);
   } catch (error) {
     console.error('Failed to fetch amenities:', error);
@@ -605,12 +600,7 @@ export async function getAmenities(): Promise<AmenityFromApi[]> {
  */
 export async function getAmenityById(id: number): Promise<AmenityFromApi> {
   try {
-    const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(`${API_BASE_URL}/amenities/${id}`);
     return handleResponse<AmenityFromApi>(response);
   } catch (error) {
     console.error(`Failed to fetch amenity ${id}:`, error);
@@ -670,9 +660,6 @@ export async function deleteAmenity(id: number): Promise<{ message: string }> {
   try {
     const response = await fetch(`${API_BASE_URL}/amenities/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
     return handleResponse<{ message: string }>(response);
   } catch (error) {
@@ -804,9 +791,6 @@ export async function deleteRoom(roomId: number): Promise<{ message: string }> {
   try {
     const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
     return handleResponse<{ message: string }>(response);
   } catch (error) {
