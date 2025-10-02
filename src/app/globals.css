@@ -37,8 +37,8 @@ body {
     --radius: 0.5rem;
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 6% 10%;
-    --sidebar-primary: 220 80% 55%;
-    --sidebar-primary-foreground: 220 80% 95%;
+    --sidebar-primary: 45 68% 52%;
+    --sidebar-primary-foreground: 240 6% 10%;
     --sidebar-accent: 220 80% 92%;
     --sidebar-accent-foreground: 220 80% 31%;
     --sidebar-border: 240 6% 90%;
@@ -72,8 +72,8 @@ body {
     --radius: 0.5rem;
     --sidebar-background: 240 4% 14%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 220 80% 55%;
-    --sidebar-primary-foreground: 220 80% 95%;
+    --sidebar-primary: 45 68% 52%;
+    --sidebar-primary-foreground: 240 6% 10%;
     --sidebar-accent: 220 80% 21%;
     --sidebar-accent-foreground: 220 80% 91%;
     --sidebar-border: 240 4% 24%;
