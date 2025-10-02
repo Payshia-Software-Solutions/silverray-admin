@@ -120,8 +120,6 @@ const reservations = [
 type VenueWithHours = RestaurantFromApi & { operatingHours?: OperatingHoursFromApi };
 
 function RestaurantFeaturesTab() {
-  const router = useRouter();
-  const { toast } = useToast();
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -157,11 +155,8 @@ function RestaurantFeaturesTab() {
         setFeatures(prev => prev.filter(item => item.id !== itemToDelete.id));
         setShowDeleteSuccessDialog(true);
       } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Error Deleting Feature",
-          description: error.message || "An unexpected error occurred.",
-        });
+        // The toast will be handled by the main component's Toaster
+        console.error("Error Deleting Feature:", error);
       } finally {
         setItemToDelete(null);
       }
