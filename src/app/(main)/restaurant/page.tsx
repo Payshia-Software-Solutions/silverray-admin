@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -38,8 +37,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
-import RestaurantFeaturesPage from './features/page';
-import { getRestaurants, deleteRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi } from '@/lib/services/api';
+import { getRestaurants, deleteRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi, getRestaurantFeatures, deleteRestaurantFeature, type RestaurantFeatureFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
@@ -120,6 +118,150 @@ const reservations = [
 ];
 
 type VenueWithHours = RestaurantFromApi & { operatingHours?: OperatingHoursFromApi };
+
+function RestaurantFeaturesTab() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<RestaurantFeatureFromApi | null>(null);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [deletedItemName, setDeletedItemName] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchFeatures() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getRestaurantFeatures();
+        setFeatures(data);
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred while fetching features.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFeatures();
+  }, []);
+
+  const handleDeleteClick = (feature: RestaurantFeatureFromApi) => {
+    setItemToDelete(feature);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (itemToDelete) {
+      try {
+        await deleteRestaurantFeature(itemToDelete.id);
+        setDeletedItemName(itemToDelete.feature_name);
+        setFeatures(prev => prev.filter(item => item.id !== itemToDelete.id));
+        setShowDeleteSuccessDialog(true);
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error Deleting Feature",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setItemToDelete(null);
+      }
+    }
+  };
+
+  return (
+    <>
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <Card>
+            <CardHeader>
+                <CardTitle>All Restaurant Features</CardTitle>
+            </CardHeader>
+          <CardContent className="p-0">
+            {loading && <p className="p-4 text-center">Loading features...</p>}
+            {error && <p className="p-4 text-center text-red-500">{error}</p>}
+            {!loading && !error && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Feature Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {features.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.feature_name}</TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell>
+                        <Badge variant={item.is_active ? 'default' : 'secondary'} className={item.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                            {item.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-primary/10" asChild>
+                            <Link href={`/restaurant/features/${item.id}`}>
+                              <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                              <span className="sr-only">View/Edit</span>
+                            </Link>
+                          </Button>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 group hover:bg-red-100" onClick={() => handleDeleteClick(item)}>
+                              <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+          <CardFooter className="flex items-center justify-between border-t px-6 py-3">
+            <div className="text-sm text-muted-foreground">
+              Showing 1 to {features.length} of {features.length} features
+            </div>
+          </CardFooter>
+        </Card>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-2xl font-bold">Delete Feature?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-lg">
+                Are you sure you want to delete the feature: <strong className="text-red-500">{itemToDelete?.feature_name}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+       <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeaderComponent className="sr-only">
+                <DialogTitleComponent>Successfully Deleted</DialogTitleComponent>
+            </DialogHeaderComponent>
+            <div className="flex flex-col items-center justify-center text-center p-6 pt-8">
+                <div className="p-4 bg-red-100 rounded-full mb-4">
+                    <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold">Successfully Deleted {deletedItemName}!</h2>
+            </div>
+            <DialogClose asChild>
+              <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+              </button>
+            </DialogClose>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 
 export default function RestaurantDiningPage() {
   const router = useRouter();
@@ -263,6 +405,12 @@ export default function RestaurantDiningPage() {
             <Button onClick={() => router.push('/restaurant/menu/new')}>
               <Plus className="mr-2 h-4 w-4" />
               Add New Item
+            </Button>
+          )}
+           {activeTab === 'features' && (
+            <Button onClick={() => router.push('/restaurant/features/new')}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Feature
             </Button>
           )}
         </div>
@@ -594,7 +742,7 @@ export default function RestaurantDiningPage() {
           </Card>
         </TabsContent>
         <TabsContent value="features">
-          <RestaurantFeaturesPage />
+          <RestaurantFeaturesTab />
         </TabsContent>
       </Tabs>
 

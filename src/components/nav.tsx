@@ -58,7 +58,7 @@ export function Nav() {
         return `/${parts[0]}/${parts[1]}`;
       }
       if (parts[0] === 'restaurant' && parts[1] === 'features') {
-        return `/${parts[0]}/${parts[1]}`;
+        return `/${parts[0]}`;
       }
       return `/${parts[0]}`;
     }
