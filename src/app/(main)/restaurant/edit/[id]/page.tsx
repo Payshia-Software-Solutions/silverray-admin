@@ -99,9 +99,9 @@ export default function EditRestaurantVenuePage() {
             const operatingHoursTransformed = daysOfWeek.reduce((acc, day) => {
                 const lowerDay = day.toLowerCase();
                 acc[lowerDay] = {
-                    isOpen: (hoursData as any)[`${lowerDay}_open`] === 1,
-                    open: (hoursData as any)[`${lowerDay}_open_time`],
-                    close: (hoursData as any)[`${lowerDay}_close_time`],
+                    isOpen: (hoursData as any)[\`\${lowerDay}_open\`] === 1,
+                    open: (hoursData as any)[\`\${lowerDay}_open_time\`],
+                    close: (hoursData as any)[\`\${lowerDay}_close_time\`],
                 };
                 return acc;
             }, {} as any);
@@ -131,9 +131,9 @@ export default function EditRestaurantVenuePage() {
             company_id: 'COMP001',
             ...Object.fromEntries(
                 Object.entries(data.operating_hours).flatMap(([day, times]: [string, any]) => [
-                    [`${day}_open`, times.isOpen ? 1 : 0],
-                    [`${day}_open_time`, times.open],
-                    [`${day}_close_time`, times.close],
+                    [\`\${day}_open\`, times.isOpen ? 1 : 0],
+                    [\`\${day}_open_time\`, times.open],
+                    [\`\${day}_close_time\`, times.close],
                 ])
             )
         };
@@ -233,18 +233,18 @@ export default function EditRestaurantVenuePage() {
                 {daysOfWeek.map((day) => (
                   <Controller
                     key={day}
-                    name={`operating_hours.${day.toLowerCase()}`}
+                    name={\`operating_hours.\${day.toLowerCase()}\`}
                     control={control}
                     render={({ field }) => (
                       <div className="space-y-2">
                         <p className="font-medium text-sm">{day}</p>
                         <div className="flex items-center gap-2">
                           <Switch
-                            id={`open-${day}`}
+                            id={\`open-\${day}\`}
                             checked={field.value?.isOpen || false}
                             onCheckedChange={(checked) => field.onChange({...field.value, isOpen: checked})}
                           />
-                          <Label htmlFor={`open-${day}`}>{field.value?.isOpen ? 'Open' : 'Closed'}</Label>
+                          <Label htmlFor={\`open-\${day}\`}>{field.value?.isOpen ? 'Open' : 'Closed'}</Label>
                         </div>
                          {field.value?.isOpen && (
                             <div className="flex items-center gap-1">
@@ -275,7 +275,7 @@ export default function EditRestaurantVenuePage() {
                     {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
                       <div key={feature.id} className="flex items-center space-x-2">
                         <Checkbox 
-                          id={`feature-${feature.id}`}
+                          id={\`feature-\${feature.id}\`}
                           checked={field.value?.includes(String(feature.id))}
                           onCheckedChange={(checked) => {
                             const currentFeatures = field.value || [];
@@ -286,7 +286,7 @@ export default function EditRestaurantVenuePage() {
                             }
                           }}
                         />
-                        <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
+                        <Label htmlFor={\`feature-\${feature.id}\`} className="font-normal">{feature.feature_name}</Label>
                       </div>
                     ))}
                 </div>

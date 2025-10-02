@@ -48,73 +48,73 @@ const getDynamicPageInfo = (pathname: string) => {
     const pathSegments = pathname.split('/').filter(Boolean);
 
     if (pathSegments[0] === 'rooms' && pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'types') {
-        return { title: 'Edit Room', description: `Editing Room ${pathSegments[1]}` };
+        return { title: 'Edit Room', description: 'Editing Room ' + pathSegments[1] };
     }
      if (pathSegments[0] === 'rooms' && pathSegments[1] === 'types' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
-        return { title: 'Edit Room Type', description: `Updating details for a room type.` };
+        return { title: 'Edit Room Type', description: 'Updating details for a room type.' };
     }
      if (pathSegments[0] === 'amenities' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Amenity', description: `Updating details for an amenity.` };
+        return { title: 'Edit Amenity', description: 'Updating details for an amenity.' };
     }
     if (pathSegments[0] === 'halls' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Hall', description: `Updating details for a hall.` };
+        return { title: 'Edit Hall', description: 'Updating details for a hall.' };
     }
     if (pathSegments[0] === 'events' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Event', description: `Updating details for an event.` };
+        return { title: 'Edit Event', description: 'Updating details for an event.' };
     }
      if (pathSegments[0] === 'package-inclusions' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Package Inclusion', description: `Updating details for an inclusion.` };
+        return { title: 'Edit Package Inclusion', description: 'Updating details for an inclusion.' };
     }
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Customer', description: `Updating details for a customer.` };
+        return { title: 'Edit Customer', description: 'Updating details for a customer.' };
     }
     if (pathSegments[0] === 'user-management' && pathSegments.length > 1) {
         if (pathSegments[1] !== 'new' && pathSegments[1] !== 'roles') {
-            return { title: 'Edit User', description: `Updating details for a user.` };
+            return { title: 'Edit User', description: 'Updating details for a user.' };
         }
         if (pathSegments[1] === 'roles' && pathSegments[2] && pathSegments[2] !== 'new') {
             return { title: 'Edit Role', description: 'Update an existing user role and its permissions.' };
         }
     }
      if (pathSegments[0] === 'reservations' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Booking Management (Rooms & Suites)', description: `Details for a booking.` };
+        return { title: 'Booking Management (Rooms & Suites)', description: 'Details for a booking.' };
     }
     if (pathSegments[0] === 'bookings' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
-        return { title: 'Edit Booking', description: `Details for booking #${pathSegments[1]}.` };
+        return { title: 'Edit Booking', description: 'Details for booking #' + pathSegments[1] + '.' };
     }
      if (pathSegments[0] === 'weddingpackages' && pathSegments.length > 1 && pathSegments[1] !== 'new' && pathSegments[1] !== 'booking') {
-        return { title: `Edit Wedding Package`, description: 'Update details for a wedding package.' };
+        return { title: 'Edit Wedding Package', description: 'Update details for a wedding package.' };
     }
      if (pathSegments[0] === 'weddingpackages' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
-        return { title: `Wedding Booking Details`, description: 'Details for a wedding booking.' };
+        return { title: 'Wedding Booking Details', description: 'Details for a wedding booking.' };
     }
     if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {
         if(pathSegments[1] === 'menu' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
-            return { title: `Edit Menu Item`, description: 'Manage a dining menu item.' };
+            return { title: 'Edit Menu Item', description: 'Manage a dining menu item.' };
         }
         if(pathSegments[1] === 'reservations' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
-             return { title: 'Restaurant Reservation Details', description: `Details for a dining reservation.` };
+             return { title: 'Restaurant Reservation Details', description: 'Details for a dining reservation.' };
         }
          if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
-             return { title: 'Edit Restaurant Feature', description: `Updating details for a restaurant feature.` };
+             return { title: 'Edit Restaurant Feature', description: 'Updating details for a restaurant feature.' };
         }
         if(pathSegments[1] === 'edit' && pathSegments.length === 3){
-            return { title: 'Edit Restaurant Venue', description: `Updating details for a restaurant venue.` };
+            return { title: 'Edit Restaurant Venue', description: 'Updating details for a restaurant venue.' };
         }
     }
     if (pathSegments[0] === 'experience' && pathSegments.length > 1) {
         const title = pathSegments[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         if (pathSegments.length === 2) {
-            return { title: 'Experience Details', description: `Bookings and details for ${title}` };
+            return { title: 'Experience Details', description: 'Bookings and details for ' + title };
         }
         if(pathSegments[2] === 'edit'){
-            return { title: 'Edit Experience', description: `Editing ${title}` };
+            return { title: 'Edit Experience', description: 'Editing ' + title };
         }
         if(pathSegments[2] === 'bookings' && pathSegments.length > 3 && pathSegments[3] === 'new'){
-            return { title: 'New Experience Booking', description: `Creating a booking for ${title}` };
+            return { title: 'New Experience Booking', description: 'Creating a booking for ' + title };
         }
         if(pathSegments[2] === 'booking' && pathSegments.length > 3){
-             return { title: 'View Experience Booking', description: `Details for booking in ${title}` };
+             return { title: 'View Experience Booking', description: 'Details for booking in ' + title };
         }
     }
     
