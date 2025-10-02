@@ -31,6 +31,7 @@ import {
   DialogDescription as DialogDescriptionComponent,
   DialogClose,
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 const statusColors: { [key: string]: string } = {
   Active: 'bg-green-500',
@@ -74,6 +75,7 @@ export default function RestaurantPage() {
   const router = useRouter();
   const [venueToDelete, setVenueToDelete] = useState<Venue | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState('venues');
 
   const handleDeleteClick = (venue: Venue) => {
     setVenueToDelete(venue);
@@ -85,11 +87,21 @@ export default function RestaurantPage() {
     setVenueToDelete(null); // Close the confirmation dialog
     setShowDeleteSuccessDialog(true); // Show the success dialog
   }
+  
+  const getAddButtonLink = () => {
+    switch (activeTab) {
+        case 'venues': return '/restaurant/new';
+        case 'menu': return '/restaurant/menu/new';
+        case 'reservations': return '/restaurant/reservations/new';
+        case 'features': return '/restaurant/features/new';
+        default: return '/restaurant/new';
+    }
+  }
 
   return (
     <div className="space-y-6">
         <Toaster />
-      <Tabs defaultValue="venues" className="space-y-4">
+      <Tabs defaultValue="venues" className="space-y-4" onValueChange={setActiveTab}>
         <div className="flex justify-between items-center">
             <TabsList>
                 <TabsTrigger value="venues"><Utensils className="mr-2 h-4 w-4" />Dining Venues</TabsTrigger>
@@ -97,8 +109,10 @@ export default function RestaurantPage() {
                 <TabsTrigger value="reservations"><CalendarCheck className="mr-2 h-4 w-4" />Reservations</TabsTrigger>
                 <TabsTrigger value="features"><Shield className="mr-2 h-4 w-4" />Features</TabsTrigger>
             </TabsList>
-             <Button onClick={() => router.push('/restaurant/new')}>
-                <Plus className="mr-2 h-4 w-4" /> Add New Item
+             <Button asChild>
+                <Link href={getAddButtonLink()}>
+                    <Plus className="mr-2 h-4 w-4" /> Add New Item
+                </Link>
             </Button>
         </div>
         <AlertDialog open={!!venueToDelete} onOpenChange={(open) => !open && setVenueToDelete(null)}>

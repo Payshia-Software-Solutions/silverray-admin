@@ -1225,9 +1225,28 @@ export async function getRestaurants(): Promise<RestaurantFromApi[]> {
 }
 
 export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/dining`);
-  return handleResponse<RestaurantFromApi[]>(response);
+    try {
+        const response = await fetch(`${API_BASE_URL}/dining`);
+        if (!response.ok) {
+            // If the response is not OK, return an empty array to avoid breaking the UI.
+            console.error(`API request to /dining failed with status ${response.status}`);
+            return [];
+        }
+        const data = await handleResponse<RestaurantFromApi | RestaurantFromApi[]>(response);
+
+        // The API might return a single object or an array. Standardize it to an array.
+        if (Array.isArray(data)) {
+            return data;
+        } else if (data && typeof data === 'object') {
+            return [data];
+        }
+        return [];
+    } catch (error) {
+        console.error('Failed to fetch dining venues:', error);
+        return []; // Return empty array on error to prevent UI crash
+    }
 }
+
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
     const response = await fetch(`${API_BASE_URL}/restaurant/${id}`);
