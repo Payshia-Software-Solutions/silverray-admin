@@ -89,13 +89,13 @@ const getDynamicPageInfo = (pathname: string) => {
         return { title: 'Wedding Booking Details', description: 'Details for a wedding booking.' };
     }
     if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {
-        if(pathSegments[1] === 'menu' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
+        if(pathSegments[1] === 'menu' && pathSegments[2] && pathSegments[2] !== 'new'){
             return { title: 'Edit Menu Item', description: 'Manage a dining menu item.' };
         }
-        if(pathSegments[1] === 'reservations' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
+        if(pathSegments[1] === 'reservations' && pathSegments[2] && pathSegments[2] !== 'new'){
              return { title: 'Restaurant Reservation Details', description: 'Details for a dining reservation.' };
         }
-         if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
+         if(pathSegments[1] === 'features' && pathSegments.length > 1 && pathSegments[2] !== 'new'){
              return { title: 'Edit Restaurant Feature', description: 'Updating details for a restaurant feature.' };
         }
         if(pathSegments[1] === 'edit' && pathSegments.length === 3){

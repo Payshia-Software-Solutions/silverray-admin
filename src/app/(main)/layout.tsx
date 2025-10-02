@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -17,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut, Settings, Bell } from 'lucide-react';
 import { Nav } from '@/components/nav';
 import { AppLogo } from '@/components/app-logo';
-import { Header } from '@/components/header';
+import { Header } from '@/app/(main)/header';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
