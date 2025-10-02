@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Plus, Trash2, UploadCloud, CheckCircle2, Pencil, Star, MoreVertical, Building2, Clock, Users, Tag, Image as ImageIcon } from 'lucide-react';
+import { Bold, Italic, List, Plus, Trash2, X, CheckCircle2, Upload, MoreVertical, Star, Building2, Clock, Users, Tag, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -27,6 +28,17 @@ import {
   DialogDescription,
   DialogClose,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi, getWeddingPackageImages, type WeddingPackageImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadWeddingPackageImage, updateWeddingPackageImage, deleteWeddingPackageImage } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,6 +57,7 @@ export default function EditRestaurantPage() {
   const id = Number(params.id);
   
   const [showSaveSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -186,17 +199,36 @@ export default function EditRestaurantPage() {
             </CardContent>
         </Card>
       
-        <div className="flex justify-between items-center">
-            <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
-            <div className="flex justify-end gap-2">
-                <Button variant="outline" asChild type="button">
-                <Link href="/restaurant">Cancel</Link>
-                </Button>
-                <Button type="submit">
-                    Save Changes
-                </Button>
+        <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+            <div className="flex justify-between items-center">
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
+                </AlertDialogTrigger>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" asChild type="button">
+                    <Link href="/restaurant">Cancel</Link>
+                    </Button>
+                    <Button type="submit">
+                        Save Changes
+                    </Button>
+                </div>
             </div>
-        </div>
+             <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-center text-red-500 text-lg">
+                        Main Restaurant
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="sm:justify-center">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+                 <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                    <X className="h-5 w-5" />
+                </button>
+            </AlertDialogContent>
+        </AlertDialog>
       </form>
 
       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSuccessDialog}>
@@ -221,3 +253,4 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
+
