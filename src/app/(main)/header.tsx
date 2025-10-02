@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -141,7 +140,7 @@ export function Header() {
 
   return (
     <div className="grid gap-1">
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-primary">{title}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-600">{title}</h1>
       <p className="text-muted-foreground">{description}</p>
     </div>
   );
