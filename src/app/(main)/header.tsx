@@ -2,7 +2,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
@@ -137,7 +137,7 @@ export function Header() {
 
   return (
     <div className="grid gap-1">
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-600">{pageDetails.title}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-800">{pageDetails.title}</h1>
       <p className="text-muted-foreground">{pageDetails.description}</p>
     </div>
   );
