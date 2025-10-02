@@ -154,7 +154,7 @@ export default function EditRestaurantReservationPage() {
                   </AlertDialogFooter>
                   <AlertDialogCancel asChild>
                     <button className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                      <X className="h-5 w-5" />
+                        <X className="h-5 w-5" />
                     </button>
                   </AlertDialogCancel>
                 </AlertDialogContent>

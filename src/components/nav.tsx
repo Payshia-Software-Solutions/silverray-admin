@@ -57,7 +57,7 @@ export function Nav() {
        if (parts[0] === 'rooms' && (parts[1] === 'images' || parts[1] === 'types')) {
         return `/${parts[0]}/${parts[1]}`;
       }
-      if (parts[0] === 'restaurant' && parts[1] === 'features') {
+      if (parts[0] === 'restaurant' && (parts[1] === 'features' || parts[1] === 'menu' || parts[1] === 'reservations' || parts[1] === 'edit')) {
         return `/${parts[0]}`;
       }
       return `/${parts[0]}`;

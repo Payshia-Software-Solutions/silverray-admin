@@ -983,13 +983,13 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<{ experience: ExperienceFromApi }> {
+export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
   const response = await fetch(`${API_BASE_URL}/experiences`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(experienceData),
   });
-  return handleResponse<{ experience: ExperienceFromApi }>(response);
+  return handleResponse<ExperienceFromApi>(response);
 }
 
 export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
