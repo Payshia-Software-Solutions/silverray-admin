@@ -1232,10 +1232,8 @@ export async function getRestaurants(): Promise<RestaurantFromApi[]> {
 }
 
 export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
-  const response = await fetch(`${API_BASE_URL}/dining`);
-  const data = await handleResponse<RestaurantFromApi>(response);
-  // Since the endpoint returns a single object, we wrap it in an array for consistency
-  return [data];
+  const response = await fetch(`${API_BASE_URL}/restaurant`);
+  return handleResponse<RestaurantFromApi[]>(response);
 }
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
