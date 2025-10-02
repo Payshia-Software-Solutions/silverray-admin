@@ -34,6 +34,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/events/new': { title: 'Add New Event', description: 'Create a new event booking.' },
   '/package-inclusions': { title: 'Package Inclusions', description: 'Manage all package inclusions for weddings and events.' },
   '/package-inclusions/new': { title: 'Add new Inclusion', description: 'Add a new inclusion to your system.' },
+  '/gallery': { title: 'Gallery Management', description: 'Manage your website\'s image gallery.' },
   '/website-content': { title: 'Website Content Management', description: 'Manage your website content and pages' },
   '/user-management': { title: 'User Management', description: 'Manage admin accounts and permissions' },
   '/user-management/new': { title: 'Add New Admin', description: 'Create a new administrative user account.' },
@@ -97,7 +98,7 @@ const getDynamicPageInfo = (pathname: string) => {
          if(pathSegments[1] === 'features' && pathSegments.length > 2 && pathSegments[2] !== 'new'){
              return { title: 'Edit Restaurant Feature', description: `Updating details for a restaurant feature.` };
         }
-        if(pathSegments.length === 2 && pathSegments[1] !== 'new' && pathSegments[1] !== 'features' && pathSegments[1] !== 'menu' && pathSegments[1] !== 'reservations'){
+        if(pathSegments[1] === 'edit' && pathSegments.length === 3){
             return { title: 'Edit Restaurant Venue', description: `Updating details for a restaurant venue.` };
         }
     }
