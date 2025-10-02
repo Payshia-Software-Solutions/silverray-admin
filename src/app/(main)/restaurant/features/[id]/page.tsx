@@ -102,14 +102,16 @@ export default function EditRestaurantFeaturePage() {
                                     name="is_active"
                                     control={control}
                                     render={({ field }) => (
-                                        <Switch
-                                            id="is_active"
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
+                                        <>
+                                            <Switch
+                                                id="is_active"
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                            <Label htmlFor="is_active">{field.value ? 'Active' : 'Inactive'}</Label>
+                                        </>
                                     )}
                                 />
-                                <Label htmlFor="is_active">Active</Label>
                             </div>
                             
                             <div className="flex justify-end gap-2">
