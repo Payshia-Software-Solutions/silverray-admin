@@ -32,6 +32,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import RestaurantFeaturesPage from './features/page';
 
 const statusColors: { [key: string]: string } = {
   Active: 'bg-green-500',
@@ -98,6 +99,16 @@ export default function RestaurantPage() {
     }
   }
 
+  const getAddButtonText = () => {
+    switch (activeTab) {
+        case 'venues': return 'Add New Venue';
+        case 'menu': return 'Add New Menu Item';
+        case 'reservations': return 'Add New Reservation';
+        case 'features': return 'Add New Feature';
+        default: return 'Add New Item';
+    }
+  };
+
   return (
     <div className="space-y-6">
         <Toaster />
@@ -111,7 +122,7 @@ export default function RestaurantPage() {
             </TabsList>
              <Button asChild>
                 <Link href={getAddButtonLink()}>
-                    <Plus className="mr-2 h-4 w-4" /> Add New Item
+                    <Plus className="mr-2 h-4 w-4" /> {getAddButtonText()}
                 </Link>
             </Button>
         </div>
@@ -158,8 +169,8 @@ export default function RestaurantPage() {
             <TabsContent value="reservations">
                 <p>Reservations will be displayed here.</p>
             </TabsContent>
-            <TabsContent value="features">
-                <p>Features will be displayed here.</p>
+             <TabsContent value="features">
+                <RestaurantFeaturesPage />
             </TabsContent>
 
             <AlertDialogContent>
