@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import RestaurantFeaturesPage from './features/page';
+import MenuItemsPage from './menu/page';
 
 const statusColors: { [key: string]: string } = {
   Active: 'bg-green-500',
@@ -164,7 +165,7 @@ export default function RestaurantPage() {
                 </div>
             </TabsContent>
             <TabsContent value="menu">
-                <p>Menu items will be displayed here.</p>
+                <MenuItemsPage />
             </TabsContent>
             <TabsContent value="reservations">
                 <p>Reservations will be displayed here.</p>
