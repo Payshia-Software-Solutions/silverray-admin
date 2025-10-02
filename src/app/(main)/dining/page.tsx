@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -28,7 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import Link from 'next/link';
-import { getRestaurants, deleteRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi } from '@/lib/services/api';
+import { getDiningVenues, deleteRestaurant, type RestaurantFromApi, getOperatingHoursById, OperatingHoursFromApi } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
@@ -113,7 +114,7 @@ export default function DiningManagementPage() {
     async function fetchVenues() {
       try {
         setLoading(true);
-        const venueData = await getRestaurants();
+        const venueData = await getDiningVenues();
         const venuesWithHours = await Promise.all(
             venueData.map(async (venue) => {
                 if(venue.operating_hours_id) {
@@ -256,7 +257,7 @@ export default function DiningManagementPage() {
                   <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
                       <div className="relative w-full h-48">
                         <Image
-                            src={venue.images_url || 'https://placehold.co/600x400.png'}
+                            src={venue.restaurant_image || venue.images_url || 'https://placehold.co/600x400.png'}
                             alt={venue.venue_name}
                             fill
                             className="object-cover"

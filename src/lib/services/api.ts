@@ -1,4 +1,5 @@
 
+
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -264,6 +265,7 @@ export interface RestaurantFromApi {
   operating_hours_id: string;
   feature_id: string;
   images_url: string | null;
+  restaurant_image?: string;
   status: 'Active' | 'Inactive' | 'Seasonal';
   status_notes: string;
   company_id: string;
@@ -1227,6 +1229,13 @@ export async function getRestaurants(): Promise<RestaurantFromApi[]> {
     return [];
   }
   return restaurants;
+}
+
+export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/dining`);
+  const data = await handleResponse<RestaurantFromApi>(response);
+  // Since the endpoint returns a single object, we wrap it in an array for consistency
+  return [data];
 }
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
