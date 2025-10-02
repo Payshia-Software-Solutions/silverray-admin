@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -121,6 +120,7 @@ const reservations = [
 type VenueWithHours = RestaurantFromApi & { operatingHours?: OperatingHoursFromApi };
 
 function RestaurantFeaturesTab() {
+  const { toast } = useToast();
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -137,12 +137,13 @@ function RestaurantFeaturesTab() {
         setFeatures(data);
       } catch (err: any) {
         setError(err.message || 'An unexpected error occurred while fetching features.');
+        toast({ variant: 'destructive', title: 'Error', description: err.message });
       } finally {
         setLoading(false);
       }
     }
     fetchFeatures();
-  }, []);
+  }, [toast]);
 
   const handleDeleteClick = (feature: RestaurantFeatureFromApi) => {
     setItemToDelete(feature);
@@ -155,9 +156,13 @@ function RestaurantFeaturesTab() {
         setDeletedItemName(itemToDelete.feature_name);
         setFeatures(prev => prev.filter(item => item.id !== itemToDelete.id));
         setShowDeleteSuccessDialog(true);
+        toast({ title: 'Success', description: `Feature "${itemToDelete.feature_name}" deleted.` });
       } catch (error: any) {
-        // The toast will be handled by the main component's Toaster
-        console.error("Error Deleting Feature:", error);
+        toast({
+          variant: "destructive",
+          title: "Error Deleting Feature",
+          description: error.message || "An unexpected error occurred.",
+        });
       } finally {
         setItemToDelete(null);
       }
@@ -280,6 +285,11 @@ export default function RestaurantDiningPage() {
       try {
         setLoading(true);
         const venueData = await getRestaurants();
+        
+        if (!Array.isArray(venueData)) {
+            throw new Error("Invalid data format received from API.");
+        }
+        
         const venuesWithHours = await Promise.all(
             venueData.map(async (venue) => {
                 if(venue.operating_hours_id) {
@@ -288,7 +298,7 @@ export default function RestaurantDiningPage() {
                         return { ...venue, operatingHours: hours };
                     } catch (e) {
                          console.error(`Failed to fetch hours for venue ${venue.id}`, e);
-                        return venue; // Return venue without hours if fetch fails
+                        return venue;
                     }
                 }
                 return venue;
@@ -317,6 +327,7 @@ export default function RestaurantDiningPage() {
         setDeletedVenueName(venueToDelete.venue_name);
         setShowDeleteSuccessDialog(true);
         setVenues(venues.filter(v => v.id !== venueToDelete.id));
+        toast({ title: "Success", description: `Venue "${venueToDelete.venue_name}" has been deleted.` });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error deleting venue', description: error.message });
     } finally {
@@ -329,8 +340,10 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteItemConfirm = () => {
-    console.log(`Deleting ${itemToDelete?.name}`);
+    if (!itemToDelete) return;
+    toast({ title: "Success", description: `Menu item "${itemToDelete.name}" has been deleted.` });
     setShowDeleteSuccessDialog(true);
+    setDeletedVenueName(itemToDelete.name);
     setItemToDelete(null);
   }
 
@@ -339,8 +352,10 @@ export default function RestaurantDiningPage() {
   };
 
   const handleDeleteReservationConfirm = () => {
-    console.log(`Deleting reservation ${reservationToDelete?.id}`);
+    if (!reservationToDelete) return;
+    toast({ title: "Success", description: `Reservation "${reservationToDelete.id}" has been deleted.` });
     setShowDeleteSuccessDialog(true);
+    setDeletedVenueName(reservationToDelete.id);
     setReservationToDelete(null);
   };
   
@@ -356,7 +371,6 @@ export default function RestaurantDiningPage() {
 
   const getOperatingHours = (hours?: OperatingHoursFromApi): string => {
     if (!hours) return 'N/A';
-    // Simplified logic: find the first open day and display its hours
     const firstOpenDayKey = Object.keys(hours).find(key => key.endsWith('_open') && (hours as any)[key] === 1);
     if (firstOpenDayKey) {
         const day = firstOpenDayKey.replace('_open', '');
@@ -765,3 +779,5 @@ export default function RestaurantDiningPage() {
     </div>
   );
 }
+
+    

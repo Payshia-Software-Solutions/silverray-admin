@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -1223,7 +1222,11 @@ export async function getRestaurants(): Promise<RestaurantFromApi[]> {
   const data = await handleResponse<any>(response);
   // The API might return an object with a 'restaurants' key or just the array.
   const restaurants = Array.isArray(data) ? data : data.restaurants;
-  return Array.isArray(restaurants) ? restaurants : [];
+  if (!Array.isArray(restaurants)) {
+    console.warn("getRestaurants did not receive a valid array. Response:", data);
+    return [];
+  }
+  return restaurants;
 }
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
@@ -1516,3 +1519,5 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
   
+
+    
