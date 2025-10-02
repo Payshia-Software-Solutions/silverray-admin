@@ -88,6 +88,9 @@ const getDynamicPageInfo = (pathname: string) => {
      if (pathSegments[0] === 'weddingpackages' && pathSegments[1] === 'booking' && pathSegments.length > 2 && pathSegments[2] !== 'new') {
         return { title: 'Wedding Booking Details', description: 'Details for a wedding booking.' };
     }
+    if (pathSegments[0] === 'restaurant' && pathSegments[1] === 'edit' && pathSegments.length === 3) {
+      return { title: 'Edit Restaurant Venue', description: 'Updating details for a restaurant venue.' };
+    }
     if (pathSegments[0] === 'restaurant' && pathSegments.length > 1) {
         if(pathSegments[1] === 'menu' && pathSegments[2] && pathSegments[2] !== 'new'){
             return { title: 'Edit Menu Item', description: 'Manage a dining menu item.' };

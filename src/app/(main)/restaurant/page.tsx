@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Users, Clock, Edit, Trash2 } from 'lucide-react';
+import { Plus, Users, Clock, Edit, Trash2, Utensils, CalendarCheck, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -57,9 +58,10 @@ export default function RestaurantPage() {
       <Tabs defaultValue="venues" className="space-y-4">
         <div className="flex justify-between items-center">
             <TabsList>
-                <TabsTrigger value="venues">Dining Venues</TabsTrigger>
-                <TabsTrigger value="menu">Menu Items</TabsTrigger>
-                <TabsTrigger value="reservations">Reservations</TabsTrigger>
+                <TabsTrigger value="venues"><Utensils className="mr-2 h-4 w-4" />Dining Venues</TabsTrigger>
+                <TabsTrigger value="menu"><Utensils className="mr-2 h-4 w-4" />Menu Items</TabsTrigger>
+                <TabsTrigger value="reservations"><CalendarCheck className="mr-2 h-4 w-4" />Reservations</TabsTrigger>
+                <TabsTrigger value="features"><Shield className="mr-2 h-4 w-4" />Features</TabsTrigger>
             </TabsList>
              <Button onClick={() => router.push('/restaurant/new')}>
                 <Plus className="mr-2 h-4 w-4" /> Add New Item
@@ -88,7 +90,7 @@ export default function RestaurantPage() {
                       </div>
                   </CardContent>
                   <CardFooter className="flex justify-end items-center p-2 bg-muted/50">
-                     <Button variant="ghost" size="icon" className="group hover:bg-primary/10">
+                     <Button variant="ghost" size="icon" className="group hover:bg-primary/10" onClick={() => router.push(`/restaurant/edit/${venue.id}`)}>
                         <Edit className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                      </Button>
                      <Button variant="ghost" size="icon" className="group hover:bg-red-100">
@@ -105,7 +107,11 @@ export default function RestaurantPage() {
         <TabsContent value="reservations">
              <p>Reservations will be displayed here.</p>
         </TabsContent>
+        <TabsContent value="features">
+             <p>Features will be displayed here.</p>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
+
