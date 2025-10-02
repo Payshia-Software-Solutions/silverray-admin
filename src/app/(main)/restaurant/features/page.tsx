@@ -67,11 +67,7 @@ export default function RestaurantFeaturesPage() {
   return (
     <>
       <Toaster />
-      <div className="flex justify-end mb-6">
-        <Button onClick={() => router.push('/restaurant/features/new')}>
-          <Plus className="mr-2 h-4 w-4" /> Add New Feature
-        </Button>
-      </div>
+      
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <Card>
             <CardHeader>
