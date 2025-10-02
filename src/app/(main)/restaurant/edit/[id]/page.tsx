@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -58,6 +57,13 @@ export default function EditRestaurantPage() {
   
   const [showSaveSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+
+  const handleDeleteConfirm = () => {
+    // Here you would add the actual logic to delete the venue.
+    setShowDeleteConfirmDialog(false); // Close the confirmation dialog
+    setShowDeleteSuccessDialog(true); // Show the success dialog
+  }
 
   return (
     <div className="space-y-6">
@@ -222,7 +228,7 @@ export default function EditRestaurantPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter className="sm:justify-center">
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                    <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
                  <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
                     <X className="h-5 w-5" />
@@ -250,7 +256,26 @@ export default function EditRestaurantPage() {
                 </div>
             </DialogContent>
         </Dialog>
+
+        <Dialog open={showDeleteSuccessDialog} onOpenChange={setShowDeleteSuccessDialog}>
+          <DialogContent>
+            <DialogHeader className='sr-only'>
+              <DialogTitle>Venue Deleted</DialogTitle>
+              <DialogDescription>The venue has been successfully deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="text-center p-6 flex flex-col items-center">
+                <div className="p-3 bg-red-100 rounded-full mb-4">
+                    <Trash2 className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Successfully Deleted Main Restaurant !</h2>
+            </div>
+            <DialogClose asChild>
+                <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
+                    <X className="h-5 w-5" />
+                </button>
+            </DialogClose>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
