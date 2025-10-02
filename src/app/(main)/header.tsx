@@ -2,7 +2,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/': { title: 'Dashboard', description: "Welcome back! Here's what's happening at your hotel today." },
@@ -123,25 +123,22 @@ const getDynamicPageInfo = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
+  const [pageDetails, setPageDetails] = useState({ title: '', description: '' });
 
-  const { title, description } = useMemo(() => {
-    if (pageInfo[pathname]) {
-      return pageInfo[pathname];
-    }
-    
-    const dynamicInfo = getDynamicPageInfo(pathname);
-    if (dynamicInfo) {
-      return dynamicInfo;
-    }
-   
-    return { title: 'Page Not Found', description: "The page you are looking for does not exist." };
+  useEffect(() => {
+    const info = pageInfo[pathname] || getDynamicPageInfo(pathname) || { title: 'Page Not Found', description: "The page you are looking for does not exist." };
+    setPageDetails(info);
   }, [pathname]);
 
+  if (!pageDetails.title) {
+    // Render nothing or a placeholder on the server and initial client render
+    return null;
+  }
 
   return (
     <div className="grid gap-1">
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-600">{title}</h1>
-      <p className="text-muted-foreground">{description}</p>
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-600">{pageDetails.title}</h1>
+      <p className="text-muted-foreground">{pageDetails.description}</p>
     </div>
   );
 }
