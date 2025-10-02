@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,8 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { getRestaurants, type RestaurantFromApi, deleteRestaurant, getOperatingHoursById, OperatingHoursFromApi } from '@/lib/services/api';
-import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
 const statusColors: { [key: string]: string } = {
@@ -21,48 +18,38 @@ const statusColors: { [key: string]: string } = {
   Seasonal: 'bg-orange-500',
 };
 
-type VenueWithHours = RestaurantFromApi & { operating_hours_display?: string };
+const mockVenues = [
+    {
+        id: 1,
+        venue_name: 'The Grand Palace',
+        short_description: 'Exquisite fine dining with a panoramic view of the ocean.',
+        capacity: 120,
+        operating_hours_display: '6 PM - 11 PM',
+        status: 'Active',
+        restaurant_image: 'https://picsum.photos/seed/restaurant1/600/400'
+    },
+    {
+        id: 2,
+        venue_name: 'Poolside Grill & Bar',
+        short_description: 'Casual dining with grilled specialties and refreshing cocktails by the pool.',
+        capacity: 80,
+        operating_hours_display: '11 AM - 10 PM',
+        status: 'Active',
+        restaurant_image: 'https://picsum.photos/seed/restaurant2/600/400'
+    },
+    {
+        id: 3,
+        venue_name: 'The Lighthouse Bistro',
+        short_description: 'A cozy spot for breakfast, brunch, and artisanal coffee.',
+        capacity: 40,
+        operating_hours_display: '7 AM - 4 PM',
+        status: 'Inactive',
+        restaurant_image: 'https://picsum.photos/seed/restaurant3/600/400'
+    }
+];
 
 export default function RestaurantPage() {
   const router = useRouter();
-  const { toast } = useToast();
-  const [venues, setVenues] = useState<VenueWithHours[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchVenues() {
-      try {
-        setLoading(true);
-        const venuesData = await getRestaurants();
-        const venuesWithHours = await Promise.all(
-            venuesData.map(async (venue) => {
-                try {
-                    const hoursData = await getOperatingHoursById(venue.operating_hours_id);
-                    // Find first available day to display
-                    const firstDay = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].find(day => hoursData[`${day}_open` as keyof OperatingHoursFromApi]);
-                    const displayHours = firstDay ? `${hoursData[`${firstDay}_open_time` as keyof OperatingHoursFromApi]} - ${hoursData[`${firstDay}_close_time` as keyof OperatingHoursFromApi]}` : 'N/A';
-                    return { ...venue, operating_hours_display: displayHours };
-                } catch(e) {
-                    console.error(`Failed to fetch hours for venue ${venue.id}`, e);
-                    return { ...venue, operating_hours_display: 'Not Available' };
-                }
-            })
-        );
-        setVenues(venuesWithHours);
-      } catch (err: any) {
-        setError(err.message);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to load dining venues',
-          description: err.message,
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchVenues();
-  }, [toast]);
 
   return (
     <div className="space-y-6">
@@ -79,11 +66,8 @@ export default function RestaurantPage() {
             </Button>
         </div>
         <TabsContent value="venues">
-          {loading && <p>Loading venues...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {!loading && !error && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {venues.map((venue) => (
+              {mockVenues.map((venue) => (
                 <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
                   <div className="relative w-full h-48">
                     <Image
@@ -114,7 +98,6 @@ export default function RestaurantPage() {
                 </Card>
               ))}
             </div>
-          )}
         </TabsContent>
         <TabsContent value="menu">
             <p>Menu items will be displayed here.</p>
