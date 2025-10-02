@@ -141,7 +141,7 @@ export function Header() {
 
   return (
     <div className="grid gap-1">
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-blue-800">{title}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
       <p className="text-muted-foreground">{description}</p>
     </div>
   );
