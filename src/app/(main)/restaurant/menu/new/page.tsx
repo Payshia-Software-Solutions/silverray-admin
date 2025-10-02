@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -24,7 +25,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Utensils, DollarSign, Sprout, Pepper, Upload, Image as ImageIcon, CheckCircle2, X } from 'lucide-react';
+import { Utensils, DollarSign, Sprout, Flame, Upload, Image as ImageIcon, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -127,7 +128,7 @@ export default function NewMenuItemPage() {
                   ))}
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="spice-level"><Pepper className="h-4 w-4 inline-block mr-2"/>Spice Level</Label>
+                    <Label htmlFor="spice-level"><Flame className="h-4 w-4 inline-block mr-2"/>Spice Level</Label>
                     <Select>
                         <SelectTrigger id="spice-level"><SelectValue placeholder="Not Spicy" /></SelectTrigger>
                         <SelectContent>
