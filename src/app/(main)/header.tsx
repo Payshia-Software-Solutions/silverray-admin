@@ -124,15 +124,21 @@ const getDynamicPageInfo = (pathname: string) => {
 export function Header() {
   const pathname = usePathname();
   const [pageDetails, setPageDetails] = useState({ title: '', description: '' });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const info = pageInfo[pathname] || getDynamicPageInfo(pathname) || { title: 'Page Not Found', description: "The page you are looking for does not exist." };
     setPageDetails(info);
   }, [pathname]);
 
-  if (!pageDetails.title) {
-    // Render nothing or a placeholder on the server and initial client render
-    return null;
+  if (!isMounted) {
+    return (
+        <div className="grid gap-1">
+            <div className="h-8 w-48 bg-muted rounded-md animate-pulse"></div>
+            <div className="h-5 w-72 bg-muted rounded-md animate-pulse"></div>
+        </div>
+    );
   }
 
   return (
