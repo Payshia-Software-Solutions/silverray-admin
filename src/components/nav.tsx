@@ -31,6 +31,7 @@ const navItems = [
     label: 'Restaurant & Dining', 
     icon: UtensilsCrossed,
   },
+  { href: '/dining', label: 'Dining Management', icon: UtensilsCrossed },
   { href: '/experience', label: 'Experience Management', icon: Star },
   { href: '/customers', label: 'Customer Management', icon: Users },
   { href: '/messages', label: 'Contact Messages', icon: Mail },
