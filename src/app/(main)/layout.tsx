@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarSeparator />
         <SidebarFooter className="p-4 flex flex-col gap-4">
-           <Button variant="ghost" className="justify-start gap-2 hover:bg-yellow-200 dark:hover:bg-yellow-700" asChild>
+           <Button variant="ghost" className="justify-start gap-2" asChild>
             <Link href="/settings">
               <Settings className="h-5 w-5" />
               <span className="text-sm font-medium">Settings</span>
@@ -86,6 +86,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
 
 
 
