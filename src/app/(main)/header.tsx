@@ -19,6 +19,7 @@ const pageInfo: { [key: string]: { title: string; description: string } } = {
   '/bookings': { title: 'Bookings Management', description: 'Manage all bookings.' },
   '/bookings/new': { title: 'Create New Booking', description: 'Add a new booking record.' },
   '/restaurant': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' }, 
+  '/dining': { title: 'Restaurant & Dining Management', description: 'Manage dining venues, menu items, and reservations' },
   '/restaurant/new': { title: 'Add New Restaurant Venue', description: 'Create a new dining venue in your hotel.' },
   '/restaurant/menu/new': { title: 'Add New Menu Item', description: 'Add a new dish or beverage to a restaurant menu.' },
   '/restaurant/reservations/new': { title: 'Create Dining Reservation', description: 'Manually book a table for a guest.' },
@@ -128,9 +129,14 @@ export function Header() {
 
   useEffect(() => {
     setIsMounted(true);
-    const info = pageInfo[pathname] || getDynamicPageInfo(pathname) || { title: 'Page Not Found', description: "The page you are looking for does not exist." };
-    setPageDetails(info);
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      const info = pageInfo[pathname] || getDynamicPageInfo(pathname) || { title: 'Page Not Found', description: "The page you are looking for does not exist." };
+      setPageDetails(info);
+    }
+  }, [pathname, isMounted]);
 
   if (!isMounted) {
     return (
