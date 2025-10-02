@@ -7,9 +7,11 @@ import {
   Card,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Pencil } from 'lucide-react';
+import { Edit, Trash2, Plus, Users, Clock, Utensils, ClipboardList, CalendarCheck, Pencil, BarChart, ChefHat, DollarSign } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -68,6 +70,33 @@ const reservations = [
 ];
 
 type VenueWithHours = RestaurantFromApi & { operatingHours?: OperatingHoursFromApi };
+
+interface StatCardProps {
+    title: string;
+    value: string;
+    description?: string;
+    Icon: React.ElementType;
+    iconBgColor: string;
+    iconColor: string;
+}
+
+function StatCard({ title, value, description, Icon, iconBgColor, iconColor }: StatCardProps) {
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <div className={cn("p-2 rounded-lg", iconBgColor)}>
+                    <Icon className={cn("h-5 w-5", iconColor)} />
+                </div>
+            </CardHeader>
+            <CardContent>
+                <h3 className="text-3xl font-bold">{value}</h3>
+                {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            </CardContent>
+        </Card>
+    );
+}
+
 
 export default function DiningManagementPage() {
   const router = useRouter();
@@ -154,6 +183,40 @@ export default function DiningManagementPage() {
   return (
     <div className="space-y-6">
       <Toaster />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard 
+            title="Dining Venues" 
+            value="4" 
+            description="3 Active, 1 Seasonal" 
+            Icon={Utensils}
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+        />
+        <StatCard 
+            title="Today's Reservations" 
+            value="32" 
+            description="12 pending, 20 confirmed" 
+            Icon={CalendarCheck}
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+        />
+        <StatCard 
+            title="Total Menu Items" 
+            value="88" 
+            description="Across all venues"
+            Icon={ChefHat}
+            iconBgColor="bg-orange-100"
+            iconColor="text-orange-600"
+        />
+        <StatCard 
+            title="Today's Revenue" 
+            value="LKR 12,500" 
+            description="+8% from yesterday" 
+            Icon={DollarSign}
+            iconBgColor="bg-yellow-100"
+            iconColor="text-yellow-600"
+        />
+      </div>
       <Tabs defaultValue="dining-venues" className="space-y-4" onValueChange={setActiveTab}>
         <div className="flex justify-between items-center">
           <TabsList>
