@@ -58,7 +58,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset className="bg-secondary/30">
         <header className="flex h-auto items-center gap-4 border-b bg-card px-6 py-4 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
             <SidebarTrigger className="md:hidden" />
-            <Header />
+            <div className="flex-grow">
+              <Header />
+            </div>
             <div className="ml-auto flex items-center gap-4">
               <ThemeToggle />
               <Button variant="ghost" size="icon">
