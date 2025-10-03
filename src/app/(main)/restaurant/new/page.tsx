@@ -53,6 +53,7 @@ const restaurantSchema = z.object({
   custom_feature: z.string().optional(),
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
   status_notes: z.string().optional(),
+  feature_ids: z.array(z.string()).optional(),
 });
 
 type RestaurantFormValues = z.infer<typeof restaurantSchema>;
@@ -77,6 +78,7 @@ export default function NewRestaurantPage() {
     resolver: zodResolver(restaurantSchema),
     defaultValues: {
       status: 'Active',
+      feature_ids: [],
     }
   });
 
@@ -126,7 +128,7 @@ export default function NewRestaurantPage() {
             created_by: 'admin_user',
             updated_by: 'admin_user',
             operating_hours_id: createdHours.id.toString(),
-            feature_id: '3', // This should be dynamic
+            feature_id: data.feature_ids?.join(',') || '',
             images_url: '', // Will be updated after upload
         };
         const createdRestaurant = await createRestaurant(restaurantData);
@@ -291,14 +293,31 @@ export default function NewRestaurantPage() {
         <Card>
             <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">Features & Ambiance</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
-                        <div key={feature.id} className="flex items-center space-x-2">
-                            <Checkbox id={`feature-${feature.id}`} />
-                            <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
-                        </div>
-                    ))}
-                </div>
+                 <Controller
+                    name="feature_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {loadingFeatures ? <p>Loading features...</p> : features.map(feature => (
+                            <div key={feature.id} className="flex items-center space-x-2">
+                                <Checkbox 
+                                    id={`feature-${feature.id}`}
+                                    checked={field.value?.includes(String(feature.id))}
+                                    onCheckedChange={(checked) => {
+                                        const currentFeatures = field.value || [];
+                                        if(checked) {
+                                            field.onChange([...currentFeatures, String(feature.id)])
+                                        } else {
+                                            field.onChange(currentFeatures.filter(id => id !== String(feature.id)))
+                                        }
+                                    }}
+                                />
+                                <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
+                            </div>
+                        ))}
+                      </div>
+                    )}
+                 />
                 <div className="space-y-2">
                     <Label htmlFor="custom-feature">Custom Feature</Label>
                     <Input id="custom-feature" placeholder="Add a unique feature" {...register('custom_feature')} />
