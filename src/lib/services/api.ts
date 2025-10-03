@@ -1,5 +1,4 @@
 
-
 /**
  * @fileoverview This file contains the functions for making API calls to the PHP back-end.
  * It uses the native fetch API for all requests.
@@ -984,13 +983,13 @@ export async function getExperienceById(id: number): Promise<ExperienceFromApi> 
     return handleResponse<ExperienceFromApi>(response);
 }
 
-export async function createExperience(experienceData: any): Promise<ExperienceFromApi> {
+export async function createExperience(experienceData: any): Promise<{experience: ExperienceFromApi}> {
   const response = await fetch(`${API_BASE_URL}/experiences`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(experienceData),
   });
-  return handleResponse<ExperienceFromApi>(response);
+  return handleResponse<{experience: ExperienceFromApi}>(response);
 }
 
 export async function updateExperience(id: number, experienceData: Partial<ExperienceFromApi>): Promise<ExperienceFromApi> {
@@ -1220,14 +1219,9 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 
 // Restaurant Venues API
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
-  try {
     const response = await fetch(`${API_BASE_URL}/restaurant`);
     const result = await handleResponse<{ success: boolean, data: RestaurantFromApi[] }>(response);
     return result.data || [];
-  } catch (error) {
-    console.error('Failed to fetch restaurants:', error);
-    return []; // Return empty array on error
-  }
 }
 
 export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
