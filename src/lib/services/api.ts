@@ -1220,8 +1220,21 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 
 // Restaurant Venues API
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
+  try {
     const response = await fetch(`${API_BASE_URL}/restaurant`);
-    return handleResponse<RestaurantFromApi[]>(response);
+    const data = await handleResponse<RestaurantFromApi | RestaurantFromApi[]>(response);
+    
+    // The API might return a single object or an array. Standardize it to an array.
+    if (Array.isArray(data)) {
+      return data;
+    } else if (data && typeof data === 'object') {
+      return [data];
+    }
+    return [];
+  } catch (error) {
+    console.error('Failed to fetch restaurants:', error);
+    return []; // Return empty array on error
+  }
 }
 
 export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
