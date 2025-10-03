@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,6 +34,8 @@ import {
 import Link from 'next/link';
 import RestaurantFeaturesPage from './features/page';
 import MenuItemsPage from './menu/page';
+import { getRestaurants, deleteRestaurant, RestaurantFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 const statusColors: { [key: string]: string } = {
   Active: 'bg-green-500',
@@ -41,53 +43,61 @@ const statusColors: { [key: string]: string } = {
   Seasonal: 'bg-orange-500',
 };
 
-const mockVenues = [
-    {
-        id: 1,
-        venue_name: 'The Grand Palace',
-        short_description: 'Exquisite fine dining with a panoramic view of the ocean.',
-        capacity: 120,
-        operating_hours_display: '6 PM - 11 PM',
-        status: 'Active',
-        restaurant_image: 'https://picsum.photos/seed/restaurant1/600/400'
-    },
-    {
-        id: 2,
-        venue_name: 'Poolside Grill & Bar',
-        short_description: 'Casual dining with grilled specialties and refreshing cocktails by the pool.',
-        capacity: 80,
-        operating_hours_display: '11 AM - 10 PM',
-        status: 'Active',
-        restaurant_image: 'https://picsum.photos/seed/restaurant2/600/400'
-    },
-    {
-        id: 3,
-        venue_name: 'The Lighthouse Bistro',
-        short_description: 'A cozy spot for breakfast, brunch, and artisanal coffee.',
-        capacity: 40,
-        operating_hours_display: '7 AM - 4 PM',
-        status: 'Inactive',
-        restaurant_image: 'https://picsum.photos/seed/restaurant3/600/400'
-    }
-];
-
-type Venue = typeof mockVenues[0];
 
 export default function RestaurantPage() {
   const router = useRouter();
-  const [venueToDelete, setVenueToDelete] = useState<Venue | null>(null);
+  const { toast } = useToast();
+  const [venues, setVenues] = useState<RestaurantFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [venueToDelete, setVenueToDelete] = useState<RestaurantFromApi | null>(null);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [activeTab, setActiveTab] = useState('venues');
 
-  const handleDeleteClick = (venue: Venue) => {
+  useEffect(() => {
+    async function fetchVenues() {
+        try {
+            setLoading(true);
+            const data = await getRestaurants();
+            setVenues(data);
+        } catch (err: any) {
+            setError(err.message || 'An unexpected error occurred.');
+            toast({
+                variant: 'destructive',
+                title: 'Failed to fetch venues',
+                description: err.message,
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchVenues();
+  }, [toast]);
+
+
+  const handleDeleteClick = (venue: RestaurantFromApi) => {
     setVenueToDelete(venue);
   };
 
-  const handleConfirmDelete = () => {
-    // Here you would add the actual logic to delete the venue.
-    console.log(`Deleting venue ${venueToDelete?.venue_name}`);
-    setVenueToDelete(null); // Close the confirmation dialog
-    setShowDeleteSuccessDialog(true); // Show the success dialog
+  const handleConfirmDelete = async () => {
+    if (!venueToDelete) return;
+    try {
+        await deleteRestaurant(venueToDelete.id);
+        toast({
+            title: 'Success',
+            description: `Venue "${venueToDelete.venue_name}" has been deleted.`,
+        });
+        setVenues(venues.filter(v => v.id !== venueToDelete.id));
+        setShowDeleteSuccessDialog(true);
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Error Deleting Venue',
+            description: error.message || 'An unexpected error occurred.',
+        });
+    } finally {
+        setVenueToDelete(null);
+    }
   }
   
   const getAddButtonLink = () => {
@@ -129,40 +139,44 @@ export default function RestaurantPage() {
         </div>
         <AlertDialog open={!!venueToDelete} onOpenChange={(open) => !open && setVenueToDelete(null)}>
             <TabsContent value="venues">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockVenues.map((venue) => (
-                    <Card key={venue.id} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
-                    <div className="relative w-full h-48">
-                        <Image
-                        src={venue.restaurant_image || 'https://placehold.co/600x400.png'}
-                        alt={venue.venue_name}
-                        fill
-                        className="object-cover"
-                        data-ai-hint="restaurant interior"
-                        />
-                        <Badge className={cn('absolute top-3 right-3 text-sm text-white', statusColors[venue.status] || 'bg-gray-500')}>{venue.status}</Badge>
-                    </div>
-                    <CardContent className="p-4 flex flex-col flex-grow">
-                        <h3 className="text-xl font-bold mb-2 text-foreground">{venue.venue_name}</h3>
-                        <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {venue.capacity} Capacity</span>
-                            <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> {venue.operating_hours_display}</span>
+                {loading && <p>Loading venues...</p>}
+                {error && <p className="text-red-500">{error}</p>}
+                {!loading && !error && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {venues.map((venue) => (
+                        <Card key={`${venue.id}-${venue.venue_name}`} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
+                        <div className="relative w-full h-48">
+                            <Image
+                                src={venue.restaurant_image || `${CONTENT_PROVIDER_BASE_URL}${venue.images_url}` || 'https://placehold.co/600x400.png'}
+                                alt={venue.venue_name || 'Restaurant image'}
+                                fill
+                                className="object-cover"
+                                data-ai-hint="restaurant interior"
+                            />
+                            <Badge className={cn('absolute top-3 right-3 text-sm text-white', statusColors[venue.status] || 'bg-gray-500')}>{venue.status}</Badge>
                         </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-end items-center p-2 bg-muted/50">
-                        <Button variant="ghost" size="icon" className="group hover:bg-primary/10" onClick={() => router.push(`/restaurant/edit/${venue.id}`)}>
-                            <Edit className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                        </Button>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
-                                <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                        <CardContent className="p-4 flex flex-col flex-grow">
+                            <h3 className="text-xl font-bold mb-2 text-foreground">{venue.venue_name}</h3>
+                            <p className="text-sm text-muted-foreground mb-4 flex-grow">{venue.short_description}</p>
+                            <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {venue.capacity} Capacity</span>
+                                <span className="flex items-center gap-1"><Clock className="h-4 w-4" /> TODO</span>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="flex justify-end items-center p-2 bg-muted/50">
+                            <Button variant="ghost" size="icon" className="group hover:bg-primary/10" onClick={() => router.push(`/restaurant/edit/${venue.id}`)}>
+                                <Edit className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                             </Button>
-                        </AlertDialogTrigger>
-                    </CardFooter>
-                    </Card>
-                ))}
-                </div>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="group hover:bg-red-100" onClick={() => handleDeleteClick(venue)}>
+                                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+                                </Button>
+                            </AlertDialogTrigger>
+                        </CardFooter>
+                        </Card>
+                    ))}
+                    </div>
+                )}
             </TabsContent>
             <TabsContent value="menu">
                 <MenuItemsPage />
