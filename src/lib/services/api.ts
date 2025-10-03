@@ -1405,6 +1405,11 @@ export async function deleteRole(id: string): Promise<{ message: string }> {
 }
 
 // Operating Hours API Functions
+export async function getOperatingHours(): Promise<OperatingHoursFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/operating-hours`);
+  return handleResponse<OperatingHoursFromApi[]>(response);
+}
+
 export async function getOperatingHoursById(id: string): Promise<OperatingHoursFromApi> {
   const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`);
   return handleResponse<OperatingHoursFromApi>(response);
