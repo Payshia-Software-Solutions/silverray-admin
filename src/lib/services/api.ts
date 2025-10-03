@@ -1222,15 +1222,8 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/restaurant`);
-    const data = await handleResponse<RestaurantFromApi | RestaurantFromApi[]>(response);
-    
-    // The API might return a single object or an array. Standardize it to an array.
-    if (Array.isArray(data)) {
-      return data;
-    } else if (data && typeof data === 'object') {
-      return [data];
-    }
-    return [];
+    const result = await handleResponse<{ success: boolean, data: RestaurantFromApi[] }>(response);
+    return result.data || [];
   } catch (error) {
     console.error('Failed to fetch restaurants:', error);
     return []; // Return empty array on error
