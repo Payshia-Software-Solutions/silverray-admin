@@ -38,8 +38,23 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-import { getHalls, type HallFromApi, getPackageInclusions, type PackageInclusionFromApi, updateWeddingPackage, getWeddingPackageById, type WeddingPackageFromApi, getWeddingPackageImages, type WeddingPackageImageFromApi, CONTENT_PROVIDER_BASE_URL, uploadWeddingPackageImage, updateWeddingPackageImage, deleteWeddingPackageImage } from '@/lib/services/api';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
+    getRestaurantById, 
+    updateRestaurant, 
+    deleteRestaurant, 
+    getRestaurantFeatures, 
+    RestaurantFromApi, 
+    RestaurantFeatureFromApi,
+    OperatingHoursFromApi,
+    getOperatingHoursById,
+    updateOperatingHours
+} from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,20 +65,142 @@ import { useRouter, useParams } from 'next/navigation';
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+const restaurantSchema = z.object({
+  venue_name: z.string().min(1, "Venue name is required"),
+  capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
+  short_description: z.string().optional(),
+  detailed_description: z.string().optional(),
+  status: z.enum(['Active', 'Inactive', 'Seasonal']),
+  status_notes: z.string().optional(),
+  feature_ids: z.array(z.string()).optional(),
+});
+
+type RestaurantFormValues = z.infer<typeof restaurantSchema>;
+
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  isPrimary: boolean;
+  id?: number;
+}
+
 export default function EditRestaurantPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
-  
+  const { toast } = useToast();
+
   const [showSaveSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
+  const [restaurant, setRestaurant] = useState<RestaurantFromApi | null>(null);
+  const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi | null>(null);
+  const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDeleteConfirm = () => {
-    // Here you would add the actual logic to delete the venue.
-    setShowDeleteConfirmDialog(false); // Close the confirmation dialog
-    setShowDeleteSuccessDialog(true); // Show the success dialog
+  const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<RestaurantFormValues>({
+    resolver: zodResolver(restaurantSchema),
+  });
+
+  useEffect(() => {
+    async function fetchRestaurantData() {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const [restaurantData, featuresData] = await Promise.all([
+            getRestaurantById(id),
+            getRestaurantFeatures(),
+        ]);
+        setRestaurant(restaurantData);
+        setFeatures(featuresData);
+        
+        reset({
+          ...restaurantData,
+          feature_ids: restaurantData.feature_id ? restaurantData.feature_id.split(',') : [],
+        });
+
+        if (restaurantData.operating_hours_id) {
+          const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
+          setOperatingHours(hoursData);
+        }
+
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Error fetching data",
+          description: error.message || "An unexpected error occurred.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRestaurantData();
+  }, [id, reset, toast]);
+
+  const handleDayToggle = (day: string, checked: boolean) => {
+    setOperatingHours(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            [`${day}_open`]: checked ? 1 : 0
+        };
+    });
+  };
+
+  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
+     setOperatingHours(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            [`${day}_${type}`]: value
+        };
+    });
+  };
+
+  const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
+    if (!restaurant) return;
+    try {
+      // Step 1: Update operating hours if they exist
+      if (operatingHours) {
+        await updateOperatingHours(restaurant.operating_hours_id, operatingHours);
+      }
+      
+      // Step 2: Update restaurant details
+      const restaurantDataToUpdate = {
+        ...data,
+        feature_id: data.feature_ids?.join(','),
+      };
+      await updateRestaurant(restaurant.id, restaurantDataToUpdate);
+      
+      // Step 3: Handle image uploads (add your logic here)
+
+      setShowSuccessDialog(true);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating venue",
+        description: error.message || "An unexpected error occurred."
+      });
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!restaurant) return;
+    setShowDeleteConfirmDialog(false);
+    try {
+      await deleteRestaurant(restaurant.id);
+      setShowDeleteSuccessDialog(true);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Deleting Venue',
+        description: error.message || 'An unexpected error occurred.',
+      });
+    }
   }
+  
+  if (loading) return <div>Loading...</div>;
+  if (!restaurant) return <div>Restaurant not found.</div>;
 
   return (
     <div className="space-y-6">
@@ -75,22 +212,23 @@ export default function EditRestaurantPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Main Restaurant</BreadcrumbPage>
+            <BreadcrumbPage>{restaurant.venue_name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       
-      <form onSubmit={(e) => { e.preventDefault(); setShowSuccessDialog(true); }} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold flex items-center gap-2"><Building2 className="h-5 w-5 text-primary"/>Basic Information</h3>
             <div className="space-y-2">
                 <Label htmlFor="venue-name">Venue Name</Label>
-                <Input id="venue-name" defaultValue="Main Restaurant" />
+                <Input id="venue-name" {...register('venue_name')} />
+                {errors.venue_name && <p className="text-red-500 text-sm">{errors.venue_name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
-              <Textarea id="short-description" defaultValue="Elegant fine dining restaurant featuring contemporary cuisine with panoramic ocean views." />
+              <Textarea id="short-description" {...register('short_description')} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="detailed-description">Detailed Description</Label>
@@ -103,7 +241,7 @@ export default function EditRestaurantPage() {
                 <Textarea
                   id="detailed-description"
                   className="min-h-[120px] border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  defaultValue="Experience culinary excellence at our signature Main Restaurant, where master chefs craft innovative dishes using the finest local and international ingredients. The sophisticated ambiance, complemented by floor-to-ceiling windows offering breathtaking ocean views, creates an unforgettable dining experience for our distinguished guests."
+                  {...register('detailed_description')}
                 />
               </div>
             </div>
@@ -116,9 +254,10 @@ export default function EditRestaurantPage() {
             <div className="space-y-2 w-1/4">
                 <Label htmlFor="capacity">Capacity</Label>
                 <div className="flex items-center gap-2">
-                    <Input id="capacity" type="number" defaultValue="120" />
+                    <Input id="capacity" type="number" {...register('capacity')} />
                     <span className="text-sm text-muted-foreground">guests</span>
                 </div>
+                 {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
             </div>
              <div className="space-y-4">
                 <Label>Operating Hours</Label>
@@ -127,11 +266,22 @@ export default function EditRestaurantPage() {
                         <div key={day} className="space-y-2">
                             <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
                              <div className="flex items-center gap-2">
-                                <Checkbox id={`${day}-open-check`} defaultChecked={day !== 'sunday'}/>
+                                <Checkbox id={`${day}-open-check`} 
+                                  checked={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] === 1 : false}
+                                  onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
+                                />
                                 <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
                              </div>
-                            <Input id={`${day}-open-time`} type="time" defaultValue={day !== 'saturday' && day !== 'sunday' ? '09:00' : '10:00'} disabled={day === 'sunday'} />
-                            <Input id={`${day}-close-time`} type="time" defaultValue={day !== 'saturday' && day !== 'sunday' ? '22:00' : '23:00'} disabled={day === 'sunday'} />
+                            <Input id={`${day}-open-time`} type="time" 
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi]) : ''}
+                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
+                              onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
+                            />
+                            <Input id={`${day}-close-time`} type="time" 
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi]) : ''}
+                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
+                              onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
+                            />
                         </div>
                     ))}
                 </div>
@@ -142,18 +292,31 @@ export default function EditRestaurantPage() {
         <Card>
             <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features & Ambiance</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="flex items-center space-x-2"><Checkbox id="ocean-view" defaultChecked /><Label htmlFor="ocean-view" className="font-normal">Ocean View</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="wine-bar" defaultChecked /><Label htmlFor="wine-bar" className="font-normal">Wine Bar</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="fine-dining" defaultChecked /><Label htmlFor="fine-dining" className="font-normal">Fine Dining</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="private-dining" /><Label htmlFor="private-dining" className="font-normal">Private Dining</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="live-music" /><Label htmlFor="live-music" className="font-normal">Live Music</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="outdoor-seating" defaultChecked /><Label htmlFor="outdoor-seating" className="font-normal">Outdoor Seating</Label></div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="custom-features">Custom Features</Label>
-                    <Input id="custom-features" placeholder="Add custom features..."/>
-                </div>
+                 <Controller
+                    name="feature_ids"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {features.map(feature => (
+                              <div key={feature.id} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                      id={`feature-${feature.id}`} 
+                                      checked={field.value?.includes(String(feature.id))}
+                                      onCheckedChange={(checked) => {
+                                          const currentFeatures = field.value || [];
+                                          if (checked) {
+                                              field.onChange([...currentFeatures, String(feature.id)]);
+                                          } else {
+                                              field.onChange(currentFeatures.filter(id => id !== String(feature.id)));
+                                          }
+                                      }}
+                                  />
+                                  <Label htmlFor={`feature-${feature.id}`} className="font-normal">{feature.feature_name}</Label>
+                              </div>
+                          ))}
+                      </div>
+                    )}
+                 />
             </CardContent>
         </Card>
         
@@ -188,18 +351,24 @@ export default function EditRestaurantPage() {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="status">Current Status</Label>
-                        <Select defaultValue="Active">
-                            <SelectTrigger id="status"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Active">Active</SelectItem>
-                                <SelectItem value="Inactive">Inactive</SelectItem>
-                                <SelectItem value="Seasonal">Seasonal</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Controller
+                            name="status"
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger id="status"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Active">Active</SelectItem>
+                                        <SelectItem value="Inactive">Inactive</SelectItem>
+                                        <SelectItem value="Seasonal">Seasonal</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="status-notes">Status Notes</Label>
-                        <Textarea id="status-notes" placeholder="Optional notes about status" />
+                        <Textarea id="status-notes" placeholder="Optional notes about status" {...register('status_notes')} />
                     </div>
                 </div>
             </CardContent>
@@ -214,16 +383,16 @@ export default function EditRestaurantPage() {
                     <Button variant="outline" asChild type="button">
                     <Link href="/restaurant">Cancel</Link>
                     </Button>
-                    <Button type="submit">
-                        Save Changes
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </div>
             </div>
              <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue ?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue?</AlertDialogTitle>
                     <AlertDialogDescription className="text-center text-red-500 text-lg">
-                        Main Restaurant
+                        {restaurant.venue_name}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="sm:justify-center">
@@ -267,7 +436,10 @@ export default function EditRestaurantPage() {
                 <div className="p-3 bg-red-100 rounded-full mb-4">
                     <Trash2 className="h-8 w-8 text-red-600" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">Successfully Deleted Main Restaurant !</h2>
+                <h2 className="text-2xl font-bold mb-2">Successfully Deleted {restaurant.venue_name}!</h2>
+                 <DialogClose asChild>
+                    <Button className="mt-4" onClick={() => router.push('/restaurant')}>Done</Button>
+                </DialogClose>
             </div>
             <DialogClose asChild>
                 <button className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted" onClick={() => setShowDeleteSuccessDialog(false)}>
