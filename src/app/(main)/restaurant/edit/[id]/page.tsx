@@ -182,8 +182,16 @@ export default function EditRestaurantPage() {
           const reader = new FileReader();
           reader.onloadend = () => {
               const newImageSlots = [...imageSlots];
-              const isFirstImage = !imageSlots.some(slot => slot.preview);
-              newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string, isPrimary: newImageSlots[index]?.isPrimary || isFirstImage };
+              const isFirstImage = !newImageSlots.some(slot => slot.preview);
+              
+              const newSlot: ImageSlot = { 
+                  file, 
+                  preview: reader.result as string, 
+                  isPrimary: newImageSlots[index]?.isPrimary || isFirstImage, 
+                  id: newImageSlots[index]?.id 
+              };
+              
+              newImageSlots[index] = newSlot;
               setImageSlots(newImageSlots);
           };
           reader.readAsDataURL(file);
@@ -257,8 +265,8 @@ export default function EditRestaurantPage() {
       };
       await updateRestaurant(restaurant.id, restaurantDataToUpdate);
       
-      const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
-      for (const slot of imagesToUpload) {
+      const newImages = imageSlots.filter(slot => slot.file);
+      for (const slot of newImages) {
           if (slot.file) {
               await uploadRestaurantImage(id, slot.file, slot.isPrimary);
           }
@@ -587,3 +595,5 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
+
+  
