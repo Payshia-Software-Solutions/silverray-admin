@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -73,8 +72,8 @@ export default function NewRestaurantPage() {
     const initialHours: any = {};
     daysOfWeek.forEach(day => {
         initialHours[`${day}_open`] = true;
-        initialHours[`${day}_open_time`] = '09:00';
-        initialHours[`${day}_close_time`] = '22:00';
+        initialHours[`${day}_open_time`] = '09:00:00';
+        initialHours[`${day}_close_time`] = '22:00:00';
     });
     initialHours['sunday_open'] = false;
     return initialHours;
@@ -107,16 +106,6 @@ export default function NewRestaurantPage() {
     fetchFeatures();
   }, [toast]);
   
-  const handleOperatingHoursChange = (day: string, field: string, value: any) => {
-    setOperatingHours((prev: any) => ({
-        ...prev,
-        [day]: {
-            ...prev[day],
-            [field]: value,
-        }
-    }));
-  };
-
   const handleDayToggle = (day: string, checked: boolean) => {
       setOperatingHours((prev: any) => ({
           ...prev,
@@ -137,8 +126,8 @@ export default function NewRestaurantPage() {
         const hoursPayload: any = { company_id: '1', capacity: data.capacity };
         daysOfWeek.forEach(day => {
             hoursPayload[`${day}_open`] = operatingHours[`${day}_open`] ? 1 : 0;
-            hoursPayload[`${day}_open_time`] = operatingHours[`${day}_open_time`] || null;
-            hoursPayload[`${day}_close_time`] = operatingHours[`${day}_close_time`] || null;
+            hoursPayload[`${day}_open_time`] = operatingHours[`${day}_open`] ? operatingHours[`${day}_open_time`] : null;
+            hoursPayload[`${day}_close_time`] = operatingHours[`${day}_open`] ? operatingHours[`${day}_close_time`] : null;
         });
 
         const createdHours = await createOperatingHours(hoursPayload);
@@ -286,7 +275,7 @@ export default function NewRestaurantPage() {
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
             <div className="space-y-2 w-1/4">
-                <Label htmlFor="capacity">Capacity</Label>
+                <Label htmlFor="capacity">Capacity *</Label>
                 <div className="flex items-center gap-2">
                     <Input id="capacity" type="number" {...register('capacity')} />
                     <span className="text-sm text-muted-foreground">guests</span>
@@ -469,4 +458,3 @@ export default function NewRestaurantPage() {
     </>
   );
 }
-
