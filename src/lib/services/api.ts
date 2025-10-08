@@ -260,14 +260,14 @@ export interface RestaurantFromApi {
   id: number;
   venue_name: string;
   short_description: string;
-  detailed_description: string;
-  capacity: number;
-  operating_hours_id: string;
-  feature_id: string;
+  detailed_description: string | null;
+  capacity: string;
+  operating_hours_id: string | null;
+  feature_id: string | null;
   images_url: string | null;
-  restaurant_image?: string;
+  restaurant_image: string | null;
   status: 'Active' | 'Inactive' | 'Seasonal';
-  status_notes: string;
+  status_notes: string | null;
   company_id: string;
   created_by: string;
   updated_by: string;
@@ -1268,7 +1268,8 @@ export async function getDiningVenues(): Promise<RestaurantFromApi[]> {
 
 export async function getRestaurantById(id: number): Promise<RestaurantFromApi> {
     const response = await fetch(`${API_BASE_URL}/restaurant/${id}`);
-    return handleResponse<RestaurantFromApi>(response);
+    const result = await handleResponse<{ success: boolean, data: RestaurantFromApi }>(response);
+    return result.data;
 }
 
 export async function createRestaurant(restaurantData: any): Promise<RestaurantFromApi> {
@@ -1457,7 +1458,8 @@ export async function getOperatingHours(): Promise<OperatingHoursFromApi[]> {
 
 export async function getOperatingHoursById(id: string): Promise<OperatingHoursFromApi> {
   const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`);
-  return handleResponse<OperatingHoursFromApi>(response);
+  const result = await handleResponse<{ success: boolean, data: OperatingHoursFromApi }>(response);
+  return result.data;
 }
 
 export async function createOperatingHours(hoursData: any): Promise<any> {

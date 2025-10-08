@@ -182,7 +182,7 @@ export default function EditRestaurantPage() {
           const reader = new FileReader();
           reader.onloadend = () => {
               const newImageSlots = [...imageSlots];
-              const isFirstImage = !newImageSlots.some(slot => slot.preview);
+              const isFirstImage = !imageSlots.some(slot => slot.preview);
               
               const newSlot: ImageSlot = { 
                   file, 
@@ -249,7 +249,7 @@ export default function EditRestaurantPage() {
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     if (!restaurant) return;
     try {
-      if (operatingHours) {
+      if (operatingHours && restaurant.operating_hours_id) {
         await updateOperatingHours(restaurant.operating_hours_id, operatingHours);
       }
       
@@ -371,12 +371,12 @@ export default function EditRestaurantPage() {
                                 <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
                              </div>
                             <Input id={`${day}-open-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi]) : ''}
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi] || '') : ''}
                               disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
                               onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
                             />
                             <Input id={`${day}-close-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi]) : ''}
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi] || '') : ''}
                               disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
                               onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
                             />
@@ -595,5 +595,3 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
-
-  
