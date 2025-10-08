@@ -17,12 +17,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Bold, Italic, List, Upload, X, CheckCircle2, Image as ImageIcon, Trash2, MoreVertical, Star, Plus } from 'lucide-react';
+import { Bold, Italic, List, Upload, X, CheckCircle2, Image as ImageIcon, Trash2, MoreVertical, Star, Plus, Clock, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, type OperatingHoursFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, getOperatingHours } from '@/lib/services/api';
+import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, createOperatingHours } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,7 +48,6 @@ const restaurantSchema = z.object({
   capacity: z.coerce.number().min(1, "Capacity is required"),
   short_description: z.string().optional(),
   detailed_description: z.string().optional(),
-  operating_hours_id: z.string().min(1, "Operating hours are required"),
   custom_feature: z.string().optional(),
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
   status_notes: z.string().optional(),
@@ -63,13 +62,24 @@ interface ImageSlot {
   isPrimary: boolean;
 }
 
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
 export default function NewRestaurantPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
-  const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi[]>([]);
-  const [loadingHours, setLoadingHours] = useState(true);
+  const [operatingHours, setOperatingHours] = useState(() => {
+    const initialHours: any = {};
+    daysOfWeek.forEach(day => {
+        initialHours[`${day}_open`] = true;
+        initialHours[`${day}_open_time`] = '09:00';
+        initialHours[`${day}_close_time`] = '22:00';
+    });
+    initialHours['sunday_open'] = false;
+    return initialHours;
+  });
+
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [newlyCreatedRestaurant, setNewlyCreatedRestaurant] = useState<RestaurantFromApi | null>(null);
@@ -95,26 +105,48 @@ export default function NewRestaurantPage() {
       }
     }
     fetchFeatures();
-
-    async function fetchOperatingHours() {
-      try {
-        setLoadingHours(true);
-        const data = await getOperatingHours();
-        setOperatingHours(data);
-      } catch (err: any) {
-        toast({ variant: 'destructive', title: 'Error fetching operating hours', description: err.message });
-      } finally {
-        setLoadingHours(false);
-      }
-    }
-    fetchOperatingHours();
   }, [toast]);
+  
+  const handleOperatingHoursChange = (day: string, field: string, value: any) => {
+    setOperatingHours((prev: any) => ({
+        ...prev,
+        [day]: {
+            ...prev[day],
+            [field]: value,
+        }
+    }));
+  };
+
+  const handleDayToggle = (day: string, checked: boolean) => {
+      setOperatingHours((prev: any) => ({
+          ...prev,
+          [`${day}_open`]: checked,
+      }));
+  };
+
+  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
+      setOperatingHours((prev: any) => ({
+          ...prev,
+          [`${day}_${type}`]: value,
+      }));
+  };
   
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     try {
-        // Step 1: Create restaurant
+        // Step 1: Create operating hours
+        const hoursPayload: any = { company_id: '1', capacity: data.capacity };
+        daysOfWeek.forEach(day => {
+            hoursPayload[`${day}_open`] = operatingHours[`${day}_open`] ? 1 : 0;
+            hoursPayload[`${day}_open_time`] = operatingHours[`${day}_open_time`] || null;
+            hoursPayload[`${day}_close_time`] = operatingHours[`${day}_close_time`] || null;
+        });
+
+        const createdHours = await createOperatingHours(hoursPayload);
+
+        // Step 2: Create restaurant with the new operating_hours_id
         const restaurantData = {
             ...data,
+            operating_hours_id: createdHours.id,
             company_id: '1',
             created_by: 'admin_user',
             updated_by: 'admin_user',
@@ -222,17 +254,10 @@ export default function NewRestaurantPage() {
         <Card>
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold">Basic Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="space-y-2">
-                    <Label htmlFor="venue-name">Venue Name *</Label>
-                    <Input id="venue-name" placeholder="e.g., Skyline Rooftop Bar" {...register('venue_name')} />
-                     {errors.venue_name && <p className="text-red-500 text-sm">{errors.venue_name.message}</p>}
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="capacity">Capacity *</Label>
-                    <Input id="capacity" type="number" placeholder="Maximum occupancy" {...register('capacity')} />
-                     {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
-                </div>
+            <div className="space-y-2">
+                <Label htmlFor="venue-name">Venue Name *</Label>
+                <Input id="venue-name" placeholder="e.g., Skyline Rooftop Bar" {...register('venue_name')} />
+                    {errors.venue_name && <p className="text-red-500 text-sm">{errors.venue_name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="short-description">Short Description</Label>
@@ -259,35 +284,48 @@ export default function NewRestaurantPage() {
 
         <Card>
           <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold">Operating Hours</h3>
-             <div className="space-y-2">
-                <Label htmlFor="operating-hours">Select Schedule *</Label>
-                <Controller
-                    name="operating_hours_id"
-                    control={control}
-                    render={({ field }) => (
-                        <Select onValueChange={field.onChange} value={field.value} disabled={loadingHours}>
-                            <SelectTrigger id="operating-hours">
-                                <SelectValue placeholder={loadingHours ? "Loading schedules..." : "Select an operating schedule"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {operatingHours.map(schedule => (
-                                    <SelectItem key={schedule.id} value={String(schedule.id)}>
-                                        Schedule ID: {schedule.id} (Capacity: {schedule.capacity})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
-                {errors.operating_hours_id && <p className="text-red-500 text-sm">{errors.operating_hours_id.message}</p>}
+            <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
+            <div className="space-y-2 w-1/4">
+                <Label htmlFor="capacity">Capacity</Label>
+                <div className="flex items-center gap-2">
+                    <Input id="capacity" type="number" {...register('capacity')} />
+                    <span className="text-sm text-muted-foreground">guests</span>
+                </div>
+                    {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
+            </div>
+             <div className="space-y-4">
+                <Label>Operating Hours</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    {daysOfWeek.map(day => (
+                        <div key={day} className="space-y-2">
+                            <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
+                                <div className="flex items-center gap-2">
+                                <Checkbox id={`${day}-open-check`} 
+                                    checked={operatingHours[`${day}_open`]}
+                                    onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
+                                />
+                                <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
+                                </div>
+                            <Input id={`${day}-open-time`} type="time" 
+                                value={operatingHours[`${day}_open_time`]}
+                                disabled={!operatingHours[`${day}_open`]}
+                                onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
+                            />
+                            <Input id={`${day}-close-time`} type="time" 
+                                value={operatingHours[`${day}_close_time`]}
+                                disabled={!operatingHours[`${day}_open`]}
+                                onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
+                            />
+                        </div>
+                    ))}
+                </div>
              </div>
           </CardContent>
         </Card>
 
         <Card>
             <CardContent className="p-6 space-y-4">
-                <h3 className="text-lg font-semibold">Features & Ambiance</h3>
+                <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features & Ambiance</h3>
                  <Controller
                     name="feature_ids"
                     control={control}
@@ -431,3 +469,4 @@ export default function NewRestaurantPage() {
     </>
   );
 }
+
