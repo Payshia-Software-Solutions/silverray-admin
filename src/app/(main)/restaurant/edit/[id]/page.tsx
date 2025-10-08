@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -53,7 +54,13 @@ import {
     RestaurantFeatureFromApi,
     OperatingHoursFromApi,
     getOperatingHoursById,
-    updateOperatingHours
+    updateOperatingHours,
+    getRestaurantImages,
+    uploadRestaurantImage,
+    updateRestaurantImage,
+    deleteRestaurantImage,
+    RestaurantImageFromApi,
+    CONTENT_PROVIDER_BASE_URL
 } from '@/lib/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -73,6 +80,7 @@ const restaurantSchema = z.object({
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
   status_notes: z.string().optional(),
   feature_ids: z.array(z.string()).optional(),
+  images_url: z.string().optional().nullable(),
 });
 
 type RestaurantFormValues = z.infer<typeof restaurantSchema>;
@@ -97,6 +105,8 @@ export default function EditRestaurantPage() {
   const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi | null>(null);
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
+  const [imageToDelete, setImageToDelete] = useState<ImageSlot | null>(null);
 
   const { register, handleSubmit, control, reset, formState: { errors, isSubmitting } } = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantSchema),
@@ -107,9 +117,10 @@ export default function EditRestaurantPage() {
       if (!id) return;
       setLoading(true);
       try {
-        const [restaurantData, featuresData] = await Promise.all([
+        const [restaurantData, featuresData, imagesData] = await Promise.all([
             getRestaurantById(id),
             getRestaurantFeatures(),
+            getRestaurantImages(id),
         ]);
         setRestaurant(restaurantData);
         setFeatures(featuresData);
@@ -118,6 +129,14 @@ export default function EditRestaurantPage() {
           ...restaurantData,
           feature_ids: restaurantData.feature_id ? restaurantData.feature_id.split(',') : [],
         });
+        
+        const formattedImages = imagesData.map(img => ({
+            id: img.id,
+            file: null,
+            preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
+            isPrimary: img.is_primary === 1,
+        }));
+        setImageSlots(formattedImages);
 
         if (restaurantData.operating_hours_id) {
           const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
@@ -157,22 +176,93 @@ export default function EditRestaurantPage() {
     });
   };
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const file = event.target.files?.[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              const newImageSlots = [...imageSlots];
+              const isFirstImage = !imageSlots.some(slot => slot.preview);
+              newImageSlots[index] = { ...newImageSlots[index], file, preview: reader.result as string, isPrimary: newImageSlots[index]?.isPrimary || isFirstImage };
+              setImageSlots(newImageSlots);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+      const image = imageSlots[indexToRemove];
+      if (image.id) {
+          setImageToDelete(image);
+      } else {
+          const newSlots = imageSlots.filter((_, index) => index !== indexToRemove);
+          setImageSlots(newSlots);
+      }
+  };
+
+  const handleConfirmDeleteImage = async () => {
+      if (!imageToDelete || !imageToDelete.id) return;
+      try {
+          await deleteRestaurantImage(imageToDelete.id);
+          toast({ title: 'Success', description: 'Image deleted successfully.' });
+          setImageSlots(currentSlots => currentSlots.filter(slot => slot.id !== imageToDelete.id));
+      } catch (error: any) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete image.' });
+      } finally {
+          setImageToDelete(null);
+      }
+  }
+
+  const setPrimaryImage = async (selectedIndex: number) => {
+      const newPrimaryImage = imageSlots[selectedIndex];
+      if (!newPrimaryImage || newPrimaryImage.isPrimary) return;
+
+      const oldPrimaryImage = imageSlots.find(slot => slot.isPrimary);
+
+      try {
+          if (newPrimaryImage.id) {
+              await updateRestaurantImage(newPrimaryImage.id, { is_primary: 1 });
+          }
+          if (oldPrimaryImage && oldPrimaryImage.id) {
+              await updateRestaurantImage(oldPrimaryImage.id, { is_primary: 0 });
+          }
+
+          const newImageSlots = imageSlots.map((slot, index) => ({
+              ...slot,
+              isPrimary: index === selectedIndex,
+          }));
+          setImageSlots(newImageSlots);
+          toast({ title: 'Success', description: 'Primary image updated.' });
+      } catch (error) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to update primary image.' });
+      }
+  };
+
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     if (!restaurant) return;
     try {
-      // Step 1: Update operating hours if they exist
       if (operatingHours) {
         await updateOperatingHours(restaurant.operating_hours_id, operatingHours);
       }
       
-      // Step 2: Update restaurant details
+      const primaryImage = imageSlots.find(slot => slot.isPrimary);
+      const primaryImageUrl = primaryImage?.file
+          ? '' // will be handled by upload
+          : (primaryImage?.preview?.replace(CONTENT_PROVIDER_BASE_URL, '') || null);
+
       const restaurantDataToUpdate = {
         ...data,
         feature_id: data.feature_ids?.join(','),
+        images_url: primaryImageUrl,
       };
       await updateRestaurant(restaurant.id, restaurantDataToUpdate);
       
-      // Step 3: Handle image uploads (add your logic here)
+      const imagesToUpload = imageSlots.filter(slot => slot.file !== null);
+      for (const slot of imagesToUpload) {
+          if (slot.file) {
+              await uploadRestaurantImage(id, slot.file, slot.isPrimary);
+          }
+      }
 
       setShowSuccessDialog(true);
     } catch (error: any) {
@@ -324,23 +414,55 @@ export default function EditRestaurantPage() {
             <CardContent className="p-6 space-y-6">
                 <h3 className="text-lg font-semibold flex items-center gap-2"><ImageIcon className="h-5 w-5 text-primary"/>Image Gallery</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <div className="relative aspect-video group">
-                        <Image src="https://picsum.photos/seed/restaurant1/600/400" alt="Restaurant interior" fill className="rounded-lg object-cover" />
-                        <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>
-                    </div>
-                     <div className="relative aspect-video group">
-                        <Image src="https://picsum.photos/seed/restaurant-bar/600/400" alt="Restaurant bar" fill className="rounded-lg object-cover" />
-                    </div>
-                     <div className="relative aspect-video group">
-                        <Image src="https://picsum.photos/seed/restaurant-patio/600/400" alt="Restaurant patio" fill className="rounded-lg object-cover" />
-                    </div>
-                    <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted">
-                        <div className="flex flex-col items-center justify-center text-center">
-                            <Plus className="w-8 h-8 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div key={index} className="relative aspect-video group">
+                        {imageSlots[index]?.preview ? (
+                            <>
+                            <Image
+                                src={imageSlots[index].preview!}
+                                alt={`Restaurant image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                            />
+                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="secondary" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => setPrimaryImage(index)}>
+                                            <Star className="mr-2 h-4 w-4" /> Set as Primary
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-red-500" onClick={() => removeImage(index)}>
+                                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            {imageSlots[index].isPrimary && <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><Star className="w-3 h-3" /> Primary</div>}
+                            </>
+                        ) : (
+                            <label
+                            htmlFor={`image-upload-${index}`}
+                            className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                            >
+                            <div className="flex flex-col items-center justify-center text-center">
+                                <Plus className="w-8 h-8 text-muted-foreground" />
+                                <p className="text-xs text-muted-foreground mt-1">Add Image</p>
+                            </div>
+                            <Input
+                                id={`image-upload-${index}`}
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(e, index)}
+                            />
+                            </label>
+                        )}
                         </div>
-                        <Input id="image-upload" type="file" className="hidden" accept="image/*" />
-                    </label>
+                    ))}
                 </div>
             </CardContent>
         </Card>
@@ -448,6 +570,20 @@ export default function EditRestaurantPage() {
             </DialogClose>
           </DialogContent>
       </Dialog>
+      <AlertDialog open={!!imageToDelete} onOpenChange={setImageToDelete.bind(null, null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    Are you sure you want to permanently delete this image? This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeleteImage}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,7 +22,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, createOperatingHours } from '@/lib/services/api';
+import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, createOperatingHours, getOperatingHours, OperatingHoursFromApi } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -51,6 +52,7 @@ const restaurantSchema = z.object({
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
   status_notes: z.string().optional(),
   feature_ids: z.array(z.string()).optional(),
+  operating_hours_id: z.string().min(1, "Operating hours schedule is required"),
 });
 
 type RestaurantFormValues = z.infer<typeof restaurantSchema>;
@@ -68,16 +70,8 @@ export default function NewRestaurantPage() {
   const { toast } = useToast();
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
-  const [operatingHours, setOperatingHours] = useState(() => {
-    const initialHours: any = {};
-    daysOfWeek.forEach(day => {
-        initialHours[`${day}_open`] = true;
-        initialHours[`${day}_open_time`] = '09:00:00';
-        initialHours[`${day}_close_time`] = '22:00:00';
-    });
-    initialHours['sunday_open'] = false;
-    return initialHours;
-  });
+  const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi[]>([]);
+  const [loadingHours, setLoadingHours] = useState(true);
 
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
   const [showImageDialog, setShowImageDialog] = useState(false);
@@ -92,50 +86,30 @@ export default function NewRestaurantPage() {
   });
 
   useEffect(() => {
-    async function fetchFeatures() {
+    async function fetchInitialData() {
       try {
         setLoadingFeatures(true);
-        const data = await getRestaurantFeatures();
-        setFeatures(data);
+        setLoadingHours(true);
+        const [featuresData, hoursData] = await Promise.all([
+            getRestaurantFeatures(),
+            getOperatingHours()
+        ]);
+        setFeatures(featuresData);
+        setOperatingHours(hoursData);
       } catch (err: any) {
-        toast({ variant: 'destructive', title: 'Error fetching features', description: err.message });
+        toast({ variant: 'destructive', title: 'Error fetching initial data', description: err.message });
       } finally {
         setLoadingFeatures(false);
+        setLoadingHours(false);
       }
     }
-    fetchFeatures();
+    fetchInitialData();
   }, [toast]);
-  
-  const handleDayToggle = (day: string, checked: boolean) => {
-      setOperatingHours((prev: any) => ({
-          ...prev,
-          [`${day}_open`]: checked,
-      }));
-  };
-
-  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
-      setOperatingHours((prev: any) => ({
-          ...prev,
-          [`${day}_${type}`]: value,
-      }));
-  };
   
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     try {
-        // Step 1: Create operating hours
-        const hoursPayload: any = { company_id: '1', capacity: data.capacity };
-        daysOfWeek.forEach(day => {
-            hoursPayload[`${day}_open`] = operatingHours[`${day}_open`] ? 1 : 0;
-            hoursPayload[`${day}_open_time`] = operatingHours[`${day}_open`] ? operatingHours[`${day}_open_time`] : null;
-            hoursPayload[`${day}_close_time`] = operatingHours[`${day}_open`] ? operatingHours[`${day}_close_time`] : null;
-        });
-
-        const createdHours = await createOperatingHours(hoursPayload);
-
-        // Step 2: Create restaurant with the new operating_hours_id
         const restaurantData = {
             ...data,
-            operating_hours_id: createdHours.id,
             company_id: '1',
             created_by: 'admin_user',
             updated_by: 'admin_user',
@@ -274,41 +248,38 @@ export default function NewRestaurantPage() {
         <Card>
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
-            <div className="space-y-2 w-1/4">
-                <Label htmlFor="capacity">Capacity *</Label>
-                <div className="flex items-center gap-2">
-                    <Input id="capacity" type="number" {...register('capacity')} />
-                    <span className="text-sm text-muted-foreground">guests</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label htmlFor="capacity">Capacity *</Label>
+                    <div className="flex items-center gap-2">
+                        <Input id="capacity" type="number" {...register('capacity')} />
+                        <span className="text-sm text-muted-foreground">guests</span>
+                    </div>
+                        {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
                 </div>
-                    {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
+                <div className="space-y-2">
+                    <Label htmlFor="operating-hours">Operating Hours Schedule *</Label>
+                    <Controller
+                        name="operating_hours_id"
+                        control={control}
+                        render={({ field }) => (
+                           <Select onValueChange={field.onChange} value={field.value} disabled={loadingHours}>
+                               <SelectTrigger>
+                                   <SelectValue placeholder={loadingHours ? "Loading schedules..." : "Select a schedule"}/>
+                               </SelectTrigger>
+                               <SelectContent>
+                                   {operatingHours.map(hours => (
+                                       <SelectItem key={hours.id} value={String(hours.id)}>
+                                           Schedule ID: {hours.id}
+                                       </SelectItem>
+                                   ))}
+                               </SelectContent>
+                           </Select>
+                        )}
+                    />
+                     {errors.operating_hours_id && <p className="text-red-500 text-sm">{errors.operating_hours_id.message}</p>}
+                </div>
             </div>
-             <div className="space-y-4">
-                <Label>Operating Hours</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                    {daysOfWeek.map(day => (
-                        <div key={day} className="space-y-2">
-                            <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
-                                <div className="flex items-center gap-2">
-                                <Checkbox id={`${day}-open-check`} 
-                                    checked={operatingHours[`${day}_open`]}
-                                    onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
-                                />
-                                <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
-                                </div>
-                            <Input id={`${day}-open-time`} type="time" 
-                                value={operatingHours[`${day}_open_time`]}
-                                disabled={!operatingHours[`${day}_open`]}
-                                onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
-                            />
-                            <Input id={`${day}-close-time`} type="time" 
-                                value={operatingHours[`${day}_close_time`]}
-                                disabled={!operatingHours[`${day}_open`]}
-                                onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
-                            />
-                        </div>
-                    ))}
-                </div>
-             </div>
           </CardContent>
         </Card>
 

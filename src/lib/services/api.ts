@@ -275,6 +275,23 @@ export interface RestaurantFromApi {
   updated_at: string;
 }
 
+export interface RestaurantImageFromApi {
+    id: number;
+    restaurant_id: number;
+    company_id: number;
+    image_name: string;
+    image_url: string;
+    file_size: number;
+    alt_text: string;
+    is_primary: number;
+    display_order: number;
+    uploaded_by: string;
+    updated_by: string;
+    created_at: string;
+    updated_at: string;
+    is_active: number;
+}
+
 export interface OperatingHoursFromApi {
     id: number;
     capacity: number;
@@ -1221,7 +1238,7 @@ export async function deleteWeddingPackage(id: number): Promise<{ message: strin
 // Restaurant Venues API
 export async function getRestaurants(): Promise<RestaurantFromApi[]> {
     const response = await fetch(`${API_BASE_URL}/restaurant`);
-    const result = await handleResponse<{ success: boolean, data: RestaurantFromApi[] }>(response);
+    const result = await handleResponse<{ success: boolean; data: RestaurantFromApi[] }>(response);
     return result.data || [];
 }
 
@@ -1283,6 +1300,32 @@ export async function uploadRestaurantImage(restaurantId: number, imageFile: Fil
     });
     return handleResponse<any>(response);
 }
+
+export async function getRestaurantImages(restaurantId: number): Promise<RestaurantImageFromApi[]> {
+  const companyId = '1';
+  const response = await fetch(`${API_BASE_URL}/restaurant-images/company/${companyId}/restaurant/${restaurantId}`);
+  if (response.status === 404) {
+    return [];
+  }
+  return handleResponse<RestaurantImageFromApi[]>(response);
+}
+
+export async function updateRestaurantImage(imageId: number, imageData: Partial<{ is_primary: number }>): Promise<RestaurantImageFromApi> {
+    const response = await fetch(`${API_BASE_URL}/restaurant-images/${imageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(imageData),
+    });
+    return handleResponse<RestaurantImageFromApi>(response);
+}
+
+export async function deleteRestaurantImage(imageId: number): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/restaurant-images/${imageId}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<{ message: string }>(response);
+}
+
 
 export async function updateRestaurant(id: number, restaurantData: Partial<RestaurantFromApi>): Promise<RestaurantFromApi> {
     const response = await fetch(`${API_BASE_URL}/restaurant/${id}`, {

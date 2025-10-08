@@ -34,7 +34,7 @@ import {
 import Link from 'next/link';
 import RestaurantFeaturesPage from './features/page';
 import MenuItemsPage from './menu/page';
-import { getRestaurants, deleteRestaurant, RestaurantFromApi, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
+import { getRestaurants, deleteRestaurant, RestaurantFromApi, getRestaurantImages, CONTENT_PROVIDER_BASE_URL } from '@/lib/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 const statusColors: { [key: string]: string } = {
@@ -59,7 +59,18 @@ export default function RestaurantPage() {
         try {
             setLoading(true);
             const data = await getRestaurants();
-            setVenues(data);
+            const venuesWithImages = await Promise.all(data.map(async (venue) => {
+                try {
+                    const images = await getRestaurantImages(venue.id);
+                    const primaryImage = images.find(img => img.is_primary) || images[0];
+                    return { ...venue, images_url: primaryImage ? CONTENT_PROVIDER_BASE_URL + primaryImage.image_url : null };
+                } catch (e) {
+                    console.error(`Failed to load image for venue ${venue.id}`, e);
+                    return { ...venue, images_url: null };
+                }
+            }));
+
+            setVenues(venuesWithImages);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');
             toast({
@@ -147,7 +158,7 @@ export default function RestaurantPage() {
                         <Card key={`${venue.id}-${venue.venue_name}`} className="flex flex-col overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200">
                         <div className="relative w-full h-48">
                             <Image
-                                src={venue.restaurant_image || `${CONTENT_PROVIDER_BASE_URL}${venue.images_url}` || 'https://placehold.co/600x400.png'}
+                                src={venue.images_url || 'https://placehold.co/600x400.png'}
                                 alt={venue.venue_name || 'Restaurant image'}
                                 fill
                                 className="object-cover"
