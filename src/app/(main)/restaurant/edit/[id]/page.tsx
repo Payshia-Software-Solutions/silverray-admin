@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -36,6 +37,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
     DropdownMenu,
@@ -111,12 +113,7 @@ export default function EditRestaurantPage() {
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [restaurant, setRestaurant] = useState<RestaurantFromApi | null>(null);
-  const [operatingHours, setOperatingHours] = useState<OperatingHoursState>(
-    daysOfWeek.reduce((acc, day) => {
-        acc[day] = { open: false, open_time: '', close_time: '' };
-        return acc;
-    }, {} as OperatingHoursState)
-  );
+  const [operatingHours, setOperatingHours] = useState<OperatingHoursState | null>(null);
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
@@ -149,7 +146,7 @@ export default function EditRestaurantPage() {
             id: img.id,
             file: null,
             preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
-            is_primary: img.is_primary === 1,
+            isPrimary: img.is_primary === 1,
         }));
         setImageSlots(formattedImages);
 
@@ -181,16 +178,18 @@ export default function EditRestaurantPage() {
   }, [id, reset, toast]);
 
   const handleDayToggle = (day: string, checked: boolean) => {
+    if (!operatingHours) return;
     setOperatingHours(prev => ({
-      ...prev,
-      [day]: { ...prev[day], open: checked }
+      ...prev!,
+      [day]: { ...prev![day], open: checked }
     }));
   };
 
   const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
+     if (!operatingHours) return;
      setOperatingHours(prev => ({
-      ...prev,
-      [day]: { ...prev[day], [type]: value }
+      ...prev!,
+      [day]: { ...prev![day], [type]: value }
     }));
   };
 
@@ -368,6 +367,42 @@ export default function EditRestaurantPage() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
+              <div className="space-y-2">
+                  <Label htmlFor="capacity">Capacity *</Label>
+                  <Input id="capacity" type="number" {...register('capacity')} />
+                  {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
+              </div>
+
+              {operatingHours && (
+                <div className="space-y-4">
+                    <Label>Operating Hours</Label>
+                    <div className="space-y-3">
+                        {daysOfWeek.map(day => (
+                            <div key={day} className="grid grid-cols-4 items-center gap-4 p-2 border rounded-md">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id={`open-${day}`} checked={operatingHours[day]?.open} onCheckedChange={(checked) => handleDayToggle(day, !!checked)} />
+                                    <Label htmlFor={`open-${day}`} className="capitalize font-medium">{day}</Label>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor={`open-time-${day}`} className="text-xs">Open Time</Label>
+                                    <Input id={`open-time-${day}`} type="time" disabled={!operatingHours[day]?.open} value={operatingHours[day]?.open_time || ''} onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor={`close-time-${day}`} className="text-xs">Close Time</Label>
+                                    <Input id={`close-time-${day}`} type="time" disabled={!operatingHours[day]?.open} value={operatingHours[day]?.close_time || ''} onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)} />
+                                </div>
+                                {!operatingHours[day]?.open && <p className="col-span-2 text-center text-sm text-muted-foreground">Closed</p>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+              )}
           </CardContent>
         </Card>
         
