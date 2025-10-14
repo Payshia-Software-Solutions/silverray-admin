@@ -69,18 +69,10 @@ import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { useRouter, useParams } from 'next/navigation';
+import OperatingHoursForm, { type OperatingHoursState } from '@/components/operating-hours-form';
+
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-type DayHours = {
-    open: boolean;
-    open_time: string;
-    close_time: string;
-};
-
-type OperatingHoursState = {
-    [key: string]: DayHours;
-};
 
 
 const restaurantSchema = z.object({
@@ -176,22 +168,6 @@ export default function EditRestaurantPage() {
     }
     fetchRestaurantData();
   }, [id, reset, toast]);
-
-  const handleDayToggle = (day: string, checked: boolean) => {
-    if (!operatingHours) return;
-    setOperatingHours(prev => ({
-      ...prev!,
-      [day]: { ...prev![day], open: checked }
-    }));
-  };
-
-  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
-     if (!operatingHours) return;
-     setOperatingHours(prev => ({
-      ...prev!,
-      [day]: { ...prev![day], [type]: value }
-    }));
-  };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
       const file = event.target.files?.[0];
@@ -372,37 +348,16 @@ export default function EditRestaurantPage() {
 
         <Card>
           <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity &amp; Operating Hours</h3>
-              <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacity *</Label>
-                  <Input id="capacity" type="number" {...register('capacity')} />
-                  {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
-              </div>
-
-              {operatingHours && (
-                <div className="space-y-4">
-                    <Label>Operating Hours</Label>
-                    <div className="space-y-3">
-                        {daysOfWeek.map(day => (
-                            <div key={day} className="grid grid-cols-4 items-center gap-4 p-2 border rounded-md">
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id={`open-${day}`} checked={operatingHours[day]?.open} onCheckedChange={(checked) => handleDayToggle(day, !!checked)} />
-                                    <Label htmlFor={`open-${day}`} className="capitalize font-medium">{day}</Label>
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor={`open-time-${day}`} className="text-xs">Open Time</Label>
-                                    <Input id={`open-time-${day}`} type="time" disabled={!operatingHours[day]?.open} value={operatingHours[day]?.open_time || ''} onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)} />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor={`close-time-${day}`} className="text-xs">Close Time</Label>
-                                    <Input id={`close-time-${day}`} type="time" disabled={!operatingHours[day]?.open} value={operatingHours[day]?.close_time || ''} onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)} />
-                                </div>
-                                {!operatingHours[day]?.open && <p className="col-span-2 text-center text-sm text-muted-foreground">Closed</p>}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-              )}
+            {operatingHours ? (
+                 <OperatingHoursForm 
+                    operatingHours={operatingHours}
+                    setOperatingHours={setOperatingHours}
+                    register={register}
+                    errors={errors}
+                />
+            ) : (
+                <div>Loading operating hours...</div>
+            )}
           </CardContent>
         </Card>
         
@@ -523,36 +478,19 @@ export default function EditRestaurantPage() {
             </CardContent>
         </Card>
       
-        <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
-            <div className="flex justify-between items-center">
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
-                </AlertDialogTrigger>
-                <div className="flex justify-end gap-2">
-                    <Button variant="outline" asChild type="button">
-                    <Link href="/restaurant">Cancel</Link>
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                </div>
+        <div className="flex justify-between items-center">
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
+            </AlertDialogTrigger>
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" asChild type="button">
+                <Link href="/restaurant">Cancel</Link>
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
             </div>
-             <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-center text-red-500 text-lg">
-                        {restaurant.venue_name}
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter className="sm:justify-center">
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-                 <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
-                    <X className="h-5 w-5" />
-                </button>
-            </AlertDialogContent>
-        </AlertDialog>
+        </div>
       </form>
 
       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSuccessDialog}>
@@ -609,6 +547,23 @@ export default function EditRestaurantPage() {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleConfirmDeleteImage}>Delete</AlertDialogAction>
             </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+     <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue?</AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-red-500 text-lg">
+                    {restaurant.venue_name}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-center">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+                <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                <X className="h-5 w-5" />
+            </button>
         </AlertDialogContent>
     </AlertDialog>
     </div>
