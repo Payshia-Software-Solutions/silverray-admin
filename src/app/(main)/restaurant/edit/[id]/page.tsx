@@ -72,6 +72,17 @@ import { useRouter, useParams } from 'next/navigation';
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+type DayHours = {
+    open: boolean;
+    open_time: string;
+    close_time: string;
+};
+
+type OperatingHoursState = {
+    [key: string]: DayHours;
+};
+
+
 const restaurantSchema = z.object({
   venue_name: z.string().min(1, "Venue name is required"),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
@@ -102,7 +113,12 @@ export default function EditRestaurantPage() {
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [restaurant, setRestaurant] = useState<RestaurantFromApi | null>(null);
-  const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi | null>(null);
+  const [operatingHours, setOperatingHours] = useState<OperatingHoursState>(
+    daysOfWeek.reduce((acc, day) => {
+        acc[day] = { open: false, open_time: '', close_time: '' };
+        return acc;
+    }, {} as OperatingHoursState)
+  );
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
@@ -141,7 +157,16 @@ export default function EditRestaurantPage() {
 
         if (restaurantData.operating_hours_id) {
           const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
-          setOperatingHours(hoursData);
+          const newOperatingHoursState: OperatingHoursState = {};
+            daysOfWeek.forEach(day => {
+                const dayKey = day as keyof typeof newOperatingHoursState;
+                newOperatingHoursState[dayKey] = {
+                    open: hoursData[`${day}_open` as keyof OperatingHoursFromApi] === "1",
+                    open_time: String(hoursData[`${day}_open_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
+                    close_time: String(hoursData[`${day}_close_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
+                };
+            });
+            setOperatingHours(newOperatingHoursState);
         }
 
       } catch (error: any) {
@@ -158,25 +183,17 @@ export default function EditRestaurantPage() {
   }, [id, reset, toast]);
 
   const handleDayToggle = (day: string, checked: boolean) => {
-    setOperatingHours(prev => {
-        if (!prev) return null;
-        const key = `${day}_open` as keyof OperatingHoursFromApi;
-        return {
-            ...prev,
-            [key]: checked ? "1" : "0"
-        };
-    });
+    setOperatingHours(prev => ({
+      ...prev,
+      [day]: { ...prev[day], open: checked }
+    }));
   };
 
   const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
-     setOperatingHours(prev => {
-        if (!prev) return null;
-        const key = `${day}_${type}` as keyof OperatingHoursFromApi;
-        return {
-            ...prev,
-            [key]: value
-        };
-    });
+     setOperatingHours(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [type]: value }
+    }));
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -253,7 +270,14 @@ export default function EditRestaurantPage() {
     if (!restaurant) return;
     try {
       if (operatingHours && restaurant.operating_hours_id) {
-        await updateOperatingHours(restaurant.operating_hours_id, operatingHours);
+         const hoursDataToUpdate: Partial<OperatingHoursFromApi> = {};
+          daysOfWeek.forEach(day => {
+              const dayKey = day as keyof typeof operatingHours;
+              hoursDataToUpdate[`${dayKey}_open` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? "1" : "0";
+              hoursDataToUpdate[`${dayKey}_open_time` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? operatingHours[dayKey].open_time + ':00' : null;
+              hoursDataToUpdate[`${dayKey}_close_time` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? operatingHours[dayKey].close_time + ':00' : null;
+          });
+        await updateOperatingHours(restaurant.operating_hours_id, hoursDataToUpdate);
       }
       
       const primaryImage = imageSlots.find(slot => slot.isPrimary);
@@ -368,19 +392,19 @@ export default function EditRestaurantPage() {
                             <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
                              <div className="flex items-center gap-2">
                                 <Checkbox id={`${day}-open-check`} 
-                                  checked={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] === "1" : false}
+                                  checked={operatingHours[day]?.open}
                                   onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
                                 />
                                 <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
                              </div>
                             <Input id={`${day}-open-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi] || '').substring(0,5) : ''}
-                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== "1" : true}
+                              value={operatingHours[day]?.open_time || ''}
+                              disabled={!operatingHours[day]?.open}
                               onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
                             />
                             <Input id={`${day}-close-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi] || '').substring(0,5) : ''}
-                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== "1" : true}
+                              value={operatingHours[day]?.close_time || ''}
+                              disabled={!operatingHours[day]?.open}
                               onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
                             />
                         </div>
@@ -598,3 +622,4 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
+
