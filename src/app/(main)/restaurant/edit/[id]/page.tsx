@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -372,7 +371,7 @@ export default function EditRestaurantPage() {
 
         <Card>
           <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
+            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity &amp; Operating Hours</h3>
               <div className="space-y-2">
                   <Label htmlFor="capacity">Capacity *</Label>
                   <Input id="capacity" type="number" {...register('capacity')} />
@@ -408,7 +407,7 @@ export default function EditRestaurantPage() {
         
         <Card>
             <CardContent className="p-6 space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features & Ambiance</h3>
+                <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features &amp; Ambiance</h3>
                  <Controller
                     name="feature_ids"
                     control={control}
