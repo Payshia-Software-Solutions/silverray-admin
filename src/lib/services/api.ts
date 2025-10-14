@@ -278,7 +278,7 @@ export interface RestaurantFromApi {
 export interface RestaurantImageFromApi {
     id: number;
     restaurant_id: number;
-    company_id: string;
+    company_id: number;
     image_name: string;
     image_url: string;
     file_size: number;
@@ -1595,3 +1595,6 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
     
 
   
+
+
+    

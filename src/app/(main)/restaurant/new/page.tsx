@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -21,7 +22,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, createOperatingHours, getOperatingHours, OperatingHoursFromApi } from '@/lib/services/api';
+import { createRestaurant, uploadRestaurantImage, type RestaurantFromApi, getRestaurantFeatures, type RestaurantFeatureFromApi, createOperatingHours } from '@/lib/services/api';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -467,5 +468,7 @@ export default function NewRestaurantPage() {
     </>
   );
 }
+
+    
 
     
