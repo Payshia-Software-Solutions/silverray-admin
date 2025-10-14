@@ -144,7 +144,8 @@ export default function EditRestaurantPage() {
 
         if (restaurantData.operating_hours_id) {
           const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
-          const newOperatingHoursState: OperatingHoursState = {};
+          if (hoursData) {
+            const newOperatingHoursState: OperatingHoursState = {};
             daysOfWeek.forEach(day => {
                 const dayKey = day as keyof typeof newOperatingHoursState;
                 const openKey = `${dayKey}_open` as keyof OperatingHoursFromApi;
@@ -158,6 +159,7 @@ export default function EditRestaurantPage() {
                 };
             });
             setOperatingHours(newOperatingHoursState);
+          }
         }
 
       } catch (error: any) {
@@ -571,5 +573,6 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
+
 
 
