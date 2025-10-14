@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -37,7 +36,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
     DropdownMenu,
@@ -151,7 +149,7 @@ export default function EditRestaurantPage() {
             id: img.id,
             file: null,
             preview: CONTENT_PROVIDER_BASE_URL + img.image_url,
-            isPrimary: img.is_primary === 1,
+            is_primary: img.is_primary === 1,
         }));
         setImageSlots(formattedImages);
 
@@ -161,9 +159,9 @@ export default function EditRestaurantPage() {
             daysOfWeek.forEach(day => {
                 const dayKey = day as keyof typeof newOperatingHoursState;
                 newOperatingHoursState[dayKey] = {
-                    open: hoursData[`${day}_open` as keyof OperatingHoursFromApi] === "1",
-                    open_time: String(hoursData[`${day}_open_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
-                    close_time: String(hoursData[`${day}_close_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
+                    open: hoursData[`${dayKey}_open` as keyof OperatingHoursFromApi] === "1",
+                    open_time: String(hoursData[`${dayKey}_open_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
+                    close_time: String(hoursData[`${dayKey}_close_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
                 };
             });
             setOperatingHours(newOperatingHoursState);
@@ -370,47 +368,6 @@ export default function EditRestaurantPage() {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
-            <div className="space-y-2 w-1/4">
-                <Label htmlFor="capacity">Capacity</Label>
-                <div className="flex items-center gap-2">
-                    <Input id="capacity" type="number" {...register('capacity')} />
-                    <span className="text-sm text-muted-foreground">guests</span>
-                </div>
-                 {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
-            </div>
-             <div className="space-y-4">
-                <Label>Operating Hours</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                    {daysOfWeek.map(day => (
-                        <div key={day} className="space-y-2">
-                            <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
-                             <div className="flex items-center gap-2">
-                                <Checkbox id={`${day}-open-check`} 
-                                  checked={operatingHours[day]?.open}
-                                  onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
-                                />
-                                <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
-                             </div>
-                            <Input id={`${day}-open-time`} type="time" 
-                              value={operatingHours[day]?.open_time || ''}
-                              disabled={!operatingHours[day]?.open}
-                              onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
-                            />
-                            <Input id={`${day}-close-time`} type="time" 
-                              value={operatingHours[day]?.close_time || ''}
-                              disabled={!operatingHours[day]?.open}
-                              onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
-                            />
-                        </div>
-                    ))}
-                </div>
-             </div>
           </CardContent>
         </Card>
         
@@ -622,4 +579,3 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
-
