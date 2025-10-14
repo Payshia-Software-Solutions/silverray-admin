@@ -295,26 +295,26 @@ export interface OperatingHoursFromApi {
     id: string;
     capacity: string;
     monday_open: string;
-    monday_open_time: string;
-    monday_close_time: string;
+    monday_open_time: string | null;
+    monday_close_time: string | null;
     tuesday_open: string;
-    tuesday_open_time: string;
-    tuesday_close_time: string;
+    tuesday_open_time: string | null;
+    tuesday_close_time: string | null;
     wednesday_open: string;
-    wednesday_open_time: string;
-    wednesday_close_time: string;
+    wednesday_open_time: string | null;
+    wednesday_close_time: string | null;
     thursday_open: string;
-    thursday_open_time: string;
-    thursday_close_time: string;
+    thursday_open_time: string | null;
+    thursday_close_time: string | null;
     friday_open: string;
-    friday_open_time: string;
-    friday_close_time: string;
+    friday_open_time: string | null;
+    friday_close_time: string | null;
     saturday_open: string;
-    saturday_open_time: string;
-    saturday_close_time: string;
+    saturday_open_time: string | null;
+    saturday_close_time: string | null;
     sunday_open: string;
-    sunday_open_time: string;
-    sunday_close_time: string;
+    sunday_open_time: string | null;
+    sunday_close_time: string | null;
     company_id: string;
 }
 
@@ -1597,3 +1597,4 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+

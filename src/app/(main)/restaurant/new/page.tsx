@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -42,6 +41,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import OperatingHoursForm from '@/components/operating-hours-form';
+import type { OperatingHoursState } from '@/components/operating-hours-form';
 
 const restaurantSchema = z.object({
   venue_name: z.string().min(1, "Venue name is required"),
@@ -63,17 +64,6 @@ interface ImageSlot {
 }
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-type DayHours = {
-    open: boolean;
-    open_time: string;
-    close_time: string;
-};
-
-type OperatingHoursState = {
-    [key: string]: DayHours;
-};
-
 
 export default function NewRestaurantPage() {
   const router = useRouter();
@@ -114,28 +104,15 @@ export default function NewRestaurantPage() {
     }
     fetchInitialData();
   }, [toast]);
-  
-  const handleDayToggle = (day: string, checked: boolean) => {
-    setOperatingHours(prev => ({
-        ...prev,
-        [day]: { ...prev[day], open: checked }
-    }));
-  };
-
-  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
-      setOperatingHours(prev => ({
-          ...prev,
-          [day]: { ...prev[day], [type]: value }
-      }));
-  };
 
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     try {
         const hoursData: any = { capacity: data.capacity, company_id: '1' };
         daysOfWeek.forEach(day => {
-            hoursData[`${day}_open`] = operatingHours[day].open ? 1 : 0;
-            hoursData[`${day}_open_time`] = operatingHours[day].open ? operatingHours[day].open_time + ':00' : null;
-            hoursData[`${day}_close_time`] = operatingHours[day].open ? operatingHours[day].close_time + ':00' : null;
+            const dayKey = day as keyof OperatingHoursState;
+            hoursData[`${dayKey}_open`] = operatingHours[dayKey].open ? 1 : 0;
+            hoursData[`${dayKey}_open_time`] = operatingHours[dayKey].open ? `${operatingHours[dayKey].open_time}:00` : null;
+            hoursData[`${dayKey}_close_time`] = operatingHours[dayKey].open ? `${operatingHours[dayKey].close_time}:00` : null;
         });
 
         const createdHours = await createOperatingHours(hoursData);
@@ -281,6 +258,17 @@ export default function NewRestaurantPage() {
           </CardContent>
         </Card>
         
+         <Card>
+          <CardContent className="p-6 space-y-6">
+             <OperatingHoursForm
+              operatingHours={operatingHours}
+              setOperatingHours={setOperatingHours}
+              register={register}
+              errors={errors}
+            />
+          </CardContent>
+        </Card>
+
         <Card>
             <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features & Ambiance</h3>
@@ -423,7 +411,3 @@ export default function NewRestaurantPage() {
     </>
   );
 }
-
-    
-
-    
