@@ -147,10 +147,14 @@ export default function EditRestaurantPage() {
           const newOperatingHoursState: OperatingHoursState = {};
             daysOfWeek.forEach(day => {
                 const dayKey = day as keyof typeof newOperatingHoursState;
+                const openKey = `${dayKey}_open` as keyof OperatingHoursFromApi;
+                const openTimeKey = `${dayKey}_open_time` as keyof OperatingHoursFromApi;
+                const closeTimeKey = `${dayKey}_close_time` as keyof OperatingHoursFromApi;
+
                 newOperatingHoursState[dayKey] = {
-                    open: hoursData[`${dayKey}_open` as keyof OperatingHoursFromApi] === "1",
-                    open_time: String(hoursData[`${dayKey}_open_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
-                    close_time: String(hoursData[`${dayKey}_close_time` as keyof OperatingHoursFromApi] || '').substring(0, 5),
+                    open: hoursData[openKey] === "1",
+                    open_time: String(hoursData[openTimeKey] || '').substring(0, 5),
+                    close_time: String(hoursData[closeTimeKey] || '').substring(0, 5),
                 };
             });
             setOperatingHours(newOperatingHoursState);
@@ -567,4 +571,5 @@ export default function EditRestaurantPage() {
     </div>
   );
 }
+
 
