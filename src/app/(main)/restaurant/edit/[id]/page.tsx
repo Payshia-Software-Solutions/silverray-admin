@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -70,6 +69,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { useRouter, useParams } from 'next/navigation';
 import OperatingHoursForm, { type OperatingHoursState } from '@/components/operating-hours-form';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -108,6 +108,7 @@ export default function EditRestaurantPage() {
   const [operatingHours, setOperatingHours] = useState<OperatingHoursState | null>(null);
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingHours, setLoadingHours] = useState(true);
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>([]);
   const [imageToDelete, setImageToDelete] = useState<ImageSlot | null>(null);
 
@@ -119,6 +120,7 @@ export default function EditRestaurantPage() {
     async function fetchRestaurantData() {
       if (!id) return;
       setLoading(true);
+      setLoadingHours(true);
       try {
         const [restaurantData, featuresData, imagesData] = await Promise.all([
             getRestaurantById(id),
@@ -143,22 +145,31 @@ export default function EditRestaurantPage() {
         setImageSlots(formattedImages);
 
         if (restaurantData.operating_hours_id) {
-          const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
-          if (hoursData) {
-            const newOperatingHoursState: OperatingHoursState = {};
-            daysOfWeek.forEach(day => {
-                const dayKey = day as keyof typeof newOperatingHoursState;
-                const openKey = `${dayKey}_open` as keyof OperatingHoursFromApi;
-                const openTimeKey = `${dayKey}_open_time` as keyof OperatingHoursFromApi;
-                const closeTimeKey = `${dayKey}_close_time` as keyof OperatingHoursFromApi;
+          try {
+            const hoursData = await getOperatingHoursById(restaurantData.operating_hours_id);
+            if (hoursData) {
+              const newOperatingHoursState: OperatingHoursState = {};
+              daysOfWeek.forEach(day => {
+                  const dayKey = day as keyof typeof newOperatingHoursState;
+                  const openKey = `${dayKey}_open` as keyof OperatingHoursFromApi;
+                  const openTimeKey = `${dayKey}_open_time` as keyof OperatingHoursFromApi;
+                  const closeTimeKey = `${dayKey}_close_time` as keyof OperatingHoursFromApi;
 
-                newOperatingHoursState[dayKey] = {
-                    open: hoursData[openKey] === "1",
-                    open_time: String(hoursData[openTimeKey] || '').substring(0, 5),
-                    close_time: String(hoursData[closeTimeKey] || '').substring(0, 5),
-                };
-            });
-            setOperatingHours(newOperatingHoursState);
+                  newOperatingHoursState[dayKey] = {
+                      open: hoursData[openKey] === "1",
+                      open_time: String(hoursData[openTimeKey] || '00:00:00').substring(0, 5),
+                      close_time: String(hoursData[closeTimeKey] || '00:00:00').substring(0, 5),
+                  };
+              });
+              setOperatingHours(newOperatingHoursState);
+            }
+          } catch(hoursError) {
+             console.error("Failed to fetch operating hours:", hoursError);
+             toast({
+                variant: "destructive",
+                title: "Error fetching operating hours",
+                description: "Could not load the schedule for this venue.",
+             });
           }
         }
 
@@ -170,6 +181,7 @@ export default function EditRestaurantPage() {
         });
       } finally {
         setLoading(false);
+        setLoadingHours(false);
       }
     }
     fetchRestaurantData();
@@ -352,18 +364,28 @@ export default function EditRestaurantPage() {
           </CardContent>
         </Card>
 
-        {operatingHours && (
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <OperatingHoursForm 
-                    operatingHours={operatingHours}
-                    setOperatingHours={setOperatingHours}
-                    register={register}
-                    errors={errors}
-                />
-              </CardContent>
-            </Card>
-        )}
+        <Card>
+            <CardContent className="p-6 space-y-6">
+              {loadingHours ? (
+                 <div className="space-y-4">
+                  <Skeleton className="h-8 w-1/3" />
+                  <Skeleton className="h-10 w-1/2" />
+                   <div className="space-y-3">
+                      {daysOfWeek.map(day => <Skeleton key={day} className="h-16 w-full" />)}
+                   </div>
+                 </div>
+              ) : operatingHours ? (
+                  <OperatingHoursForm 
+                      operatingHours={operatingHours}
+                      setOperatingHours={setOperatingHours}
+                      register={register}
+                      errors={errors}
+                  />
+              ) : (
+                <p>No operating hours schedule found for this venue.</p>
+              )}
+            </CardContent>
+        </Card>
         
         <Card>
             <CardContent className="p-6 space-y-4">
@@ -576,3 +598,4 @@ export default function EditRestaurantPage() {
 
 
 
+    
