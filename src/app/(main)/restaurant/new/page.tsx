@@ -282,51 +282,6 @@ export default function NewRestaurantPage() {
         </Card>
         
         <Card>
-            <CardContent className="p-6 space-y-6">
-                <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="capacity">Capacity *</Label>
-                    <div className="flex items-center gap-2">
-                        <Input id="capacity" type="number" {...register('capacity')} />
-                        <span className="text-sm text-muted-foreground">guests</span>
-                    </div>
-                    {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
-                </div>
-                 <div className="space-y-4">
-                    <Label>Operating Hours</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                        {daysOfWeek.map(day => (
-                            <div key={day} className="space-y-2">
-                                <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
-                                 <div className="flex items-center gap-2">
-                                    <Checkbox id={`${day}-open-check`} 
-                                      checked={operatingHours[day].open}
-                                      onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
-                                    />
-                                    <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
-                                 </div>
-                                <Input id={`${day}-open-time`} type="time" 
-                                  value={operatingHours[day].open_time}
-                                  disabled={!operatingHours[day].open}
-                                  onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
-                                />
-                                <Input id={`${day}-close-time`} type="time" 
-                                  value={operatingHours[day].close_time}
-                                  disabled={!operatingHours[day].open}
-                                  onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="status-notes">Special Hours Notes</Label>
-                    <Input id="status-notes" placeholder="e.g., Brunch only on Sundays, Happy hour 5-7 PM" {...register('status_notes')} />
-                </div>
-            </CardContent>
-        </Card>
-
-        <Card>
             <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-primary"/>Features & Ambiance</h3>
                  <Controller
