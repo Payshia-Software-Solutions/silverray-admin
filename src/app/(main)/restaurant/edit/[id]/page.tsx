@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -268,7 +269,7 @@ export default function EditRestaurantPage() {
       if (operatingHours && restaurant.operating_hours_id) {
          const hoursDataToUpdate: Partial<OperatingHoursFromApi> = {};
           daysOfWeek.forEach(day => {
-              const dayKey = day as keyof typeof operatingHours;
+              const dayKey = day as keyof OperatingHoursState;
               hoursDataToUpdate[`${dayKey}_open` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? "1" : "0";
               hoursDataToUpdate[`${dayKey}_open_time` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? operatingHours[dayKey].open_time + ':00' : null;
               hoursDataToUpdate[`${dayKey}_close_time` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? operatingHours[dayKey].close_time + ':00' : null;

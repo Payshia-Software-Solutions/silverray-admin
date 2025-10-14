@@ -1597,3 +1597,4 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
