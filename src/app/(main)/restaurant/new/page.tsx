@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -52,7 +51,6 @@ const restaurantSchema = z.object({
   status: z.enum(['Active', 'Inactive', 'Seasonal']),
   status_notes: z.string().optional(),
   feature_ids: z.array(z.string()).optional(),
-  operating_hours_id: z.string().min(1, "Operating hours schedule is required"),
 });
 
 type RestaurantFormValues = z.infer<typeof restaurantSchema>;
@@ -65,13 +63,29 @@ interface ImageSlot {
 
 const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+type DayHours = {
+    open: boolean;
+    open_time: string;
+    close_time: string;
+};
+
+type OperatingHoursState = {
+    [key: string]: DayHours;
+};
+
+
 export default function NewRestaurantPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [features, setFeatures] = useState<RestaurantFeatureFromApi[]>([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
-  const [operatingHours, setOperatingHours] = useState<OperatingHoursFromApi[]>([]);
-  const [loadingHours, setLoadingHours] = useState(true);
+
+  const [operatingHours, setOperatingHours] = useState<OperatingHoursState>(
+    daysOfWeek.reduce((acc, day) => {
+        acc[day] = { open: true, open_time: '09:00', close_time: '22:00' };
+        return acc;
+    }, {} as OperatingHoursState)
+  );
 
   const [imageSlots, setImageSlots] = useState<ImageSlot[]>(Array(5).fill({ file: null, preview: null, isPrimary: false }));
   const [showImageDialog, setShowImageDialog] = useState(false);
@@ -89,32 +103,53 @@ export default function NewRestaurantPage() {
     async function fetchInitialData() {
       try {
         setLoadingFeatures(true);
-        setLoadingHours(true);
-        const [featuresData, hoursData] = await Promise.all([
-            getRestaurantFeatures(),
-            getOperatingHours()
-        ]);
+        const featuresData = await getRestaurantFeatures();
         setFeatures(featuresData);
-        setOperatingHours(hoursData);
       } catch (err: any) {
         toast({ variant: 'destructive', title: 'Error fetching initial data', description: err.message });
       } finally {
         setLoadingFeatures(false);
-        setLoadingHours(false);
       }
     }
     fetchInitialData();
   }, [toast]);
   
+  const handleDayToggle = (day: string, checked: boolean) => {
+    setOperatingHours(prev => ({
+        ...prev,
+        [day]: { ...prev[day], open: checked }
+    }));
+  };
+
+  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
+      setOperatingHours(prev => ({
+          ...prev,
+          [day]: { ...prev[day], [type]: value }
+      }));
+  };
+
   const onSubmit: SubmitHandler<RestaurantFormValues> = async (data) => {
     try {
+        const hoursData: any = { capacity: data.capacity, company_id: '1' };
+        daysOfWeek.forEach(day => {
+            hoursData[`${day}_open`] = operatingHours[day].open ? 1 : 0;
+            hoursData[`${day}_open_time`] = operatingHours[day].open ? operatingHours[day].open_time + ':00' : null;
+            hoursData[`${day}_close_time`] = operatingHours[day].open ? operatingHours[day].close_time + ':00' : null;
+        });
+
+        const createdHours = await createOperatingHours(hoursData);
+        if (!createdHours || !createdHours.id) {
+            throw new Error("Failed to create operating hours schedule.");
+        }
+
         const restaurantData = {
             ...data,
             company_id: '1',
             created_by: 'admin_user',
             updated_by: 'admin_user',
             feature_id: data.feature_ids?.join(',') || '',
-            images_url: '', // Will be updated after upload
+            images_url: '', // Image handled in second step
+            operating_hours_id: String(createdHours.id),
         };
         const createdRestaurant = await createRestaurant(restaurantData);
         setNewlyCreatedRestaurant(createdRestaurant);
@@ -244,43 +279,50 @@ export default function NewRestaurantPage() {
             </div>
           </CardContent>
         </Card>
-
+        
         <Card>
-          <CardContent className="p-6 space-y-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+            <CardContent className="p-6 space-y-6">
+                <h3 className="text-lg font-semibold flex items-center gap-2"><Clock className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
+                <div className="space-y-2 w-1/4">
                     <Label htmlFor="capacity">Capacity *</Label>
                     <div className="flex items-center gap-2">
                         <Input id="capacity" type="number" {...register('capacity')} />
                         <span className="text-sm text-muted-foreground">guests</span>
                     </div>
-                        {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
+                    {errors.capacity && <p className="text-red-500 text-sm">{errors.capacity.message}</p>}
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="operating-hours">Operating Hours Schedule *</Label>
-                    <Controller
-                        name="operating_hours_id"
-                        control={control}
-                        render={({ field }) => (
-                           <Select onValueChange={field.onChange} value={field.value} disabled={loadingHours}>
-                               <SelectTrigger>
-                                   <SelectValue placeholder={loadingHours ? "Loading schedules..." : "Select a schedule"}/>
-                               </SelectTrigger>
-                               <SelectContent>
-                                   {operatingHours.map(hours => (
-                                       <SelectItem key={hours.id} value={String(hours.id)}>
-                                           Schedule ID: {hours.id}
-                                       </SelectItem>
-                                   ))}
-                               </SelectContent>
-                           </Select>
-                        )}
-                    />
-                     {errors.operating_hours_id && <p className="text-red-500 text-sm">{errors.operating_hours_id.message}</p>}
+                 <div className="space-y-4">
+                    <Label>Operating Hours</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                        {daysOfWeek.map(day => (
+                            <div key={day} className="space-y-2">
+                                <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
+                                 <div className="flex items-center gap-2">
+                                    <Checkbox id={`${day}-open-check`} 
+                                      checked={operatingHours[day].open}
+                                      onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
+                                    />
+                                    <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
+                                 </div>
+                                <Input id={`${day}-open-time`} type="time" 
+                                  value={operatingHours[day].open_time}
+                                  disabled={!operatingHours[day].open}
+                                  onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
+                                />
+                                <Input id={`${day}-close-time`} type="time" 
+                                  value={operatingHours[day].close_time}
+                                  disabled={!operatingHours[day].open}
+                                  onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                 </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="status-notes">Special Hours Notes</Label>
+                    <Input id="status-notes" placeholder="e.g., Brunch only on Sundays, Happy hour 5-7 PM" {...register('status_notes')} />
                 </div>
-            </div>
-          </CardContent>
+            </CardContent>
         </Card>
 
         <Card>
@@ -338,10 +380,6 @@ export default function NewRestaurantPage() {
                                 </Select>
                             )}
                         />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="status-notes">Status Notes</Label>
-                        <Input id="status-notes" placeholder="Optional notes about status" {...register('status_notes')} />
                     </div>
                 </div>
             </CardContent>
@@ -429,3 +467,5 @@ export default function NewRestaurantPage() {
     </>
   );
 }
+
+    
