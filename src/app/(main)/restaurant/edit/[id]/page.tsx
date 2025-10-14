@@ -128,6 +128,7 @@ export default function EditRestaurantPage() {
         reset({
           ...restaurantData,
           feature_ids: restaurantData.feature_id ? restaurantData.feature_id.split(',') : [],
+          capacity: Number(restaurantData.capacity)
         });
         
         const formattedImages = imagesData.map(img => ({
@@ -159,9 +160,10 @@ export default function EditRestaurantPage() {
   const handleDayToggle = (day: string, checked: boolean) => {
     setOperatingHours(prev => {
         if (!prev) return null;
+        const key = `${day}_open` as keyof OperatingHoursFromApi;
         return {
             ...prev,
-            [`${day}_open`]: checked ? 1 : 0
+            [key]: checked ? "1" : "0"
         };
     });
   };
@@ -169,9 +171,10 @@ export default function EditRestaurantPage() {
   const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
      setOperatingHours(prev => {
         if (!prev) return null;
+        const key = `${day}_${type}` as keyof OperatingHoursFromApi;
         return {
             ...prev,
-            [`${day}_${type}`]: value
+            [key]: value
         };
     });
   };
@@ -365,19 +368,19 @@ export default function EditRestaurantPage() {
                             <Label htmlFor={`${day}-open`} className="capitalize text-sm font-medium">{day}</Label>
                              <div className="flex items-center gap-2">
                                 <Checkbox id={`${day}-open-check`} 
-                                  checked={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] === 1 : false}
+                                  checked={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] === "1" : false}
                                   onCheckedChange={(checked) => handleDayToggle(day, !!checked)}
                                 />
                                 <Label htmlFor={`${day}-open-check`} className="text-sm">Open</Label>
                              </div>
                             <Input id={`${day}-open-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi] || '') : ''}
-                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_open_time` as keyof OperatingHoursFromApi] || '').substring(0,5) : ''}
+                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== "1" : true}
                               onChange={(e) => handleTimeChange(day, 'open_time', e.target.value)}
                             />
                             <Input id={`${day}-close-time`} type="time" 
-                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi] || '') : ''}
-                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== 1 : true}
+                              defaultValue={operatingHours ? String(operatingHours[`${day}_close_time` as keyof OperatingHoursFromApi] || '').substring(0,5) : ''}
+                              disabled={operatingHours ? operatingHours[`${day}_open` as keyof OperatingHoursFromApi] !== "1" : true}
                               onChange={(e) => handleTimeChange(day, 'close_time', e.target.value)}
                             />
                         </div>

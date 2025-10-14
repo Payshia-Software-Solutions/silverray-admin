@@ -264,7 +264,6 @@ export interface RestaurantFromApi {
   capacity: string;
   operating_hours_id: string | null;
   feature_id: string | null;
-  images_url: string | null;
   restaurant_image: string | null;
   status: 'Active' | 'Inactive' | 'Seasonal';
   status_notes: string | null;
@@ -278,7 +277,7 @@ export interface RestaurantFromApi {
 export interface RestaurantImageFromApi {
     id: number;
     restaurant_id: number;
-    company_id: number;
+    company_id: string;
     image_name: string;
     image_url: string;
     file_size: number;
@@ -293,31 +292,32 @@ export interface RestaurantImageFromApi {
 }
 
 export interface OperatingHoursFromApi {
-    id: number;
-    capacity: number;
-    monday_open: number;
+    id: string;
+    capacity: string;
+    monday_open: string;
     monday_open_time: string;
     monday_close_time: string;
-    tuesday_open: number;
+    tuesday_open: string;
     tuesday_open_time: string;
     tuesday_close_time: string;
-    wednesday_open: number;
+    wednesday_open: string;
     wednesday_open_time: string;
     wednesday_close_time: string;
-    thursday_open: number;
+    thursday_open: string;
     thursday_open_time: string;
     thursday_close_time: string;
-    friday_open: number;
+    friday_open: string;
     friday_open_time: string;
     friday_close_time: string;
-    saturday_open: number;
+    saturday_open: string;
     saturday_open_time: string;
     saturday_close_time: string;
-    sunday_open: number;
+    sunday_open: string;
     sunday_open_time: string;
     sunday_close_time: string;
     company_id: string;
 }
+
 
 
 export interface UserFromApi {
@@ -1449,8 +1449,7 @@ export async function deleteRole(id: string): Promise<{ message: string }> {
 }
 
 // Operating Hours API Functions
-export async function getOperatingHours(): Promise<OperatingHoursFromApi[]> {
-  const companyId = '1';
+export async function getOperatingHours(companyId: string): Promise<OperatingHoursFromApi[]> {
   const response = await fetch(`${API_BASE_URL}/company/${companyId}/operating-hours`);
   const result = await handleResponse<{ success: boolean; data: OperatingHoursFromApi[] }>(response);
   return result.data || [];
