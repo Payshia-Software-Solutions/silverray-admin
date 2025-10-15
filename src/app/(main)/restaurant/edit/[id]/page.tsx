@@ -157,7 +157,7 @@ export default function EditRestaurantPage() {
                   const closeTimeKey = `${dayKey}_close_time` as keyof OperatingHoursFromApi;
 
                   newOperatingHoursState[dayKey] = {
-                      open: String(hoursData[openKey]) === '1',
+                      open: String(hoursData[openKey]) === '1' || hoursData[openKey] === 1,
                       open_time: String(hoursData[openTimeKey] || '00:00:00').substring(0, 5),
                       close_time: String(hoursData[closeTimeKey] || '00:00:00').substring(0, 5),
                   };
@@ -262,7 +262,9 @@ export default function EditRestaurantPage() {
     if (!restaurant) return;
     try {
       if (operatingHours && restaurant.operating_hours_id) {
-         const hoursDataToUpdate: Partial<OperatingHoursFromApi> = {};
+         const hoursDataToUpdate: Partial<OperatingHoursFromApi> = {
+            capacity: data.capacity,
+         };
           daysOfWeek.forEach(day => {
               const dayKey = day as keyof OperatingHoursState;
               hoursDataToUpdate[`${dayKey}_open` as keyof OperatingHoursFromApi] = operatingHours[dayKey].open ? 1 : 0;
@@ -597,9 +599,8 @@ export default function EditRestaurantPage() {
   );
 }
 
-
-
     
+
 
 
 
