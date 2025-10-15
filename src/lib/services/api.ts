@@ -292,31 +292,32 @@ export interface RestaurantImageFromApi {
 }
 
 export interface OperatingHoursFromApi {
-    id: string;
-    capacity: string;
-    monday_open: string;
+    id: number;
+    capacity: number;
+    monday_open: number; // 0 or 1
     monday_open_time: string | null;
     monday_close_time: string | null;
-    tuesday_open: string;
+    tuesday_open: number;
     tuesday_open_time: string | null;
     tuesday_close_time: string | null;
-    wednesday_open: string;
+    wednesday_open: number;
     wednesday_open_time: string | null;
     wednesday_close_time: string | null;
-    thursday_open: string;
+    thursday_open: number;
     thursday_open_time: string | null;
     thursday_close_time: string | null;
-    friday_open: string;
+    friday_open: number;
     friday_open_time: string | null;
     friday_close_time: string | null;
-    saturday_open: string;
+    saturday_open: number;
     saturday_open_time: string | null;
     saturday_close_time: string | null;
-    sunday_open: string;
+    sunday_open: number;
     sunday_open_time: string | null;
     sunday_close_time: string | null;
-    company_id: string;
+    company_id: number;
 }
+
 
 
 
@@ -1597,4 +1598,5 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
 
