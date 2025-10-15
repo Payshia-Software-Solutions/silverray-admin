@@ -68,6 +68,9 @@ const getDynamicPageInfo = (pathname: string) => {
     if (pathSegments[0] === 'customers' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
         return { title: 'Edit Customer', description: 'Updating details for a customer.' };
     }
+     if (pathSegments[0] === 'messages' && pathSegments.length > 1 && pathSegments[1] !== 'new') {
+        return { title: 'View Message', description: 'Viewing message details.' };
+    }
     if (pathSegments[0] === 'user-management' && pathSegments.length > 1) {
         if (pathSegments[1] !== 'new' && pathSegments[1] !== 'roles') {
             return { title: 'Edit User', description: 'Updating details for a user.' };

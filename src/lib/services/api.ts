@@ -428,6 +428,17 @@ export interface GalleryImageFromApi {
     is_active: number;
 }
 
+export interface ContactMessageFromApi {
+  id: string;
+  company_id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'unread' | 'read' | 'archived' | 'replied';
+  created_at: string;
+  updated_at: string;
+}
 
 
 /**
@@ -1589,6 +1600,32 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
     return handleResponse<{ message: string }>(response);
 }
 
+// Contact Messages API
+export async function getContactMessages(): Promise<ContactMessageFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/contacts`);
+  return handleResponse<ContactMessageFromApi[]>(response);
+}
+
+export async function getContactMessageById(id: string): Promise<ContactMessageFromApi> {
+  const response = await fetch(`${API_BASE_URL}/contacts/${id}`);
+  return handleResponse<ContactMessageFromApi>(response);
+}
+
+export async function updateContactMessage(id: string, data: Partial<ContactMessageFromApi>): Promise<ContactMessageFromApi> {
+  const response = await fetch(`${API_BASE_URL}/contacts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<ContactMessageFromApi>(response);
+}
+
+export async function deleteContactMessage(id: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/contacts/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
+}
 
   
 
@@ -1598,6 +1635,7 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
 
 
 
