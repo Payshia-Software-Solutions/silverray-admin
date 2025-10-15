@@ -157,7 +157,7 @@ export default function EditRestaurantPage() {
                   const closeTimeKey = `${dayKey}_close_time` as keyof OperatingHoursFromApi;
 
                   newOperatingHoursState[dayKey] = {
-                      open: hoursData[openKey] === 1,
+                      open: String(hoursData[openKey]) === '1',
                       open_time: String(hoursData[openTimeKey] || '00:00:00').substring(0, 5),
                       close_time: String(hoursData[closeTimeKey] || '00:00:00').substring(0, 5),
                   };
@@ -600,6 +600,7 @@ export default function EditRestaurantPage() {
 
 
     
+
 
 
 

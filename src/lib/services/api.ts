@@ -293,29 +293,29 @@ export interface RestaurantImageFromApi {
 
 export interface OperatingHoursFromApi {
     id: number;
-    capacity: number;
-    monday_open: number; // 0 or 1
+    capacity: number | string;
+    company_id: number | string;
+    monday_open: number | string;
     monday_open_time: string | null;
     monday_close_time: string | null;
-    tuesday_open: number;
+    tuesday_open: number | string;
     tuesday_open_time: string | null;
     tuesday_close_time: string | null;
-    wednesday_open: number;
+    wednesday_open: number | string;
     wednesday_open_time: string | null;
     wednesday_close_time: string | null;
-    thursday_open: number;
+    thursday_open: number | string;
     thursday_open_time: string | null;
     thursday_close_time: string | null;
-    friday_open: number;
+    friday_open: number | string;
     friday_open_time: string | null;
     friday_close_time: string | null;
-    saturday_open: number;
+    saturday_open: number | string;
     saturday_open_time: string | null;
     saturday_close_time: string | null;
-    sunday_open: number;
+    sunday_open: number | string;
     sunday_open_time: string | null;
     sunday_close_time: string | null;
-    company_id: number;
 }
 
 
@@ -1456,11 +1456,11 @@ export async function getOperatingHours(): Promise<OperatingHoursFromApi[]> {
   return result.data || [];
 }
 
-export async function getOperatingHoursById(id: string): Promise<OperatingHoursFromApi> {
-  const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`);
-  const result = await handleResponse<{ success: boolean, data: OperatingHoursFromApi }>(response);
-  return result.data;
+export async function getOperatingHoursById(operatingHoursId: string, companyId: string = '1'): Promise<OperatingHoursFromApi> {
+    const response = await fetch(`${API_BASE_URL}/company/${companyId}/operating-hours/${operatingHoursId}`);
+    return handleResponse<OperatingHoursFromApi>(response);
 }
+
 
 export async function createOperatingHours(hoursData: any): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/operating-hours`, {
@@ -1598,5 +1598,6 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
 
 
