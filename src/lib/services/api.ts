@@ -293,27 +293,27 @@ export interface RestaurantImageFromApi {
 
 export interface OperatingHoursFromApi {
     id: number;
-    capacity: number | string;
-    company_id: number | string;
-    monday_open: number | string;
+    capacity: number;
+    company_id: number;
+    monday_open: number;
     monday_open_time: string | null;
     monday_close_time: string | null;
-    tuesday_open: number | string;
+    tuesday_open: number;
     tuesday_open_time: string | null;
     tuesday_close_time: string | null;
-    wednesday_open: number | string;
+    wednesday_open: number;
     wednesday_open_time: string | null;
     wednesday_close_time: string | null;
-    thursday_open: number | string;
+    thursday_open: number;
     thursday_open_time: string | null;
     thursday_close_time: string | null;
-    friday_open: number | string;
+    friday_open: number;
     friday_open_time: string | null;
     friday_close_time: string | null;
-    saturday_open: number | string;
+    saturday_open: number;
     saturday_open_time: string | null;
     saturday_close_time: string | null;
-    sunday_open: number | string;
+    sunday_open: number;
     sunday_open_time: string | null;
     sunday_close_time: string | null;
 }
@@ -1471,7 +1471,7 @@ export async function createOperatingHours(hoursData: any): Promise<any> {
     return handleResponse<any>(response);
 }
 
-export async function updateOperatingHours(id: string, hoursData: any): Promise<OperatingHoursFromApi> {
+export async function updateOperatingHours(id: string, hoursData: Partial<OperatingHoursFromApi>): Promise<OperatingHoursFromApi> {
     const response = await fetch(`${API_BASE_URL}/operating-hours/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -1598,6 +1598,7 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
 
 
 
