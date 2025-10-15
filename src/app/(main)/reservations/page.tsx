@@ -235,7 +235,7 @@ export default function ReservationsPage() {
                   <TableRow>
                     <TableHead>Booking ID</TableHead>
                     <TableHead className="w-[200px]">Guest</TableHead>
-                    <TableHead>Room</TableHead>
+                    <TableHead>Room Type</TableHead>
                     <TableHead>Check-in</TableHead>
                     <TableHead>Check-out</TableHead>
                     <TableHead>Total</TableHead>
