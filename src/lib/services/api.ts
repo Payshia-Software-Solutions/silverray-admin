@@ -261,7 +261,7 @@ export interface RestaurantFromApi {
   venue_name: string;
   short_description: string;
   detailed_description: string | null;
-  capacity: string;
+  capacity: number;
   operating_hours_id: string | null;
   feature_id: string | null;
   restaurant_image: string | null;
@@ -1598,6 +1598,7 @@ export async function deleteGalleryImage(id: number): Promise<{ message: string 
 
 
     
+
 
 
 
