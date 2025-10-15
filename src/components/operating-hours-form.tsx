@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,7 @@ export default function OperatingHoursForm({ operatingHours, setOperatingHours, 
 
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity & Operating Hours</h3>
+            <h3 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-primary"/>Capacity &amp; Operating Hours</h3>
             <div className="space-y-2">
                 <Label htmlFor="capacity">Capacity *</Label>
                 <Input id="capacity" type="number" placeholder="Number of guests" {...register('capacity')} />

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -504,36 +505,36 @@ export default function EditRestaurantPage() {
             </CardContent>
         </Card>
       
-        <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
-          <div className="flex justify-between items-center">
-              <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
-              </AlertDialogTrigger>
-              <div className="flex justify-end gap-2">
-                  <Button variant="outline" asChild type="button">
-                  <Link href="/restaurant">Cancel</Link>
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Saving...' : 'Save Changes'}
-                  </Button>
-              </div>
-          </div>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-center text-red-500 text-lg">
-                      {restaurant.venue_name}
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="sm:justify-center">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-                  <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
-                  <X className="h-5 w-5" />
-              </button>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="flex justify-between items-center">
+            <AlertDialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4" /> Delete Venue</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-center text-2xl font-bold">Do you want to Delete this Venue?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-center text-red-500 text-lg">
+                            {restaurant.venue_name}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center">
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                        <button onClick={() => setShowDeleteConfirmDialog(false)} className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted">
+                        <X className="h-5 w-5" />
+                    </button>
+                </AlertDialogContent>
+            </AlertDialog>
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" asChild type="button">
+                <Link href="/restaurant">Cancel</Link>
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+            </div>
+        </div>
       </form>
 
       <Dialog open={showSaveSuccessDialog} onOpenChange={setShowSuccessDialog}>
