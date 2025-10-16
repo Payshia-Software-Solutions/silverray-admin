@@ -440,6 +440,24 @@ export interface ContactMessageFromApi {
   updated_at: string;
 }
 
+export interface BookingRequestFromApi {
+  id: string;
+  room_type: string;
+  company_id: string;
+  num_guests: string;
+  check_in_date: string;
+  check_out_date: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  special_requests: string;
+  total_price: string;
+  booking_status: 'Pending' | 'Confirmed' | 'Cancelled';
+  created_at: string;
+  updated_at: string;
+}
+
 
 /**
  * A helper function to handle the response from the fetch API.
@@ -1469,7 +1487,8 @@ export async function getOperatingHours(): Promise<OperatingHoursFromApi[]> {
 
 export async function getOperatingHoursById(operatingHoursId: string, companyId: string = '1'): Promise<OperatingHoursFromApi> {
     const response = await fetch(`${API_BASE_URL}/company/${companyId}/operating-hours/${operatingHoursId}`);
-    return handleResponse<OperatingHoursFromApi>(response);
+    const result = await handleResponse<{ success: boolean; data: OperatingHoursFromApi }>(response);
+    return result.data;
 }
 
 
@@ -1627,6 +1646,42 @@ export async function deleteContactMessage(id: string): Promise<{ message: strin
   return handleResponse<{ message: string }>(response);
 }
 
+// Booking Requests API
+export async function getBookingRequests(): Promise<BookingRequestFromApi[]> {
+  const response = await fetch(`${API_BASE_URL}/bookings`);
+  return handleResponse<BookingRequestFromApi[]>(response);
+}
+
+export async function getBookingRequestById(id: string): Promise<BookingRequestFromApi> {
+  const response = await fetch(`${API_BASE_URL}/bookings/${id}`);
+  return handleResponse<BookingRequestFromApi>(response);
+}
+
+export async function createBookingRequest(data: Omit<BookingRequestFromApi, 'id' | 'created_at' | 'updated_at' | 'company_id'>): Promise<BookingRequestFromApi> {
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...data, company_id: '1' }), // Add company_id
+  });
+  const result = await handleResponse<{ message: string, data: BookingRequestFromApi }>(response);
+  return result.data;
+}
+
+export async function updateBookingRequest(id: string, data: Partial<Omit<BookingRequestFromApi, 'id' | 'created_at' | 'updated_at' | 'company_id'>>): Promise<BookingRequestFromApi> {
+  const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<BookingRequestFromApi>(response);
+}
+
+export async function deleteBookingRequest(id: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+    method: 'DELETE',
+  });
+  return handleResponse<{ message: string }>(response);
+}
   
 
     
@@ -1635,6 +1690,7 @@ export async function deleteContactMessage(id: string): Promise<{ message: strin
 
 
     
+
 
 
 
