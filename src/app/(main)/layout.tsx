@@ -21,6 +21,7 @@ import { AppLogo } from '@/components/app-logo';
 import { Header } from '@/app/(main)/header';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { LiveTime } from '@/components/live-time';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -62,6 +63,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Header />
             </div>
             <div className="ml-auto flex items-center gap-4">
+              <LiveTime />
               <ThemeToggle />
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
@@ -86,7 +88,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-
-
-
