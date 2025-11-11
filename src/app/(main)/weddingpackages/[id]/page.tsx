@@ -512,8 +512,4 @@ export default function EditWeddingPackagePage() {
         </AlertDialog>
     </div>
   );
-
-    
-
-
-
+}
