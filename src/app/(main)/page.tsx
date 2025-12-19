@@ -19,70 +19,133 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-
+import { useState, useEffect } from 'react';
+import { getRooms, getBookings, getContactMessages, RoomFromApi, BookingFromApi, ContactMessageFromApi } from '@/lib/services/api';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format, isToday } from 'date-fns';
 
 const quickActions = [
-  { label: 'New Booking', icon: Plus, href: '/reservations', color: 'text-blue-500', bgColor: 'bg-blue-100' },
+  { label: 'New Booking', icon: Plus, href: '/reservations/new', color: 'text-blue-500', bgColor: 'bg-blue-100' },
   { label: 'Manage Rooms', icon: BedDouble, href: '/rooms', color: 'text-green-500', bgColor: 'bg-green-100' },
-  { label: 'New Experience', icon: Star, href: '/experience', color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
-  { label: 'Wedding Package', icon: Heart, href: '/weddings', color: 'text-red-500', bgColor: 'bg-red-100' },
+  { label: 'New Experience', icon: Star, href: '/experience/new', color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
+  { label: 'Wedding Package', icon: Heart, href: '/weddingpackages/new', color: 'text-red-500', bgColor: 'bg-red-100' },
   { label: 'View Messages', icon: Mail, href: '/messages', color: 'text-purple-500', bgColor: 'bg-purple-100' },
-  { label: 'Dining Reservations', icon: UtensilsCrossed, href: '/restaurant', color: 'text-orange-500', bgColor: 'bg-orange-100' },
+  { label: 'Dining Reservations', icon: UtensilsCrossed, href: '/restaurant/reservations/new', color: 'text-orange-500', bgColor: 'bg-orange-100' },
 ];
 
-const recentActivity = [
-    { icon: Calendar, text: "New booking created for Room 205", time: "2 minutes ago", color: "text-blue-500", bgColor: "bg-blue-100" },
-    { icon: CheckCircle, text: "Guest checked in to Presidential Suite", time: "15 minutes ago", color: "text-green-500", bgColor: "bg-green-100" },
-    { icon: Mail, text: "New contact form message received", time: "32 minutes ago", color: "text-orange-500", bgColor: "bg-orange-100" },
-    { icon: Star, text: "New spa experience booking for tomorrow", time: "1 hour ago", color: "text-purple-500", bgColor: "bg-purple-100" },
-    { icon: Bed, text: "Room 112 marked as under maintenance", time: "2 hours ago", color: "text-red-500", bgColor: "bg-red-100" },
-];
-
-const checkIns = [
-    { name: "Sarah Johnson", room: "Room 301 • 2:00 PM", avatar: "https://placehold.co/40x40.png?text=SJ", status: "bg-green-500" },
-    { name: "Michael Chen", room: "Room 156 • 3:30 PM", avatar: "https://placehold.co/40x40.png?text=MC", status: "bg-yellow-500" },
-    { name: "Emily Davis", room: "Suite 401 • 4:15 PM", avatar: "https://placehold.co/40x40.png?text=ED", status: "bg-yellow-500" },
-    { name: "Robert Wilson", room: "Room 203 • 5:00 PM", avatar: "https://placehold.co/40x40.png?text=RW", status: "bg-gray-300" },
-];
-
+interface Activity {
+    icon: React.ElementType;
+    text: string;
+    time: string;
+    color: string;
+    bgColor: string;
+}
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    availableRooms: 0,
+    todaysBookings: 0,
+    pendingMessages: 0,
+    revenueToday: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [todaysCheckIns, setTodaysCheckIns] = useState<BookingFromApi[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [rooms, bookings, messages] = await Promise.all([
+          getRooms(),
+          getBookings(),
+          getContactMessages(),
+        ]);
+
+        const availableRooms = rooms.filter(r => r.current_status === 'Available').length;
+        
+        const today = new Date();
+        const todaysBookings = bookings.filter(b => isToday(new Date(b.check_in_date))).length;
+        const checkIns = bookings.filter(b => isToday(new Date(b.check_in_date)) && (b.booking_status === 'Confirmed' || b.booking_status === 'Pending'));
+        setTodaysCheckIns(checkIns);
+
+        const pendingMessages = messages.filter(m => m.status === 'unread').length;
+        
+        const revenueToday = bookings
+            .filter(b => isToday(new Date(b.check_in_date)))
+            .reduce((acc, b) => acc + parseFloat(b.amount_paid), 0);
+            
+        setStats({
+          availableRooms,
+          todaysBookings,
+          pendingMessages,
+          revenueToday,
+        });
+
+        // Synthesize recent activity
+        const latestBooking = bookings[0];
+        const latestMessage = messages[0];
+        const activity: Activity[] = [];
+        if (latestBooking) {
+            activity.push({ icon: Calendar, text: `New booking for Room ${latestBooking.room_number}`, time: format(new Date(latestBooking.created_at), 'PPp'), color: "text-blue-500", bgColor: "bg-blue-100" });
+        }
+        if (latestMessage) {
+            activity.push({ icon: Mail, text: `New message: "${latestMessage.subject}"`, time: format(new Date(latestMessage.created_at), 'PPp'), color: "text-orange-500", bgColor: "bg-orange-100" });
+        }
+        setRecentActivity(activity);
+
+
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="space-y-8">
       {/* Top Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
-            title="Available Rooms" 
-            value="24" 
-            description="↑+2 from yesterday" 
-            Icon={Bed}
-            iconBgColor="bg-green-100"
-            iconColor="text-green-600"
-        />
-        <StatCard 
-            title="Today's Bookings" 
-            value="12" 
-            description="8 check-ins, 4 check-outs" 
-            Icon={Calendar}
-            iconBgColor="bg-blue-100"
-            iconColor="text-blue-600"
-        />
-        <StatCard 
-            title="Pending Messages" 
-            value="7" 
-            description={<><AlertCircle className="inline-block h-3 w-3 mr-1 text-red-500" /> 3 urgent responses</>}
-            Icon={Mail}
-            iconBgColor="bg-orange-100"
-            iconColor="text-orange-600"
-        />
-        <StatCard 
-            title="Revenue Today" 
-            value="LKR. 42,000" 
-            description="↑+15% vs yesterday" 
-            Icon={DollarSign}
-            iconBgColor="bg-yellow-100"
-            iconColor="text-yellow-600"
-        />
+        {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />)
+        ) : (
+            <>
+                <StatCard 
+                    title="Available Rooms" 
+                    value={stats.availableRooms.toString()}
+                    description="Ready for guests" 
+                    Icon={Bed}
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                />
+                <StatCard 
+                    title="Today's Check-ins" 
+                    value={stats.todaysBookings.toString()}
+                    description={`${todaysCheckIns.length} arrivals expected`}
+                    Icon={Calendar}
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                />
+                <StatCard 
+                    title="Pending Messages" 
+                    value={stats.pendingMessages.toString()}
+                    description={stats.pendingMessages > 0 ? <><AlertCircle className="inline-block h-3 w-3 mr-1 text-red-500" /> Action required</> : 'All caught up'}
+                    Icon={Mail}
+                    iconBgColor="bg-orange-100"
+                    iconColor="text-orange-600"
+                />
+                <StatCard 
+                    title="Revenue Today" 
+                    value={`LKR. ${stats.revenueToday.toLocaleString()}`}
+                    description="Based on payments for today's arrivals" 
+                    Icon={DollarSign}
+                    iconBgColor="bg-yellow-100"
+                    iconColor="text-yellow-600"
+                />
+            </>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -109,17 +172,23 @@ export default function DashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-             {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-4">
-                    <div className={cn("p-2 rounded-full", activity.bgColor)}>
-                       <activity.icon className={cn("h-5 w-5", activity.color)} />
+             {loading ? (
+                Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
+             ) : recentActivity.length > 0 ? (
+                 recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start gap-4">
+                        <div className={cn("p-2 rounded-full", activity.bgColor)}>
+                           <activity.icon className={cn("h-5 w-5", activity.color)} />
+                        </div>
+                        <div>
+                            <p className="font-medium text-sm">{activity.text}</p>
+                            <p className="text-xs text-muted-foreground">{activity.time}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="font-medium text-sm">{activity.text}</p>
-                        <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    </div>
-                </div>
-             ))}
+                 ))
+             ) : (
+                <p className="text-muted-foreground text-center py-4">No recent activity to display.</p>
+             )}
              <div className="text-center pt-4">
                 <Button variant="link" className="text-primary">View All Activity</Button>
              </div>
@@ -131,19 +200,25 @@ export default function DashboardPage() {
             <CardTitle>Today's Check-ins</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {checkIns.map((checkin, index) => (
-                <div key={index} className="flex items-center gap-4">
-                    <Avatar>
-                        <AvatarImage src={checkin.avatar} alt={checkin.name} data-ai-hint="person face" />
-                        <AvatarFallback>{checkin.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-grow">
-                        <p className="font-semibold text-sm">{checkin.name}</p>
-                        <p className="text-xs text-muted-foreground">{checkin.room}</p>
+            {loading ? (
+                Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
+            ) : todaysCheckIns.length > 0 ? (
+                todaysCheckIns.map((checkin, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                        <Avatar>
+                            <AvatarImage src={`https://placehold.co/40x40.png`} alt={checkin.customer?.full_name} data-ai-hint="person face" />
+                            <AvatarFallback>{checkin.customer?.full_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-grow">
+                            <p className="font-semibold text-sm">{checkin.customer?.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Room {checkin.room_number} • {format(new Date(checkin.check_in_date), 'p')}</p>
+                        </div>
+                        <div className={cn("w-2 h-2 rounded-full", checkin.booking_status === 'Confirmed' ? 'bg-green-500' : 'bg-yellow-500')}></div>
                     </div>
-                    <div className={cn("w-2 h-2 rounded-full", checkin.status)}></div>
-                </div>
-            ))}
+                ))
+            ) : (
+                <p className="text-muted-foreground text-center py-4">No check-ins scheduled for today.</p>
+            )}
              <div className="text-center pt-4">
                 <Button variant="link" className="text-primary">View All Check-ins</Button>
              </div>
@@ -160,10 +235,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="h-[250px] flex flex-col items-center justify-center gap-4 text-center">
             <div className="w-8 h-8 rounded-md bg-gray-200" />
-            <Button>
-                <Plus className="mr-2 h-4 w-4" /> Add New Room
-            </Button>
-            <div className="w-2 h-2 bg-red-500 rounded-full" />
+            <p className="text-muted-foreground">Revenue chart will be displayed here.</p>
         </CardContent>
       </Card>
 
